@@ -100,7 +100,7 @@ $(function() {
   var tableTemp = _.template($('#tbodyPart').html())
   var selectRowIndex = -1
   var tableList = []
-  var trKeys = ['sbillBillcode', 'partsnameName', 'goodsSpec', 'goodsProperty1', 'productareaName', 'goodsMaterial', 'goodsMetering', 'goodsProperty4', 'goodsProperty5']
+  var trKeys = ['sbillBillcode', 'partsnameName', 'goodsSpec', 'goodsProperty1', 'productareaName', 'goodsMaterial', 'goodCount', 'goodsProperty4', 'goodsProperty5']
   $('#topAddBtn').click(() => {
     tdNo = $('#tdNo').val()
     request('/outWaitStorageQuery', {

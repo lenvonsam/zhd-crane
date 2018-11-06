@@ -19,7 +19,11 @@ block content
     <% _.each(data, function(itm, idx){%>
       .tr.row.center(data-rowindex="${idx}")
         <%_.each(keys, function(key, subi) {%>
-          .td ${itm[key]}
+          <% if (key == "goodCount") {%>
+            .td ${Number(itm.goodsNum - itm.oconsignDetailOknum)}
+          <% } else {%>
+            .td ${itm[key]}
+          <% } %>
         <%})%>
         .td
     <%})%>
@@ -48,7 +52,7 @@ block content
           .grid 长度
           .grid 产地
           .grid 材质
-          .grid 计量方式
+          .grid 可出库数量
           .grid 公差范围
           .grid 重量范围
           .grid 设备
