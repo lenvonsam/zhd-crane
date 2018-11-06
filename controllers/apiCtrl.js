@@ -13,7 +13,7 @@ module.exports = {
     console.log('warehouse proxy:>>>\n', body)
     let params = Object.assign({}, body.params)
     let user = ctx.cookies.get('currentUser')
-    let userArr = user.split('|')
+    let userArr = user ? user.split('|') : []
     if (body.url == '/outWaitStorageQuery') {
       if (userArr && userArr.length == 3) {
         params.currentPage = 1
