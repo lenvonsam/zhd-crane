@@ -1,0 +1,18 @@
+extends layout/basic.pug
+
+append css
+  link(rel="stylesheet", href="/css/login.css")
+append scripts
+  script(src="/lib/md5.js")
+  script(src="/js/login.js")
+block content
+  input(type="hidden", name="loginType", value=loginType)
+  .login-form
+    .center.title 智恒达智能出库系统
+    .title-bottom-line
+    .input
+      input#username
+    .input
+      input#password(type="password")
+    #loginBtn.input.login-btn 登录
+

@@ -1,0 +1,17 @@
+doctype html
+html(lang="en")
+  head
+    title= pageTitle
+    meta(charset="utf-8")
+    block css
+      link(rel="stylesheet", href="/css/common.css")
+    script(src="http://cdn.bootcss.com/jquery/3.1.1/jquery.min.js")
+    script(src="/lib/bluebird.min.js")
+    script(src="/js/request.js")
+    script(src="http://cdn.bootcss.com/lodash.js/4.16.6/lodash.min.js")
+    script(src="/js/common.js")
+  body
+    block content
+    block scripts
+
+

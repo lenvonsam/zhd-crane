@@ -1,0 +1,31 @@
+{
+  "name": "koa-crane",
+  "version": "0.0.1",
+  "description": "Electronic crane system display platform",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js",
+    "restart": "git pull origin master && npm install && node index.js"
+  },
+  "keywords": [
+    "koa",
+    "vue",
+    "mvc"
+  ],
+  "author": "sam@thinkingsam.cn",
+  "license": "MIT",
+  "dependencies": {
+    "koa": "^2.6.1",
+    "koa-bodyparser": "^3.2.0",
+    "koa-jsonp": "^2.0.2",
+    "koa-logger": "^3.2.0",
+    "koa-router": "^7.4.0",
+    "koa-static": "^5.0.0",
+    "koa-views": "^6.1.4",
+    "pug": "^2.0.3",
+    "request": "^2.88.0",
+    "request-promise": "^4.2.2",
+    "socket.io": "^2.1.1"
+  }
+}

@@ -1,0 +1,67 @@
+@charset "utf-8";
+/*登录样式*/
+.login-bg {
+  background-image: url('../img/dlbg.png');
+  background-size: cover;
+  position: relative;
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+}
+
+.login-bg .login-form {
+  background-image: url('../img/dlk.png');
+  background-size: cover;
+  position: absolute;
+  width: 617px;
+  height: 536px;
+  left: calc((100% - 617px) / 2);
+  top: calc((100vh - 536px) / 2);
+  box-sizing: border-box;
+  padding: 60px 80px;
+}
+
+.login-form .title {
+  font-size: 32px;
+  color: #fff;
+  margin-bottom: 20px;
+}
+
+.login-form .title-bottom-line {
+  height: 2px;
+  background: #ddd;
+}
+
+.login-form .input input {
+  height: 41px;
+  width: 100%;
+  background: transparent;
+  border: 0px;
+  font-size: 24px;
+  color: #666;
+}
+
+.login-form .input {
+  background-image: url('../img/mmk.png');
+  background-size: cover;
+  box-sizing: border-box;
+  margin-top: 30px;
+  height: 61px;
+  box-sizing: border-box;
+  padding: 10px 20px;
+}
+
+.login-form .input.focus {
+  background-image: url('../img/yhml.png');
+}
+
+.login-form .input.login-btn {
+  margin-top: 40px;
+  background: #ffbb00;
+  border-radius: 3px;
+  height: 51px;
+  text-align: center;
+  color: #fff;
+  font-size: 24px;
+  letter-spacing: 2px;
+}

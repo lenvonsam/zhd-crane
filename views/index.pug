@@ -1,0 +1,87 @@
+extends layout/basic.pug
+
+append css
+  link(rel="stylesheet", href="/css/main.css")
+append scripts
+  script(src="/lib/socket.io.js")
+  script(src="/js/index.js")
+block content
+  script(type="text/template", id="weightBtns")
+    .row.top-section.relative(style="bottom: -50px")
+      <% _.each(btns, function(itm, index){ %>
+        .col.relative
+          .weight-btn(data-index="${index}")
+            span 0
+          //- image(style="position: absolute; bottom: -126px; left: -40px; z-index: 10;display: none;", src="/img/taph.png")
+      <%});%>
+  script(type="text/template", id="tbodyPart")
+    <% _.each(data, function(itm, idx){%>
+      .tr.row.center(data-rowindex="${idx}")
+        <%_.each(keys, function(key, subi) {%>
+          .td ${itm[key]}
+        <%})%>
+        .td
+    <%})%>
+  .main-head.row
+    image(src="/img/bgys.png", style="height: 160px; position: absolute; top: 0px; left: 0px;")
+    .main-brand= pageBrand
+    div(style="flex-basis: 80px") TD
+    .row(style="flex-basis: 498px")
+      .main-ipt.row
+        input#tdNo
+    .row(style="flex-basis: 128px")
+      #topAddBtn.main-btn
+        span 添加
+    .row(style="flex-basis: 132px")
+      #topClearBtn.main-btn
+        span 清空
+    .main-close
+  .main-body
+    .col.relative
+      .table-wrap
+      .table
+        .th.row.center
+          .grid 提单号
+          .grid 品名
+          .grid 规格
+          .grid 长度
+          .grid 产地
+          .grid 材质
+          .grid 计量方式
+          .grid 公差范围
+          .grid 重量范围
+          .grid 设备
+        #wzBody.relative
+          .active-rect
+    div(style="flex: 0 0 340px;")
+      .row
+        .row.top-section.relative(style="bottom: -20px")
+          span.float-title 数量
+          .col
+            .count-btn
+              #countMinus.col
+              .col.column
+                .col.row
+                  input#countIpt.center
+              #countAdd.col
+          .col.center.relative
+            span.float-title 重量（公斤）
+            #weightInfoWrap.weight
+              span#weightInfo
+      #secBtns.row
+      //- .row
+        .bottom
+          .row.section
+            .col.row.pl-15
+              #calcWeight.bottom-btn
+                span 计重
+            .col.row.pl-15
+              #confirmAction.bottom-btn
+                span 确认
+            .col.row.pl-15
+              #cancelAction.bottom-btn
+                span 取消
+            .col.row.pl-15
+              #submitAction.bottom-btn
+                span 提交
+

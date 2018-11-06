@@ -1,0 +1,261 @@
+@charset "utf-8";
+
+/*首页样式*/
+.main-bg {
+  background-image: url('../img/bg.png');
+  background-size: cover;
+  position: relative;
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+}
+
+.main-head {
+  padding: 15px 15px;
+  position: relative;
+  color: #fff;
+  font-size: 40px;
+}
+
+.main-head .main-brand {
+  padding-left: 30px;
+  flex: 1;
+}
+
+.main-body {
+  width: 100%;
+  height: calc(100vh - 90px);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.main-body .count-btn {
+  height: 80px;
+  width: 473px;
+  display: flex;
+  background-image: url('../img/jj.png');
+  background-size: cover;
+}
+
+.main-body .count-btn .col {
+  height: 80px;
+}
+
+.main-body .top-section {
+  width: 1300px;
+  margin: 0 auto;
+  color: #fff;
+}
+
+.main-body .table-wrap,
+.main-body .table {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  left: 0;
+  color: #fff;
+}
+
+.main-body .table-wrap {
+  background: #000;
+  opacity: 0.2;
+}
+
+.main-body .table {
+  z-index: 20;
+  overflow: auto;
+}
+
+.main-body .table .crane-btn {
+  background-image: url('../img/ck.png');
+  background-size: cover;
+  width: 91px;
+  height: 52px;
+  display: inline-block;;
+  padding-top: 14px;
+  box-sizing: border-box;
+}
+
+.main-body .table::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+/*滚动条里面小方块*/
+.main-body .table::-webkit-scrollbar-thumb {
+  border-radius: 5px;
+  /*-webkit-box-shadow: inset 0 0 5px rgba(0,0,0,0.2);*/
+  background: rgba(7, 39, 83, 0.8);
+}
+
+.main-body .table::-webkit-scrollbar-track {/*滚动条里面轨道*/
+  /*-webkit-box-shadow: inset 0 0 5px rgba(0,0,0,0.2);*/
+  border-radius: 0;
+  background: rgba(0,0,0,0.1);
+}
+
+.main-body .table::-webkit-scrollbar-corner {
+  display: none;
+}
+
+.main-body .table .active-rect {
+  position: absolute;
+  z-index: 50;
+  left: 2px;
+  /*top: 68px;*/
+  height: 68px;
+  width: calc(100% - 3px);
+  border-width: 1px solid #fff;
+  box-shadow: 0 0px 12px #fff;
+  border-radius: 3px;
+}
+
+.main-body .table .row .grid,
+.main-body .table .tr .td {
+  flex: 0 0 168px;
+}
+.main-body .table .row .grid:last-child,
+.main-body .table .tr .td:last-child {
+  flex: 1;
+}
+
+
+.main-body .table .th {
+  font-size: 24px;
+  padding: 15px 0px;
+}
+
+.main-body .table .tr {
+  height: 68px;
+}
+
+.main-body .float-title {
+  position: absolute;
+  top: 0px;
+  left: -120px;
+  font-size: 24px;
+  color: #fff;
+}
+
+.main-body .weight {
+  height: 80px;
+  width: 507px;
+  display: inline-block;
+  background-image: url('../img/gjk.png');
+  background-size: cover;
+  padding: 15px 15px;
+  box-sizing: border-box;
+  font-size: 36px;
+  color: #fff;
+  text-align: center;
+}
+
+.main-body .weight-btn {
+  height: 207px;
+  width: 293px;
+  position: relative;
+  z-index: 20;
+  background-image: url('../img/dl.png');
+  background-size: cover;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: 30px;
+  box-sizing: border-box;
+}
+.main-body .weight-btn span {
+  margin-bottom: 18px;
+}
+
+.main-body .bottom {
+  width: 1600px;
+  margin: 0 auto;
+  height: 159px;
+  display: inline-block;
+  background-image: url('../img/tz.png');
+  background-size: cover;
+}
+
+
+.main-body .bottom .section {
+  width: 1400px;
+  margin: 0 auto;
+  position: relative;
+  bottom: -69px;
+  z-index: 30;
+}
+
+
+.main-body .bottom .bottom-btn {
+  width: 320px;
+  height: 81px;
+  background-image: url('../img/btn.png');
+  background-size: cover;
+  display: inline-block;
+  color: #fff;
+  text-align: center;
+  font-size: 34px;
+  padding-top: 16px;
+  box-sizing: border-box;
+}
+
+.main-btn {
+  width: 128px;
+  height: 60px;
+  display: inline-block;
+  background-image: url('../img/tjk.png');
+  background-size: cover;
+  font-size: 24px;
+  text-align: center;
+  padding-top: 12px;
+  box-sizing: border-box;
+}
+
+.main-close {
+  width: 55px;
+  height: 60px;
+  display: inline-block;
+  background-image: url('../img/gb.png');
+  background-size: cover;
+}
+
+.main-close:hover {
+  cursor: pointer;
+}
+
+.main-ipt {
+  width: 491px;
+  height: 60px;
+  display: inline-block;
+  background-image: url('../img/tdk.png');
+  background-size: cover;
+  font-size: 24px;
+  box-sizing: border-box;
+  padding: 15px 15px;
+}
+
+.main-ipt input,
+.main-body .count-btn input
+ {
+  background: transparent;
+  margin: 0;
+  padding: 0;
+  border: 0px;
+  height: 30px;
+  width: 100%;
+  font-size: 24px;
+  color: #fff;
+}
+
+.main-body .count-btn input {
+  height: 50px;
+  font-size: 34px;
+}
+
+.main-btn:hover {
+  cursor: pointer;
+}
+

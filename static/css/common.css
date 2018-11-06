@@ -1,0 +1,67 @@
+@charset "utf-8";
+/*公共样式*/
+.column {
+  display: flex;
+  flex-direction: column;
+  flex-wrap: nowrap;
+  align-items: center;
+}
+
+.row {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: center;
+}
+
+.col {
+  flex: 1;
+}
+
+.padding {
+  padding: 15px 15px;
+}
+
+.pl-15 {
+  padding-left: 15px;
+}
+
+.pr-10 {
+  padding-right: 10px;
+}
+
+.pr-15 {
+  padding-right: 15px;
+}
+
+.pr-30 {
+  padding-right: 30px;
+}
+
+.center {
+  text-align: center;
+}
+
+.relative {
+  position: relative;
+}
+
+input:focus {
+  outline: none;
+}
+
+.message {
+  position: fixed;
+  top: -50px;
+  left: 10%;
+  right: 10%;
+  padding:  15px 15px;
+  background: #fff;
+  opacity: 0.9;
+  border-radius: 6px;
+  text-align: center;
+}
+
+.message.error {
+  color: red;
+}
