@@ -111,16 +111,37 @@ $(function() {
         // showMsg('用户过期')
         if (tableList.length == 0) {
           tableList = res.data.data
+          updateTableData(tableList)
         } else {
+          let otherSelectRowObj = {}
+          let currentTD = tableList[selectRowIndex]['sbillBillbatch']
+          console.log('currentTD:>>' + currentTD)
+          Object.keys(linkMap).map(itm => {
+            if (linkMap[itm] >= 0) {
+              otherSelectRowObj[tableList[linkMap[itm]]['sbillBillbatch']] = itm
+            }
+          })
+          console.log(otherSelectRowObj)
+          selectRowIndex = -1
           res.data.data.map(itm => {
             let idx = tableList.findIndex(item => item.sbillBillbatch == itm.sbillBillbatch)
             if (idx < 0) {
               tableList.push(itm)
             }
           })
+          updateTableData(tableList)
+          selectRowIndex = tableList.findIndex(itm => itm.sbillBillbatch == currentTD)
+          console.log('update row index:>>' + selectRowIndex)
+          Object.keys(otherSelectRowObj).map(k => {
+            let idx = tableList.findIndex(itm => itm.sbillBillbatch == k)
+            let btnIdx = otherSelectRowObj[k]
+            linkMap[btnIdx] = idx
+            $('#wzBody .tr').eq(idx).find('.td').eq(9).html("")
+            $('#wzBody .tr').eq(idx).find('.td').eq(9).html('<div class="crane-btn column"><span>' + craneNames[btnIdx] + '</span></div>')
+          })
+          initActiveRect(selectRowIndex)
         }
         console.log(tableList)
-        updateTableData(tableList)
       } else if (resp.status == -2) {
         window.location.href = "/login?type=1"
       } else {

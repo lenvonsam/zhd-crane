@@ -10,6 +10,7 @@ block content
     .row.top-section.relative(style="bottom: -50px")
       <% _.each(btns, function(itm, index){ %>
         .col.relative
+          span A${index + 1}
           .weight-btn(data-index="${index}")
             span 0
           //- image(style="position: absolute; bottom: -126px; left: -40px; z-index: 10;display: none;", src="/img/taph.png")
