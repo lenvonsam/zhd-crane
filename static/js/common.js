@@ -4,8 +4,8 @@ function showMsg (msgInfo) {
   $('body').append(`<div class="message error">${msgInfo}</div>`)
   $('.message.error').animate({top: '15px'})
   globalTimeout = setTimeout(function() {
-    $('.message.error').animate({top: '-50px'}, 1000, function () {
+    $('.message.error').animate({top: '-50px'}, 500, function () {
       $('.message.error').remove()
     })
-  }, 3000)
+  }, 2000)
 }

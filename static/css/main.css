@@ -75,6 +75,8 @@
   height: 52px;
   display: inline-block;;
   padding-top: 14px;
+  position: relative;
+  z-index: 20;
   box-sizing: border-box;
 }
 
@@ -102,20 +104,21 @@
 
 .main-body .table .active-rect {
   position: absolute;
-  z-index: 50;
+  z-index: -1;
   left: 2px;
   /*top: 68px;*/
   height: 68px;
   width: calc(100% - 3px);
-  background:rgba(255, 0, 0, 0.3);
-  /* border-width: 1px solid red; */
-  /* box-shadow: 0 0px 12px red; */
+  background:rgba(53, 184, 255, 0.9);
+  /* border-width: 3px solid #fff; */
+  /* box-shadow: 0 0px 10px #ff; */
   border-radius: 3px;
 }
 
 .main-body .table .row .grid,
 .main-body .table .tr .td {
   flex: 0 0 168px;
+  font-weight: bold;
 }
 .main-body .table .row .grid:last-child,
 .main-body .table .tr .td:last-child {

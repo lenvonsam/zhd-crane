@@ -64,7 +64,8 @@ $(function() {
         $(this).next().css('display', 'block')
         linkMap[btnIdx] = selectRowIndex
         $('#wzBody .tr').eq(selectRowIndex).find('.td').eq(9).html("")
-        $('#wzBody .tr').eq(selectRowIndex).find('.td').eq(9).html('<div class="crane-btn column"><span>' + craneNames[btnIdx] + '</span></div>')
+        $('#wzBody .tr').eq(selectRowIndex).find('.td').eq(9).html('<div class="crane-btn column" data-bidx="'+btnIdx+'"><span>' + craneNames[btnIdx] + '</span></div>')
+        bindCraneBtn(selectRowIndex)
         showWzCount()
         factWeight = dwt[btnIdx]
         updateFactWeight(factWeight)
@@ -124,6 +125,7 @@ $(function() {
             })
             console.log(otherSelectRowObj)
             selectRowIndex = -1
+            $('.crane-btn').unbind()
             res.data.data.map(itm => {
               let idx = tableList.findIndex(item => item.sbillBillbatch == itm.sbillBillbatch)
               if (idx < 0) {
@@ -138,7 +140,8 @@ $(function() {
               let btnIdx = otherSelectRowObj[k]
               linkMap[btnIdx] = idx
               $('#wzBody .tr').eq(idx).find('.td').eq(9).html("")
-              $('#wzBody .tr').eq(idx).find('.td').eq(9).html('<div class="crane-btn column"><span>' + craneNames[btnIdx] + '</span></div>')
+              $('#wzBody .tr').eq(idx).find('.td').eq(9).html('<div class="crane-btn column" data-bidx="' + btnIdx + '"><span>' + craneNames[btnIdx] + '</span></div>')
+              bindCraneBtn(idx)
             })
             initActiveRect(selectRowIndex)
           } else {
@@ -280,6 +283,21 @@ $(function() {
   // $('#submitAction').click(() => {
   //   alert('提交')
   // })
+  // 绑定磅秤按钮事件
+  function bindCraneBtn (rowIndex) {
+    let temp = $('#wzBody .tr').eq(rowIndex).find('.crane-btn')
+    console.log(temp)
+    temp.click(function(e){
+      e.stopPropagation()
+      console.log('已经绑定')
+      console.log($(this).data("bidx"))
+      let btnIdx = $(this).data("bidx")
+      $(this).unbind()
+      linkMap[btnIdx] = -1
+      $(this).remove()
+      $('.weight-btn').eq(btnIdx).css('background-image', 'url("/img/dl.png")')
+    })
+  } 
   function outStorageSuccess(currentObj) {
     let uniqueCode = currentObj.sbillBillbatch
     let weightBtnIdx = (Object.keys(linkMap).map(itm => linkMap[itm])).findIndex(itm => itm == selectRowIndex)
@@ -290,6 +308,7 @@ $(function() {
       }
     })
     console.log('weightBtnIdx:>>>' + weightBtnIdx)
+    $('.crane-btn').unbind()
     tableList = tableList.filter(itm => itm.sbillBillbatch != uniqueCode)
     selectRowIndex = -1
     updateTableData(tableList)
@@ -297,7 +316,8 @@ $(function() {
       let idx = tableList.findIndex(itm => itm.sbillBillbatch == k)
       let btnIdx = otherSelectRowObj[k]
       $('#wzBody .tr').eq(idx).find('.td').eq(9).html("")
-      $('#wzBody .tr').eq(idx).find('.td').eq(9).html('<div class="crane-btn column"><span>' + craneNames[btnIdx] + '</span></div>')
+      $('#wzBody .tr').eq(idx).find('.td').eq(9).html('<div class="crane-btn column" data-bidx="'+btnIdx+'"><span>' + craneNames[btnIdx] + '</span></div>')
+      bindCraneBtn(idx)
     })
 
     linkMap[weightBtnIdx] = -1
