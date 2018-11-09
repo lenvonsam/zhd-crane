@@ -53,16 +53,17 @@ const socketPorts = [3001, 3002, 3003, 3004]
 
 function socketHandler(socket, port, portIdx) {
   console.log(`socket port:>>${port}`)
-  socket.setEncoding('utf8')
+  // socket.setEncoding('utf8')
+  socket.setEncoding('hex')
   try {
     socket.on('data', data => {
       const origin = data.toString()
       console.log(`device port: [${port}] origin data:>>${origin}`)
-      // const bytes = commHelp.hexstring2btye(origin)
-      // console.log(bytes)
-      // const decodeStr = commHelp.decodeCraneHexstring(bytes)
-      // console.log(`device port: [${port}] decode data:>>${decodeStr}`)
-      const decodeStr = origin
+      const bytes = commHelp.hexstring2btye(origin)
+      console.log(bytes)
+      const decodeStr = commHelp.decodeCraneHexstring(bytes)
+      console.log(`device port: [${port}] decode data:>>${decodeStr}`)
+      // const decodeStr = origin
       io.emit('factWeight', decodeStr, portIdx)
       socket.write(`device port: [${port}] has received data`)
     })
