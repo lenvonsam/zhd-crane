@@ -9,3 +9,13 @@ function showMsg (msgInfo) {
     })
   }, 2000)
 }
+
+// 用户点击浏览器全屏
+function fullScreen(){
+  var el = document.documentElement;
+  var rfs = el.requestFullScreen || el.webkitRequestFullScreen || el.mozRequestFullScreen || el.msRequestFullscreen;      
+      if(typeof rfs != "undefined" && rfs) {
+          rfs.call(el);
+      };
+    return;
+}
