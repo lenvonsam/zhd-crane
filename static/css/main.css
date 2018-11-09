@@ -79,7 +79,7 @@
 }
 
 .main-body .table::-webkit-scrollbar {
-  width: 10px;
+  width: 20px;
   height: 10px;
 }
 
@@ -87,7 +87,7 @@
 .main-body .table::-webkit-scrollbar-thumb {
   border-radius: 5px;
   /*-webkit-box-shadow: inset 0 0 5px rgba(0,0,0,0.2);*/
-  background: rgba(7, 39, 83, 0.8);
+  background: rgba(113, 140, 177, 0.8);
 }
 
 .main-body .table::-webkit-scrollbar-track {/*滚动条里面轨道*/
@@ -107,8 +107,9 @@
   /*top: 68px;*/
   height: 68px;
   width: calc(100% - 3px);
-  border-width: 1px solid #fff;
-  box-shadow: 0 0px 12px #fff;
+  background:rgba(255, 0, 0, 0.3);
+  /* border-width: 1px solid red; */
+  /* box-shadow: 0 0px 12px red; */
   border-radius: 3px;
 }
 
