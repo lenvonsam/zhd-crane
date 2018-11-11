@@ -73,8 +73,8 @@ function socketHandler(socket, port, portIdx) {
       console.log(`soket port: [${port}] ended`);
     });
   } catch (e) {
-    console.error("occur error", e);
-    return socket.end();
+    console.log("occur error", e);
+    // return socket.end();
   }
 }
 
