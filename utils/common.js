@@ -20,8 +20,6 @@ module.exports = {
       return '0'
     } else {
       const datas = bytes.splice(1, 6)
-      console.log('decode splice array')
-      console.log(datas)
       const startIdx =  datas.findIndex(itm => itm < 7)
       let result = ''
       for (var i = startIdx; i < datas.length; i++) {

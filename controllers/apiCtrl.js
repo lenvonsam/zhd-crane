@@ -46,7 +46,7 @@ module.exports = {
     if (body.url == '/login') {
       if (data.status == 0 && data.data != null) {
         // let str = JSON.stringify(data.data)
-        console.log('cookie 保存', data.data)
+        // console.log('cookie 保存', data.data)
         await ctx.cookies.set('currentUser', `${data.data.memberCode}|${data.data.operatorUserid}|${data.data.superWarehousemanFlag}`, {
           domain: '192.168.80.200',
           maxAge: 5 * 60 * 60 * 1000,
