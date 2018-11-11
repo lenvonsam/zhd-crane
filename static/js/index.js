@@ -88,7 +88,7 @@ $(function() {
   socket.on('factWeight', function(data, idx) {
     console.log(data + ';' + idx)
     dwt[idx] = data
-    if (Number(data) > 0) $('.weight-btn').eq(idx).find('span').eq(0).text(data)
+    if (Number(data) >= 0) $('.weight-btn').eq(idx).find('span').eq(0).text(data)
     // const linkDetailIndex = linkMap[idx]
     // if (linkDetailIndex == selectRowIndex && selectRowIndex >= 0) {
     //   updateFactWeight(data)
