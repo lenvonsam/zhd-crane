@@ -37,6 +37,7 @@ $(function() {
   var bottomTemp = _.template($('#weightBtns').html())
   $('#secBtns').html(bottomTemp(datas))
   $('.weight-btn').click(function() {
+    if (selectRowIndex == -1) return
     let selectObj = tableList[selectRowIndex]
     console.log(selectObj)
     let cnt = Number(selectObj.goodsNum - selectObj.oconsignDetailOknum)
@@ -54,7 +55,7 @@ $(function() {
       selectRowIndex = linkMap[btnIdx]
       initActiveRect(selectRowIndex)
       showWzCount()
-      factWeight = dwt[btnIdx]
+      factWeight = Number(dwt[btnIdx] / 1000).toFixed(3)
       updateFactWeight(factWeight)
       return
     }
@@ -67,9 +68,8 @@ $(function() {
         $('#wzBody .tr').eq(selectRowIndex).find('.td').eq(9).html('<div class="crane-btn column" data-bidx="'+btnIdx+'"><span>' + craneNames[btnIdx] + '</span></div>')
         bindCraneBtn(selectRowIndex)
         showWzCount()
-        factWeight = dwt[btnIdx]
+        factWeight = Number(dwt[btnIdx] / 1000).toFixed(3)
         updateFactWeight(factWeight)
-        console.log($(this))
         $(this).css('background-image', 'url(/img/gl.png)')
       }
     } else {
@@ -87,7 +87,6 @@ $(function() {
   var socket = io()
   socket.on('factWeight', function(data, idx) {
     console.log(data + ';' + idx)
-    console.log(typeof data)
     dwt[idx] = data
     if (Number(data) > 0) $('.weight-btn').eq(idx).find('span').eq(0).text(data)
     // const linkDetailIndex = linkMap[idx]
