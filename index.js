@@ -56,18 +56,26 @@ function socketHandler(socket, port, portIdx) {
   // console.log(`socket port:>>${port}`)
   // socket.setEncoding('utf8')
   socket.setEncoding("hex");
+  socket.setTimeout(0);
   try {
     socket.on("data", data => {
       const origin = data.toString();
       console.log(`device port: [${port}] origin data:>>${origin}`);
-      const bytes = commHelp.hexstring2btye(origin);
-      const decodeStr = commHelp.decodeCraneHexstring(bytes);
-      if (Number(decodeStr) > 0) {
-        console.log(`device port: [${port}] decode data:>>${decodeStr}`);
-        // const decodeStr = origin
-        io.emit("factWeight", decodeStr, portIdx);
+      if (origin.toLowerCase().indexOf("cd") >= 0) {
+        const bytes = commHelp.hexstring2btye(origin);
+        const decodeStr = commHelp.decodeCraneHexstring(bytes);
+        if (Number(decodeStr) > 0) {
+          console.log(`device port: [${port}] decode data:>>${decodeStr}`);
+          // const decodeStr = origin
+          io.emit("factWeight", decodeStr, portIdx);
+        }
         socket.write(`device port: [${port}] has received data`);
+      } else {
+        socket.write(`device port: [${port}] data invalid`);
       }
+    });
+    socket.on("err", err => {
+      console.log(`socket port: [${port}] error:>>`, err);
     });
     socket.on("end", () => {
       console.log(`soket port: [${port}] ended`);
