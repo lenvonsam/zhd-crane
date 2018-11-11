@@ -53,8 +53,8 @@ const socketPorts = [3001, 3002, 3003, 3004]
 
 function socketHandler(socket, port, portIdx) {
   console.log(`socket port:>>${port}`)
-  socket.setEncoding('utf8')
-  // socket.setEncoding('hex')
+  // socket.setEncoding('utf8')
+  socket.setEncoding('hex')
   try {
     socket.on('data', data => {
       const origin = data.toString()
