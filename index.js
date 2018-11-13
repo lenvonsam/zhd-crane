@@ -72,10 +72,11 @@ function socketHandler(socket, port, portIdx) {
           // const decodeStr = origin
           io.emit("factWeight", decodeStr, portIdx);
         }
-        socket.write(`device port: [${port}] has received data`);
+        // socket.write(`device port: [${port}] has received data`);
       } else {
-        socket.write(`device port: [${port}] data invalid`);
+        // socket.write(`device port: [${port}] data invalid`);
       }
+      socket.write('')
     });
     socket.on("err", err => {
       console.log(`socket port: [${port}] error:>>`, err);
