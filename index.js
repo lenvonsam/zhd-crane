@@ -48,6 +48,9 @@ server.listen(3000, () => {
 
 io.on("connection", function(socket) {
   console.log("[zhd-crane] socket io connect successful");
+  socket.on("error", err => {
+    console.log('socket io error:>>', err)
+  })
 });
 
 const socketPorts = [3001, 3002, 3003, 3004];
@@ -61,7 +64,7 @@ function socketHandler(socket, port, portIdx) {
     socket.on("data", data => {
       const origin = data.toString();
       console.log(`device port: [${port}] origin data:>>${origin}`);
-      if (origin.toLowerCase().indexOf("cd") >= 0) {
+      if (origin.toLowerCase().indexOf("cd") == 0) {
         const bytes = commHelp.hexstring2btye(origin);
         const decodeStr = commHelp.decodeCraneHexstring(bytes);
         if (Number(decodeStr) > 0) {

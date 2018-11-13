@@ -125,7 +125,6 @@
   flex: 1;
 }
 
-
 .main-body .table .th {
   font-size: 24px;
   padding: 15px 0px;
@@ -133,6 +132,7 @@
 
 .main-body .table .tr {
   height: 68px;
+  position: relative;
 }
 
 .main-body .float-title {

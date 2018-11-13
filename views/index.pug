@@ -21,6 +21,8 @@ block content
         <%_.each(keys, function(key, subi) {%>
           <% if (key == "goodCount") {%>
             .td ${Number(itm.goodsNum - itm.oconsignDetailOknum)}
+          <% } else if (subi == 0) {%>
+            .td(data-idx="${idx}") ${itm[key]}
           <% } else {%>
             .td ${itm[key]}
           <% } %>

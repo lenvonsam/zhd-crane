@@ -4,12 +4,12 @@ module.exports = {
     // console.log('user', user)
     if (user) {
       await ctx.render('index', {
-        pageTitle: '型云吊称首页',
-        pageBrand: '型云吊称'
+        pageTitle: '型云吊秤首页',
+        pageBrand: '型云吊秤'
       })
     } else {
       await ctx.render('login', {
-        pageTitle: '型云吊称登录',
+        pageTitle: '型云吊秤登录',
         loginType: 1
       })
     }
@@ -18,7 +18,7 @@ module.exports = {
     let type = ctx.query.type || 0
     // console.log('loginType:>>' + type)
     await ctx.render('login', {
-      pageTitle: '型云吊称登录',
+      pageTitle: '型云吊秤登录',
       loginType: type
     })
   }
