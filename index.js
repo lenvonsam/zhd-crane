@@ -63,8 +63,8 @@ function socketHandler(socket, port, portIdx) {
   try {
     socket.on("data", data => {
       const origin = data.toString();
-      console.log(`device port: [${port}] origin data:>>${origin}`);
       if (origin.toLowerCase().indexOf("cd") == 0) {
+        console.log(`device port: [${port}] origin data:>>${origin}`);
         const bytes = commHelp.hexstring2btye(origin);
         const decodeStr = commHelp.decodeCraneHexstring(bytes);
         if (Number(decodeStr) > 0) {
@@ -73,9 +73,10 @@ function socketHandler(socket, port, portIdx) {
           io.emit("factWeight", decodeStr, portIdx);
         }
         // socket.write(`device port: [${port}] has received data`);
-      } else {
+      } 
+      // else {
         // socket.write(`device port: [${port}] data invalid`);
-      }
+      // }
       socket.write('')
     });
     socket.on("err", err => {
