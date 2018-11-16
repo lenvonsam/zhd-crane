@@ -41,6 +41,17 @@ module.exports = {
         return
       }
     }
+    if (body.url == '/outStorageAudit') {
+      if (userArr && userArr.length == 3) {
+        params.userId = userArr[1]
+      } else {
+        ctx.body = {
+          status: -2,
+          message: '用户过期'
+        }
+        return
+      }
+    }
     let data = body.method === 'get' ? (await httpHelp.httpGet(PROXYURL + body.url, params)) : (await httpHelp.httpPost(PROXYURL + body.url, params))
     console.log('warehouse proxy resp:>>\n', data)
     if (body.url == '/login') {
@@ -48,7 +59,7 @@ module.exports = {
         // let str = JSON.stringify(data.data)
         // console.log('cookie 保存', data.data)
         await ctx.cookies.set('currentUser', `${data.data.memberCode}|${data.data.operatorUserid}|${data.data.superWarehousemanFlag}`, {
-          domain: '192.168.80.200',
+          domain: 'localhost',
           maxAge: 5 * 60 * 60 * 1000,
           httpOnly: false
         })

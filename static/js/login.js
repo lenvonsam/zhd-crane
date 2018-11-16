@@ -1,11 +1,28 @@
 $(function () {
-  $('body').removeClass()
+  $('body').removeClass('login-bg')
   $('body').addClass('login-bg')
   var pageType = $('input[name="loginType"]').val()
   if (pageType == 1) showMsg('用户登录超时')
+  $('#username').focus(function (e) {
+    console.log(e)
+    $('.zhd-keyboard').css('display', 'none')
+    globalFocusDom = '#username'
+    $('.zhd-keyboard').css('top', (e.currentTarget.offsetHeight + e.currentTarget.offsetTop + 120) + 'px')
+    $('.zhd-keyboard').css('left', (e.currentTarget.offsetLeft + e.currentTarget.offsetWidth + 100) + 'px')
+    $('.zhd-keyboard').css('display', 'block')
+  })
+
+  $('#password').focus(function (e) {
+    $('.zhd-keyboard').css('display', 'none')
+    globalFocusDom = '#password'
+    $('.zhd-keyboard').css('top', (e.currentTarget.offsetHeight + e.currentTarget.offsetTop + 160) + 'px')
+    $('.zhd-keyboard').css('left', (e.currentTarget.offsetLeft + e.currentTarget.offsetWidth + 100) + 'px')
+    $('.zhd-keyboard').css('display', 'block')
+  })
   $('#loginBtn').click(function () {
     let username = $('#username').val()
     let password = $('#password').val()
+    $('.zhd-keyboard').css('display', 'none')
     if (username.trim().length == 0) {
       showMsg('用户名不能为空')
     } else if (password.trim().length == 0) {

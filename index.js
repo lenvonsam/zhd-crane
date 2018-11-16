@@ -57,23 +57,24 @@ const socketPorts = [3001, 3002, 3003, 3004];
 
 function socketHandler(socket, port, portIdx) {
   // console.log(`socket port:>>${port}`)
-  // socket.setEncoding('utf8')
-  socket.setEncoding("hex");
+  socket.setEncoding('utf8')
+  // socket.setEncoding("hex");
   socket.setTimeout(0);
   try {
     socket.on("data", data => {
       const origin = data.toString();
-      if (origin.toLowerCase().indexOf("cd") == 0) {
+      // if (origin.toLowerCase().indexOf("cd") == 0) {
         console.log(`device port: [${port}] origin data:>>${origin}`);
-        const bytes = commHelp.hexstring2btye(origin);
-        const decodeStr = commHelp.decodeCraneHexstring(bytes);
+        // const bytes = commHelp.hexstring2btye(origin);
+        // const decodeStr = commHelp.decodeCraneHexstring(bytes);
+        const decodeStr = origin
         if (Number(decodeStr) > 0) {
           console.log(`device port: [${port}] decode data:>>${decodeStr}`);
           // const decodeStr = origin
           io.emit("factWeight", decodeStr, portIdx);
         }
         // socket.write(`device port: [${port}] has received data`);
-      } 
+      // } 
       // else {
         // socket.write(`device port: [${port}] data invalid`);
       // }
@@ -100,3 +101,7 @@ socketPorts.map((itm, idx) => {
       console.log("[zhd-crane] socket-server is starting at port " + itm);
     });
 });
+
+process.on('uncaughtException', function (err) {
+  console.log('uncaughtException:>>>', err.stack)
+})

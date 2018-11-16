@@ -1,5 +1,8 @@
 @charset "utf-8";
 /*公共样式*/
+.relative {
+  position: relative;
+}
 .column {
   display: flex;
   flex-direction: column;
@@ -64,4 +67,72 @@ input:focus {
 
 .message.error {
   color: red;
+}
+
+.zhd-keyboard {
+  display: none;
+  position: absolute;
+  width: 550px;
+  height: 456px;
+  top: 15px;
+  left: 15px;
+  /* background: #fff; */
+  /* opacity: 0.8; */
+  z-index: 100;
+}
+
+.zhd-keyboard .wrap {
+  position: relative;
+  width: 100%;
+  height: inherit;
+  z-index: 20;
+}
+
+.zhd-keyboard .wrap .bg {
+  background: #fff;
+  position: absolute;
+  opacity: 0.8;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: -1;
+  border-radius: 10px;
+}
+
+.zhd-keyboard .row {
+  height: 114px;
+}
+
+.zhd-keyboard .col {
+  display: flex;
+  justify-content: center;
+}
+
+.zhd-keyboard .num-wrap {
+  display: inline-block;
+  width: 157px;
+  height: 86px;
+  box-sizing: border-box;
+}
+
+.zhd-keyboard .num-wrap .num {
+  width: 100%;
+  height: 84px;
+  border-radius: 10px;
+  border: 1px solid #ddd;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background: #fff;
+  font-size: 38px;
+  font-weight: bold;
+}
+.zhd-keyboard .num-wrap .num:hover {
+  cursor: pointer;
+}
+.zhd-keyboard .num-wrap .num span {
+  color: #262626;
 }

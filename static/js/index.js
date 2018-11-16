@@ -1,5 +1,5 @@
 $(function() {
-  $("body").removeClass();
+  $("body").removeClass("main-bg");
   $("body").addClass("main-bg");
 
   // 初始化底部磅秤按钮
@@ -144,8 +144,21 @@ $(function() {
     "goodsProperty4",
     "goodsProperty5"
   ];
+  $('#tdNo').focus(function (e) {
+    $('.zhd-keyboard').css('display', 'none')
+    globalFocusDom = '#tdNo'
+    $('.zhd-keyboard').css('top', (e.currentTarget.offsetHeight + e.currentTarget.offsetTop + 20) + 'px')
+    $('.zhd-keyboard').css('left', (e.currentTarget.offsetLeft - 20) + 'px')
+    $('.zhd-keyboard').css('display', 'block')
+  })
+  
   $("#topAddBtn").click(() => {
     tdNo = $("#tdNo").val();
+    if (tdNo.length == 0) {
+      showMsg('请输入提单号')
+      return
+    }
+    $('.zhd-keyboard').css('display', 'none')
     request("/outWaitStorageQuery", {
       sbillBillcode: "TD" + tdNo
     })
@@ -153,6 +166,7 @@ $(function() {
         console.log(res);
         if (res.status == 0) {
           // showMsg('用户过期')
+          if (!res.data.data) return
           if (tableList.length == 0) {
             tableList = res.data.data;
             updateTableData(tableList);
@@ -233,6 +247,7 @@ $(function() {
   });
   $("#topClearBtn").click(() => {
     tdNo = "";
+    $('.zhd-keyboard').css('display', 'none')
     $("#tdNo").val(tdNo);
   });
 
@@ -241,7 +256,17 @@ $(function() {
   // 物资重量数量输入
   var countVal = $("#countIpt").val();
   console.log(typeof $("#countIpt").val());
+  $('#countIpt').focus(function (e) {
+    console.log('count ipt focus')
+    $('.zhd-keyboard').css('display', 'none')
+    console.log(e)
+    globalFocusDom = '#countIpt'
+    $('.zhd-keyboard').css('left', (e.currentTarget.offsetLeft - 20) + 'px')
+    $('.zhd-keyboard').css('top', (e.currentTarget.offsetHeight + e.currentTarget.offsetTop - 10) + 'px')
+    $('.zhd-keyboard').css('display', 'block')
+  })
   $("#countMinus").click(() => {
+    $('.zhd-keyboard').css('display', 'none') 
     countVal = Number($("#countIpt").val());
     if (countVal == "" || isNaN(Number(countVal))) {
       countVal = 0;
@@ -253,6 +278,7 @@ $(function() {
     $("#countIpt").val(countVal);
   });
   $("#countAdd").click(() => {
+    $('.zhd-keyboard').css('display', 'none')
     countVal = Number($("#countIpt").val());
     if (countVal == "" || isNaN(Number(countVal))) {
       countVal = 1;
@@ -291,7 +317,30 @@ $(function() {
             .then(res => {
               console.log(res);
               if (res.status == 0) {
-                outStorageSuccess(currentObj);
+                if (res.message.startsWith('[待审核]')) {
+                  var result = window.confirm(`此条物资需要审核确认\n 出库重量:${w}\n 出库数量:${cnt}`)
+                  if (result) {
+                    var outstorageNo = res.message.split('|')[1]
+                    request('/outStorageAudit', {billCode: outstorageNo, status: 1, remark: '吊秤审核'}).then(rp => {
+                      if (rp.status == 0) {
+                        outStorageSuccess(currentObj)
+                      } else {
+                        showMsg(rp.message)
+                        request("/unlockTd", {
+                          tdNo: currentTd
+                        });
+                      }
+                    }).catch(e => {
+                      console.log(e)
+                      request("/unlockTd", {
+                        tdNo: currentTd
+                      });
+                      showMsg(e);
+                    })
+                  }
+                } else {
+                  outStorageSuccess(currentObj);
+                }
               } else if (res.status == -2) {
                 showMsg("账户已禁用");
                 request("/unlockTd", {
