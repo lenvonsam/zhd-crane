@@ -147,8 +147,8 @@ $(function() {
   $('#tdNo').focus(function (e) {
     $('.zhd-keyboard').css('display', 'none')
     globalFocusDom = '#tdNo'
-    $('.zhd-keyboard').css('top', (e.currentTarget.offsetHeight + e.currentTarget.offsetTop + 20) + 'px')
-    $('.zhd-keyboard').css('left', (e.currentTarget.offsetLeft - 20) + 'px')
+    // $('.zhd-keyboard').css('top', (e.currentTarget.offsetHeight + e.currentTarget.offsetTop + 20) + 'px')
+    // $('.zhd-keyboard').css('left', (e.currentTarget.offsetLeft - 20) + 'px')
     $('.zhd-keyboard').css('display', 'block')
   })
   
@@ -261,8 +261,8 @@ $(function() {
     $('.zhd-keyboard').css('display', 'none')
     console.log(e)
     globalFocusDom = '#countIpt'
-    $('.zhd-keyboard').css('left', (e.currentTarget.offsetLeft - 20) + 'px')
-    $('.zhd-keyboard').css('top', (e.currentTarget.offsetHeight + e.currentTarget.offsetTop - 10) + 'px')
+    // $('.zhd-keyboard').css('left', (e.currentTarget.offsetLeft - 20) + 'px')
+    // $('.zhd-keyboard').css('top', (e.currentTarget.offsetHeight + e.currentTarget.offsetTop - 10) + 'px')
     $('.zhd-keyboard').css('display', 'block')
   })
   $("#countMinus").click(() => {

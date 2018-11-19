@@ -87,6 +87,9 @@ $(function() {
     } else if (idx == 12) {
       // 清除全部操作
       $(globalFocusDom).val("");
+    } else if (idx == 13) {
+      // 确定按钮
+      $('.zhd-keyboard').css('display', 'none')
     } else {
       var newVal = `${origin}${idx}`;
       $(globalFocusDom).val(newVal);
@@ -100,7 +103,7 @@ $(function() {
       }
     }
   });
-  initKeyboardDrag();
+  // initKeyboardDrag();
   // 屏蔽鼠标右键
   // $(document).bind('contextmenu', function(e) {
   //   console.log(e.which)

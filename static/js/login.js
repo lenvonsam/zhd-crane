@@ -7,16 +7,16 @@ $(function () {
     console.log(e)
     $('.zhd-keyboard').css('display', 'none')
     globalFocusDom = '#username'
-    $('.zhd-keyboard').css('top', (e.currentTarget.offsetHeight + e.currentTarget.offsetTop + 120) + 'px')
-    $('.zhd-keyboard').css('left', (e.currentTarget.offsetLeft + e.currentTarget.offsetWidth + 100) + 'px')
+    // $('.zhd-keyboard').css('top', (e.currentTarget.offsetHeight + e.currentTarget.offsetTop + 120) + 'px')
+    // $('.zhd-keyboard').css('left', (e.currentTarget.offsetLeft + e.currentTarget.offsetWidth + 100) + 'px')
     $('.zhd-keyboard').css('display', 'block')
   })
 
   $('#password').focus(function (e) {
     $('.zhd-keyboard').css('display', 'none')
     globalFocusDom = '#password'
-    $('.zhd-keyboard').css('top', (e.currentTarget.offsetHeight + e.currentTarget.offsetTop + 160) + 'px')
-    $('.zhd-keyboard').css('left', (e.currentTarget.offsetLeft + e.currentTarget.offsetWidth + 100) + 'px')
+    // $('.zhd-keyboard').css('top', (e.currentTarget.offsetHeight + e.currentTarget.offsetTop + 160) + 'px')
+    // $('.zhd-keyboard').css('left', (e.currentTarget.offsetLeft + e.currentTarget.offsetWidth + 100) + 'px')
     $('.zhd-keyboard').css('display', 'block')
   })
   $('#loginBtn').click(function () {
