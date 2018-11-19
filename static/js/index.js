@@ -141,8 +141,8 @@ $(function() {
     "productareaName",
     "goodsMaterial",
     "goodCount",
-    "goodsProperty4",
-    "goodsProperty5"
+    "goodsProperty5",
+    "goodsProperty4"
   ];
   $('#tdNo').focus(function (e) {
     $('.zhd-keyboard').css('display', 'none')
@@ -337,6 +337,8 @@ $(function() {
                       });
                       showMsg(e);
                     })
+                  } else {
+                    outStorageSuccess(currentObj, true)
                   }
                 } else {
                   outStorageSuccess(currentObj);
@@ -420,8 +422,12 @@ $(function() {
         .css("background-image", 'url("/img/dl.png")');
     });
   }
-  function outStorageSuccess(currentObj) {
+  function outStorageSuccess(currentObj, manAudit = false) {
+    // debugger
+    // debugger
     let uniqueCode = currentObj.sbillBillbatch;
+    console.log('uniqueCode:>>>' + uniqueCode)
+    console.log(linkMap)
     let weightBtnIdx = Object.keys(linkMap)
       .map(itm => linkMap[itm])
       .findIndex(itm => itm == selectRowIndex);
@@ -432,6 +438,7 @@ $(function() {
       }
     });
     console.log("weightBtnIdx:>>>" + weightBtnIdx);
+    linkMap[weightBtnIdx] = -1;
     $(".crane-btn").unbind();
     tableList = tableList.filter(itm => itm.sbillBillbatch != uniqueCode);
     selectRowIndex = -1;
@@ -439,6 +446,7 @@ $(function() {
     Object.keys(otherSelectRowObj).map(k => {
       let idx = tableList.findIndex(itm => itm.sbillBillbatch == k);
       let btnIdx = otherSelectRowObj[k];
+      linkMap[btnIdx] = idx
       $("#wzBody .tr")
         .eq(idx)
         .find(".td")
@@ -457,8 +465,6 @@ $(function() {
         );
       bindCraneBtn(idx);
     });
-
-    linkMap[weightBtnIdx] = -1;
     initActiveRect(selectRowIndex);
     $("#countIpt").val("");
     $(".weight-btn")
@@ -471,7 +477,12 @@ $(function() {
       .find("span")
       .eq(0)
       .text(dwt[weightBtnIdx]);
-    showMsg("该物资已出库成功");
+    console.log('出库后的按钮映射')
+    console.log(linkMap)
+    if (manAudit) 
+      showMsg('请去电脑后台人工审核出库')
+    else
+      showMsg("该物资已出库成功");
   }
 
   function updateTableData(data) {

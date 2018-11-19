@@ -78,6 +78,8 @@ function socketHandler(socket, port, portIdx) {
       // else {
         // socket.write(`device port: [${port}] data invalid`);
       }
+      // if (Number(origin) > 0) io.emit('factWeight', origin, portIdx)
+      // socket.write(origin)
       socket.write('')
     });
     socket.on("err", err => {

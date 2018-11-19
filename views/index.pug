@@ -10,7 +10,7 @@ block content
     .row.top-section.relative(style="bottom: -50px")
       <% _.each(btns, function(itm, index){ %>
         .col.relative
-          span A${index + 1}
+          span A${index + 1} (公斤)
           .weight-btn(data-index="${index}")
             span 0
           //- image(style="position: absolute; bottom: -126px; left: -40px; z-index: 10;display: none;", src="/img/taph.png")
@@ -73,7 +73,7 @@ block content
                   input#countIpt.center
               #countAdd.col
           .col.center.relative
-            span.float-title 重量（公斤）
+            span.float-title 重量（吨）
             #weightInfoWrap.weight
               span#weightInfo
       #secBtns.row
