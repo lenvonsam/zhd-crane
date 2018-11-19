@@ -67,11 +67,11 @@ function kbOnDrag(ev) {
 
 var globalFocusDom = "";
 $(function() {
-  $("body").dblclick(function(e) {
-    e.stopPropagation();
-    console.log("document body click");
-    $(".zhd-keyboard").css("display", "none");
-  });
+  // $("body").dblclick(function(e) {
+  //   e.stopPropagation();
+  //   console.log("document body click");
+  //   $(".zhd-keyboard").css("display", "none");
+  // });
   $(".num").click(function(e) {
     e.stopPropagation();
     var idx = $(this).data("index");
