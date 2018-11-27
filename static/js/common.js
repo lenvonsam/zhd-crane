@@ -65,6 +65,41 @@ function kbOnDrag(ev) {
   }
 }
 
+function loading (title) {
+  $('.zhd-loading .content').text(title)
+  $('.zhd-loading').css('display', 'block')
+}
+
+function hideLoad () {
+  $('.zhd-loading').css('display', 'none')
+}
+
+function showModal(id, cb) {
+  // $(id + ' .modal-btn.confirm').unbind()
+  // $(id + '.modal-btn.cancel').unbind()
+  // $(id + '.zhd-modal .content .title').text(title)
+  $(id).css('display', 'block')
+  $(id + '.zhd-modal .content').animate({opacity: 1}, {
+    step: function (num, fix) {
+      $(this).css('transform', 'scale('+num+')')
+    },
+    speed: 300,
+    complete: function () {
+      $('.modal-btn.confirm').click(function () {
+        $(id).css('display', 'none')
+        cb(true)
+        $(id).remove()
+      })
+      $('.modal-btn.cancel').click(function () {
+        $(id).css('display', 'none')
+        cb(false)
+        $(id).remove()
+        console.log('模态框已删除')
+      })
+    }
+  })
+}
+
 var globalFocusDom = "";
 $(function() {
   // $("body").dblclick(function(e) {

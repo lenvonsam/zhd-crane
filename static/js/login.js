@@ -28,8 +28,10 @@ $(function () {
     } else if (password.trim().length == 0) {
       window.showMsg('密码不能为空')
     } else {
+      loading('数据请求中，请耐心等待...')
       request('/login', {username: username.trim(), pwd: hexMd5(password.trim())}).then(resp => {
         console.log(resp)
+        hideLoad()
         if (resp.status == 0 && resp.data != null) {
           console.log("跳转")
           window.location.href = "/"
@@ -38,8 +40,9 @@ $(function () {
           // console.error(resp.message)
         }
       }).catch(err => {
+        hideLoad()
         console.error(err)
-        showMsg(err)
+        showMsg(err.responseText || '网络异常')
       })
     }
   })

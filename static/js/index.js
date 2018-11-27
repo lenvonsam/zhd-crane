@@ -1,7 +1,6 @@
 $(function() {
   $("body").removeClass("main-bg");
   $("body").addClass("main-bg");
-
   // 初始化底部磅秤按钮
   var datas = {
     btns: [
@@ -26,10 +25,10 @@ $(function() {
   var craneNames = ["A1", "A2", "A3", "A4"];
   // 磅秤数组下标和物资数组下标相对应
   var linkMap = {
-    0: -1,
-    1: -1,
-    2: -1,
-    3: -1
+    0: [],
+    1: [],
+    2: [],
+    3: []
   };
   // 吊秤重量
   let w1 = 0;
@@ -38,11 +37,39 @@ $(function() {
   let w4 = 0;
 
   var factWeight = "";
+  var userChooseBtnIdx = -1;
   var dwt = [w1, w2, w3, w4];
   var bottomTemp = _.template($("#weightBtns").html());
   $("#secBtns").html(bottomTemp(datas));
+  // modal template
+  var modalTemp = _.template($("#zhdModal").html());
+  // 根据品名、材质、规格、产地相等，能合并一同绑定出库
+  function isTheSame(origin, compare) {
+    console.log("is the same", compare);
+    var orginStr =
+      origin.partsnameName +
+      "**" +
+      origin.goodsSpec +
+      "**" +
+      origin.productareaName +
+      "**" +
+      origin.goodsMaterial;
+    var compareStr =
+      compare.partsnameName +
+      "**" +
+      compare.goodsSpec +
+      "**" +
+      compare.productareaName +
+      "**" +
+      compare.goodsMaterial;
+    console.log(compareStr, orginStr);
+    return orginStr == compareStr;
+  }
   $(".weight-btn").click(function() {
-    if (selectRowIndex == -1) return;
+    if (selectRowIndex == -1) {
+      showMsg("请先选择物资");
+      return;
+    }
     let selectObj = tableList[selectRowIndex];
     console.log(selectObj);
     let cnt = Number(selectObj.goodsNum - selectObj.oconsignDetailOknum);
@@ -55,59 +82,110 @@ $(function() {
     }
     console.log("click me");
     let btnIdx = Number($(this).data("index"));
-    console.log("btnRowIndx:>> " + linkMap[btnIdx]);
-    let idx = Object.keys(linkMap)
-      .map(itm => linkMap[itm])
-      .findIndex(it => it == selectRowIndex);
-    if (idx >= 0 && linkMap[btnIdx] > -1) {
-      // alert('此物资已关联设备')
-      console.log("此物资已关联设备");
-      selectRowIndex = linkMap[btnIdx];
-      initActiveRect(selectRowIndex);
-      showWzCount();
-      factWeight = Number(dwt[btnIdx] / 1000).toFixed(3);
-      updateFactWeight(factWeight);
+    console.log("btnidx:>>", btnIdx);
+    console.log("btnRowIndx:>> ", linkMap[btnIdx]);
+    console.log("dwt weight:>>", dwt[btnIdx]);
+    if (Number(dwt[btnIdx]) > 0 && linkMap[btnIdx].length == 0) {
+      showMsg("请将磅秤重置为零，才能进行设备绑定");
       return;
     }
-    if (linkMap[btnIdx] == -1 && selectRowIndex >= 0 && idx < 0) {
-      let result = window.confirm("你确定要关联此设备吗?");
-      if (result) {
-        $(this)
-          .next()
-          .css("display", "block");
-        linkMap[btnIdx] = selectRowIndex;
-        $("#wzBody .tr")
-          .eq(selectRowIndex)
-          .find(".td")
-          .eq(9)
-          .html("");
-        $("#wzBody .tr")
-          .eq(selectRowIndex)
-          .find(".td")
-          .eq(9)
-          .html(
-            '<div class="crane-btn column" data-bidx="' +
-              btnIdx +
-              '"><span>' +
-              craneNames[btnIdx] +
-              "</span></div>"
-          );
-        bindCraneBtn(selectRowIndex);
-        showWzCount();
-        factWeight = Number(dwt[btnIdx] / 1000).toFixed(3);
-        updateFactWeight(factWeight);
-        $(this).css("background-image", "url(/img/gl.png)");
+    let idx = linkMap[btnIdx].findIndex(itm => itm == selectRowIndex);
+    // let idx = Object.keys(linkMap)
+    // .map(itm => linkMap[itm])
+    // .findIndex(it => it == selectRowIndex);
+    if (idx >= 0) {
+      // alert('此物资已关联设备')
+      console.log("此物资已关联设备");
+      // selectRowIndex = linkMap[btnIdx];
+      initActiveRect(selectRowIndex);
+      showWzCount(btnIdx);
+      factWeight = Number(dwt[btnIdx] / 1000).toFixed(3);
+      updateFactWeight(factWeight);
+      userChooseBtnIdx = btnIdx;
+      return;
+    }
+    var otherIdxs = [];
+    Object.keys(linkMap).map(itm => {
+      if (itm != btnIdx) {
+        linkMap[itm].map(item => {
+          otherIdxs.push(item);
+        });
       }
+    });
+    idx = otherIdxs.findIndex(itm => itm == selectRowIndex);
+    if (idx >= 0) {
+      showMsg("此物资已关联其他设备");
+      return;
+    }
+    // 判断时候相同物资明细
+    if (linkMap[btnIdx].length > 0) {
+      console.log("selectrowindex:>>>", selectRowIndex);
+      console.log("orign idx:>>", linkMap[btnIdx][0]);
+      let origin = tableList[linkMap[btnIdx][0]];
+      let compare = tableList[selectRowIndex];
+      console.log("origin obj", origin);
+      console.log("compare obj", compare, compare.goodsSpec);
+      if (!isTheSame(origin, compare)) {
+        showMsg("此物资不能与之前的物资合并一起称重");
+        return;
+      }
+    }
+    if (selectRowIndex >= 0) {
+      // let result = window.confirm("你确定要关联此设备吗?");
+
+      $("body").append(
+        modalTemp({
+          modalId: "linkDevice",
+          modalTitle: "您确定要关联此设备吗?"
+        })
+      );
+      showModal("#linkDevice", function(result) {
+        if (result) {
+          $(".weight-btn")
+            .eq(btnIdx)
+            .next()
+            .css("display", "block");
+          linkMap[btnIdx].push(selectRowIndex);
+          $("#wzBody .tr")
+            .eq(selectRowIndex)
+            .find(".td")
+            .eq(9)
+            .html("");
+          $("#wzBody .tr")
+            .eq(selectRowIndex)
+            .find(".td")
+            .eq(9)
+            .html(
+              '<div class="crane-btn column" data-bidx="' +
+                btnIdx +
+                '" data-ridx="' +
+                selectRowIndex +
+                '"><span>' +
+                craneNames[btnIdx] +
+                "</span></div>"
+            );
+          bindCraneBtn(selectRowIndex);
+          showWzCount(btnIdx);
+          factWeight = Number(dwt[btnIdx] / 1000).toFixed(3);
+          updateFactWeight(factWeight);
+          console.log("hander link btn:>>", linkMap[btnIdx]);
+          userChooseBtnIdx = btnIdx;
+          $(".weight-btn")
+            .eq(btnIdx)
+            .css("background-image", "url(/img/gl.png)");
+        }
+      });
     } else {
       console.log("currentidx:>>" + selectRowIndex);
       console.log("btnidx:>>" + btnIdx);
-      if (selectRowIndex == -1) {
-        showMsg("请选择关联设备的物资");
-      } else if (selectRowIndex != linkMap[btnIdx]) {
-        linkMap[btnIdx] == -1
-          ? showMsg("该物资已被关联到其他设备")
-          : showMsg("此设备已关联其他物资");
-      }
+      console.error("进入未处理的判断");
+      // if (selectRowIndex == -1) {
+      //   showMsg("请选择关联设备的物资");
+      // } else if (selectRowIndex != linkMap[btnIdx]) {
+      //   linkMap[btnIdx] == -1
+      //     ? showMsg("该物资已被关联到其他设备")
+      //     : showMsg("此设备已关联其他物资");
+      // }
     }
   });
 
@@ -144,21 +222,21 @@ $(function() {
     "goodsProperty5",
     "goodsProperty4"
   ];
-  $('#tdNo').focus(function (e) {
-    $('.zhd-keyboard').css('display', 'none')
-    globalFocusDom = '#tdNo'
+  $("#tdNo").focus(function(e) {
+    $(".zhd-keyboard").css("display", "none");
+    globalFocusDom = "#tdNo";
     // $('.zhd-keyboard').css('top', (e.currentTarget.offsetHeight + e.currentTarget.offsetTop + 20) + 'px')
     // $('.zhd-keyboard').css('left', (e.currentTarget.offsetLeft - 20) + 'px')
-    $('.zhd-keyboard').css('display', 'block')
-  })
-  
+    $(".zhd-keyboard").css("display", "block");
+  });
+
   $("#topAddBtn").click(() => {
     tdNo = $("#tdNo").val();
     if (tdNo.length == 0) {
-      showMsg('请输入提单号')
-      return
+      showMsg("请输入提单号");
+      return;
     }
-    $('.zhd-keyboard').css('display', 'none')
+    $(".zhd-keyboard").css("display", "none");
     request("/outWaitStorageQuery", {
       sbillBillcode: "TD" + tdNo
     })
@@ -166,72 +244,65 @@ $(function() {
         console.log(res);
         if (res.status == 0) {
           // showMsg('用户过期')
-          if (!res.data.data) return
+          if (!res.data.data) {
+            showMsg("此提单号查无物资明细");
+            return;
+          }
           if (tableList.length == 0) {
             tableList = res.data.data;
             updateTableData(tableList);
           } else {
-            if (selectRowIndex >= 0) {
-              let otherSelectRowObj = {};
-              let currentTD = tableList[selectRowIndex]["sbillBillbatch"];
-              console.log("currentTD:>>" + currentTD);
-              Object.keys(linkMap).map(itm => {
-                if (linkMap[itm] >= 0) {
-                  otherSelectRowObj[
-                    tableList[linkMap[itm]]["sbillBillbatch"]
-                  ] = itm;
-                }
-              });
-              console.log(otherSelectRowObj);
-              selectRowIndex = -1;
-              $(".crane-btn").unbind();
-              res.data.data.map(itm => {
-                let idx = tableList.findIndex(
-                  item => item.sbillBillbatch == itm.sbillBillbatch
-                );
-                if (idx < 0) {
-                  tableList.push(itm);
-                }
-              });
-              updateTableData(tableList);
+            // 重新渲染之前选择的物资
+            let currentTD = "";
+            if (selectRowIndex >= 0)
+              currentTD = tableList[selectRowIndex]["sbillBillbatch"];
+            var chooseItems = {};
+            Object.keys(linkMap).map(itm => {
+              if (linkMap[itm].length > 0) {
+                linkMap[itm].map(item => {
+                  chooseItems[tableList[item]["sbillBillbatch"]] = itm;
+                });
+              }
+            });
+            $(".crane-btn").unbind();
+            res.data.data.map(itm => {
+              let idx = tableList.findIndex(
+                item => item.sbillBillbatch == itm.sbillBillbatch
+              );
+              if (idx < 0) tableList.push(itm);
+            });
+            updateTableData(tableList);
+            if (currentTD.length != "") {
               selectRowIndex = tableList.findIndex(
                 itm => itm.sbillBillbatch == currentTD
               );
-              console.log("update row index:>>" + selectRowIndex);
-              Object.keys(otherSelectRowObj).map(k => {
-                let idx = tableList.findIndex(itm => itm.sbillBillbatch == k);
-                let btnIdx = otherSelectRowObj[k];
-                linkMap[btnIdx] = idx;
-                $("#wzBody .tr")
-                  .eq(idx)
-                  .find(".td")
-                  .eq(9)
-                  .html("");
-                $("#wzBody .tr")
-                  .eq(idx)
-                  .find(".td")
-                  .eq(9)
-                  .html(
-                    '<div class="crane-btn column" data-bidx="' +
-                      btnIdx +
-                      '"><span>' +
-                      craneNames[btnIdx] +
-                      "</span></div>"
-                  );
-                bindCraneBtn(idx);
-              });
               initActiveRect(selectRowIndex);
-            } else {
-              res.data.data.map(itm => {
-                let idx = tableList.findIndex(
-                  item => item.sbillBillbatch == itm.sbillBillbatch
-                );
-                if (idx < 0) {
-                  tableList.push(itm);
-                }
-              });
-              updateTableData(tableList);
             }
+            resetLinkmap();
+            Object.keys(chooseItems).map(k => {
+              let idx = tableList.findIndex(itm => itm.sbillBillbatch == k);
+              let btnIdx = chooseItems[k];
+              linkMap[btnIdx].push(idx);
+              $("#wzBody .tr")
+                .eq(idx)
+                .find(".td")
+                .eq(9)
+                .html("");
+              $("#wzBody .tr")
+                .eq(idx)
+                .find(".td")
+                .eq(9)
+                .html(
+                  '<div class="crane-btn column" data-bidx="' +
+                    btnIdx +
+                    '" data-ridx="' +
+                    idx +
+                    '"><span>' +
+                    craneNames[btnIdx] +
+                    "</span></div>"
+                );
+              bindCraneBtn(idx);
+            });
           }
           console.log(tableList);
         } else if (resp.status == -2) {
@@ -247,7 +318,7 @@ $(function() {
   });
   $("#topClearBtn").click(() => {
     tdNo = "";
-    $('.zhd-keyboard').css('display', 'none')
+    $(".zhd-keyboard").css("display", "none");
     $("#tdNo").val(tdNo);
   });
 
@@ -255,18 +326,37 @@ $(function() {
 
   // 物资重量数量输入
   var countVal = $("#countIpt").val();
-  console.log(typeof $("#countIpt").val());
-  $('#countIpt').focus(function (e) {
-    console.log('count ipt focus')
-    $('.zhd-keyboard').css('display', 'none')
-    console.log(e)
-    globalFocusDom = '#countIpt'
+  function canInput() {
+    var btnIndex = -1;
+    Object.keys(linkMap).map(itm => {
+      let idx = linkMap[itm].findIndex(item => item == selectRowIndex);
+      if (idx >= 0) btnIndex = idx;
+    });
+    if (btnIndex == -1) {
+      return "请先选中关联设备的物资";
+    } else if (linkMap[btnIndex].length == 1) {
+      return "ok";
+    } else {
+      return "多个物资不能更改数量";
+    }
+  }
+  $("#countIpt").focus(function(e) {
+    console.log("count ipt focus");
+    $(".zhd-keyboard").css("display", "none");
+    if (canInput() != "ok") return;
+    console.log(e);
+    globalFocusDom = "#countIpt";
     // $('.zhd-keyboard').css('left', (e.currentTarget.offsetLeft - 20) + 'px')
     // $('.zhd-keyboard').css('top', (e.currentTarget.offsetHeight + e.currentTarget.offsetTop - 10) + 'px')
-    $('.zhd-keyboard').css('display', 'block')
-  })
+    $(".zhd-keyboard").css("display", "block");
+  });
   $("#countMinus").click(() => {
-    $('.zhd-keyboard').css('display', 'none') 
+    $(".zhd-keyboard").css("display", "none");
+    var iptResult = canInput();
+    if (iptResult != "ok") {
+      showMsg(iptResult);
+      return;
+    }
     countVal = Number($("#countIpt").val());
     if (countVal == "" || isNaN(Number(countVal))) {
       countVal = 0;
@@ -278,7 +368,12 @@ $(function() {
     $("#countIpt").val(countVal);
   });
   $("#countAdd").click(() => {
-    $('.zhd-keyboard').css('display', 'none')
+    $(".zhd-keyboard").css("display", "none");
+    var iptResult = canInput();
+    if (iptResult != "ok") {
+      showMsg(iptResult);
+      return;
+    }
     countVal = Number($("#countIpt").val());
     if (countVal == "" || isNaN(Number(countVal))) {
       countVal = 1;
@@ -290,17 +385,10 @@ $(function() {
   // 显示物资重量
   $("#weightInfo").text("");
 
-  $("#weightInfoWrap").click(() => {
-    let w = $("#weightInfo").text();
-    let cnt = $("#countIpt").val();
-    console.log(cnt);
-    // return
-    if (Number(w) <= 0) {
-      showMsg("重量必须大于0");
-      return;
-    }
-    let currentObj = tableList[selectRowIndex];
-    let currentTd = currentObj.sbillBillcode;
+  // 单个出库
+  function singleOutStorage(currentObj, currentTd, cnt, weight, idx, max) {
+    if (idx == 0) loading("批量出库中，请耐心等待...");
+    // if (idx == max) userChooseBtnIdx = -1;
     request("/lockTd", {
       tdNo: currentTd
     })
@@ -312,43 +400,69 @@ $(function() {
             oconsignBillcode: currentObj.oconsignBillcode,
             oconsignBillbatch: currentObj.oconsignBillbatch,
             goodsNum: cnt,
-            goodsWeight: w
+            goodsWeight: weight
           })
             .then(res => {
               console.log(res);
               if (res.status == 0) {
-                if (res.message.startsWith('[待审核]')) {
-                  var result = window.confirm(`此条物资需要审核确认\n 出库重量:${w}\n 出库数量:${cnt}`)
-                  if (result) {
-                    var outstorageNo = res.message.split('|')[1]
-                    request('/outStorageAudit', {billCode: outstorageNo, status: 1, remark: '吊秤审核'}).then(rp => {
-                      if (rp.status == 0) {
-                        outStorageSuccess(currentObj)
-                      } else {
-                        showMsg(rp.message)
-                        request("/unlockTd", {
-                          tdNo: currentTd
-                        });
-                      }
-                    }).catch(e => {
-                      console.log(e)
-                      request("/unlockTd", {
-                        tdNo: currentTd
-                      });
-                      showMsg(e);
+                if (res.message.startsWith("[待审核]")) {
+                  // var result = window.confirm(`此条物资需要审核确认\n 出库重量:${w}\n 出库数量:${cnt}`)
+                  hideLoad();
+                  $("body").append(
+                    modalTemp({
+                      modalId: "modal" + currentObj.oconsignBillbatch,
+                      modalTitle: `提单号:${
+                        currentObj.sbillBillcode
+                      }中此条物资需要审核确认\n 出库重量:${weight}\n 出库数量:${cnt}`
                     })
-                  } else {
-                    outStorageSuccess(currentObj, true)
-                  }
+                  );
+                  setTimeout(function() {
+                    showModal("#modal" + currentObj.oconsignBillbatch, function(
+                      result
+                    ) {
+                      if (result) {
+                        var outstorageNo = res.message.split("|")[1];
+                        request("/outStorageAudit", {
+                          billCode: outstorageNo,
+                          status: 1,
+                          remark: "吊秤审核"
+                        })
+                          .then(rp => {
+                            if (rp.status == 0) {
+                              outStorageSuccess(currentObj);
+                            } else {
+                              showMsg(rp.message);
+                              request("/unlockTd", {
+                                tdNo: currentTd
+                              });
+                            }
+                          })
+                          .catch(e => {
+                            console.log(e);
+                            request("/unlockTd", {
+                              tdNo: currentTd
+                            });
+                            if (idx == max) hideLoad();
+                            showMsg(e);
+                          });
+                      } else {
+                        if (idx == max) hideLoad();
+                        outStorageSuccess(currentObj, true);
+                      }
+                    });
+                  }, 300);
                 } else {
+                  if (idx == max) hideLoad();
                   outStorageSuccess(currentObj);
                 }
               } else if (res.status == -2) {
+                if (idx == max) hideLoad();
                 showMsg("账户已禁用");
                 request("/unlockTd", {
                   tdNo: currentTd
                 });
               } else {
+                if (idx == max) hideLoad();
                 showMsg(res.message || "网络异常");
                 request("/unlockTd", {
                   tdNo: currentTd
@@ -357,28 +471,108 @@ $(function() {
             })
             .catch(e => {
               console.log(e);
+              if (idx == max) hideLoad();
+              showMsg(res.message || "网络异常");
               request("/unlockTd", {
                 tdNo: currentTd
               });
               showMsg(e);
             });
         } else if (resp.status == -2) {
+          if (idx == max) hideLoad();
           showMsg("账户已禁用");
         } else {
+          if (idx == max) hideLoad();
           showMsg(resp.message || "网络异常");
         }
       })
       .catch(err => {
         console.log(err);
+        if (idx == max) hideLoad();
         showMsg(err);
       });
+  }
 
-    // 出库成功，自动删除明细
-    // let originCount = Number(selectObj.goodsNum - selectObj.oconsignDetailOknum)
-    // let currentCount = $('#countIpt').val()
-    // if (currentCount < originCount) {
-    // }
-    // request()
+  function getFixWeight(val) {
+    console.log("single weight:>>", val);
+    let newVal = val * 10000 + "";
+    console.log("newval:>>", newVal);
+    let prefix = newVal.substring(0, newVal.length - 2);
+    let num = newVal.substring(newVal.length - 2, newVal.length - 1);
+    let lastNum = newVal.substring(newVal.length - 1, newVal.length);
+    if (Number(lastNum) > 0 && Number(num) < 9) {
+      return Number(Number(prefix + "" + (Number(num) + 1)) / 1000).toFixed(3);
+    } else {
+      return Number(
+        (Number(newVal.substring(0, newVal.length - 1)) + 1) / 1000
+      ).toFixed(3);
+    }
+  }
+  $("#weightWrapAdd").click(function(e) {
+    e.stopPropagation();
+    var val = $("#weightInfo").text();
+    val = Number(val) + 0.005;
+    $("#weightInfo").text(val.toFixed(3));
+  });
+
+  $("#weightInfoWrap").click(() => {
+    let w = $("#weightInfo").text();
+    let cnt = $("#countIpt").val();
+    console.log(cnt);
+    console.log("currentUserChooseBtn", userChooseBtnIdx);
+    if (Number(w) <= 0) {
+      showMsg("重量必须大于0");
+      return;
+    }
+    if (userChooseBtnIdx == -1) {
+      if (selectRowIndex == -1) {
+        showMsg('请选择出库的物资')
+        return
+      }
+      var selectObj = tableList[selectRowIndex];
+      if (
+        (selectObj.goodsMetering == "理计" && selectObj.dataAwedit == 0) ||
+        selectObj.mtype == 0
+      ) {
+      } else {
+        showMsg("请选择出库的磅秤");
+        return;
+      }
+    }
+    // 批量出库
+    if (userChooseBtnIdx > -1) {
+      let detailIdx = linkMap[userChooseBtnIdx];
+      if (detailIdx.length > 1) {
+        detailIdx.map((index, idx) => {
+          let currentObj = tableList[index];
+          let currentTd = currentObj.sbillBillcode;
+          let currentCnt = Number(
+            currentObj.goodsNum - currentObj.oconsignDetailOknum
+          );
+          console.log("currentCnt:>>", currentCnt, "; w:>>", w, ";cnt:>>", cnt);
+          let currentWeight = getFixWeight(
+            Number((w / cnt) * currentCnt).toFixed(4)
+          );
+          console.log("idx:>>", idx, ";currentWeight:>>", currentWeight);
+          singleOutStorage(
+            currentObj,
+            currentTd,
+            currentCnt,
+            currentWeight,
+            idx,
+            detailIdx.length - 1
+          );
+        });
+      } else {
+        let currentObj = tableList[detailIdx[0]];
+        let currentTd = currentObj.sbillBillcode;
+        singleOutStorage(currentObj, currentTd, cnt, w, 0, 0);
+      }
+    } else {
+      let currentObj = tableList[selectRowIndex];
+      let currentTd = currentObj.sbillBillcode;
+      singleOutStorage(currentObj, currentTd, cnt, w, 0, 0);
+    }
   });
 
   // 退出按钮
@@ -414,39 +608,55 @@ $(function() {
       console.log("已经绑定");
       console.log($(this).data("bidx"));
       let btnIdx = $(this).data("bidx");
+      let rowIdx = $(this).data("ridx");
       $(this).unbind();
-      linkMap[btnIdx] = -1;
+      let selectArray = linkMap[btnIdx];
+      selectArray = selectArray.filter(itm => itm != rowIdx);
+      linkMap[btnIdx] = selectArray;
+      console.log("after unbind crane btn:>>", linkMap[btnIdx]);
       $(this).remove();
-      $(".weight-btn")
-        .eq(btnIdx)
-        .css("background-image", 'url("/img/dl.png")');
+      if (selectArray.length == 0) {
+        $(".weight-btn")
+          .eq(btnIdx)
+          .css("background-image", 'url("/img/dl.png")');
+      }
     });
   }
   function outStorageSuccess(currentObj, manAudit = false) {
     // debugger
-    // debugger
     let uniqueCode = currentObj.sbillBillbatch;
-    console.log('uniqueCode:>>>' + uniqueCode)
-    console.log(linkMap)
-    let weightBtnIdx = Object.keys(linkMap)
-      .map(itm => linkMap[itm])
-      .findIndex(itm => itm == selectRowIndex);
+    console.log("uniqueCode:>>>" + uniqueCode);
+    console.log(linkMap);
+    var tableIndex = tableList.findIndex(
+      itm => itm.sbillBillbatch == uniqueCode
+    );
     let otherSelectRowObj = {};
     Object.keys(linkMap).map(itm => {
-      if (itm != weightBtnIdx && linkMap[itm] >= 0) {
-        otherSelectRowObj[tableList[linkMap[itm]]["sbillBillbatch"]] = itm;
+      if (linkMap[itm].length >= 0) {
+        var arr = linkMap[itm];
+        arr.map(item => {
+          if (item != tableIndex) {
+            otherSelectRowObj[tableList[item]["sbillBillbatch"]] = itm;
+          }
+        });
       }
     });
-    console.log("weightBtnIdx:>>>" + weightBtnIdx);
-    linkMap[weightBtnIdx] = -1;
+    // console.log("weightBtnIdx:>>>" + weightBtnIdx);
+    // linkMap[weightBtnIdx] = -1;
+    if (userChooseBtnIdx > -1) {
+      var currentWeightArr = linkMap[userChooseBtnIdx];
+      currentWeightArr = currentWeightArr.filter(itm => itm != tableIndex);
+      linkMap[userChooseBtnIdx] = currentWeightArr;
+    }
     $(".crane-btn").unbind();
     tableList = tableList.filter(itm => itm.sbillBillbatch != uniqueCode);
     selectRowIndex = -1;
+    resetLinkmap();
     updateTableData(tableList);
     Object.keys(otherSelectRowObj).map(k => {
       let idx = tableList.findIndex(itm => itm.sbillBillbatch == k);
       let btnIdx = otherSelectRowObj[k];
-      linkMap[btnIdx] = idx
+      linkMap[btnIdx].push(idx);
       $("#wzBody .tr")
         .eq(idx)
         .find(".td")
@@ -467,27 +677,38 @@ $(function() {
     });
     initActiveRect(selectRowIndex);
     $("#countIpt").val("");
-    $(".weight-btn")
-      .eq(weightBtnIdx)
-      .css("background-image", "url(/img/dl.png)");
     $("#weightInfo").text("");
-    dwt[weightBtnIdx] = 0;
-    $(".weight-btn")
-      .eq(weightBtnIdx)
-      .find("span")
-      .eq(0)
-      .text(dwt[weightBtnIdx]);
-    console.log('出库后的按钮映射')
-    console.log(linkMap)
-    if (manAudit) 
-      showMsg('请去电脑后台人工审核出库')
-    else
-      showMsg("该物资已出库成功");
+    if (userChooseBtnIdx > -1) {
+      $(".weight-btn")
+        .eq(userChooseBtnIdx)
+        .css("background-image", "url(/img/dl.png)");
+      dwt[userChooseBtnIdx] = [];
+      $(".weight-btn")
+        .eq(userChooseBtnIdx)
+        .find("span")
+        .eq(0)
+        .text(dwt[userChooseBtnIdx]);
+      if (linkMap[userChooseBtnIdx].length == 0) userChooseBtnIdx = -1;
+    }
+    console.log("出库后的按钮映射");
+    console.log(linkMap);
+    if (manAudit) showMsg("请去电脑后台人工审核出库");
+    else showMsg("该物资已出库成功");
+  }
+
+  function resetLinkmap() {
+    linkMap = {
+      0: [],
+      1: [],
+      2: [],
+      3: []
+    };
   }
 
   function updateTableData(data) {
-    $('#wzBody .tr td:first-child').unbind()
+    $("#wzBody .tr td:first-child").unbind();
     $("#wzBody .tr").remove();
+    $("#wzBody .highlight-rect").remove();
     $("#wzBody").append(
       tableTemp({
         data,
@@ -518,59 +739,82 @@ $(function() {
         $("#weightInfo").text("");
       }
     });
-    $('#wzBody .tr .td:first-child').click(function (e) {
-      e.stopPropagation()
-      console.log('click td :>>>' + $(this).data('idx'))
-      let rowidx = $(this).data('idx')
-      let result = window.confirm('您确定要删除此物资吗?')
-      if (result) {
-        let currentTD = tableList[rowidx]["sbillBillbatch"]
-        let btnIdx = -1
-        let otherSelectRowObj = {};
-        console.log("currentTD:>>" + currentTD);
-        Object.keys(linkMap).map(k => {
-          if (linkMap[k] == rowidx) 
-            btnIdx = k
-          else if (linkMap[k] >= 0) {
-            otherSelectRowObj[tableList[linkMap[k]]["sbillBillbatch"]] = k
-          }
+    $("#wzBody .tr .td:first-child").click(function(e) {
+      e.stopPropagation();
+      console.log("click td :>>>" + $(this).data("idx"));
+      let rowidx = $(this).data("idx");
+      // let result = window.confirm('您确定要删除此物资吗?')
+      $("body").append(
+        modalTemp({
+          modalId: "modalDel",
+          modalTitle: "您确定要删除此物资吗？"
         })
-        $('.weight-btn').eq(btnIdx).css('background-image', 'url(/img/dl.png)')
-        linkMap[btnIdx] = -1
-        selectRowIndex = -1
-        $('.crane-btn').unbind()
-        tableList = tableList.filter(itm => itm["sbillBillbatch"] != currentTD)
-        updateTableData(tableList)
-        Object.keys(otherSelectRowObj).map(k => {
-          let idx = tableList.findIndex(itm => itm.sbillBillbatch == k);
-          let btnIdx = otherSelectRowObj[k];
-          linkMap[btnIdx] = idx;
-          $("#wzBody .tr")
-            .eq(idx)
-            .find(".td")
-            .eq(9)
-            .html("");
-          $("#wzBody .tr")
-            .eq(idx)
-            .find(".td")
-            .eq(9)
-            .html(
-              '<div class="crane-btn column" data-bidx="' +
-                btnIdx +
-                '"><span>' +
-                craneNames[btnIdx] +
-                "</span></div>"
-            );
-          bindCraneBtn(idx);
-        });
-        initActiveRect(selectRowIndex);
-      }
-    })
+      );
+      showModal("#modalDel", function(result) {
+        if (result) {
+          let currentTD = tableList[rowidx]["sbillBillbatch"];
+          let btnIndx = -1;
+          let otherSelectRowObj = {};
+          console.log("currentTD:>>" + currentTD);
+          Object.keys(linkMap).map(k => {
+            // let index = linkMap[k].findIndex(itm => itm == rowidx)
+            linkMap[k].map(idx => {
+              if (idx == rowidx) {
+                btnIndx = k;
+              } else {
+                otherSelectRowObj[tableList[idx]["sbillBillbatch"]] = k;
+              }
+            });
+          });
+          selectRowIndex = -1;
+          $(".crane-btn").unbind();
+          tableList = tableList.filter(
+            itm => itm["sbillBillbatch"] != currentTD
+          );
+          updateTableData(tableList);
+          resetLinkmap();
+          Object.keys(otherSelectRowObj).map(k => {
+            let idx = tableList.findIndex(itm => itm.sbillBillbatch == k);
+            let btnIdx = otherSelectRowObj[k];
+            linkMap[btnIdx].push(idx);
+            $("#wzBody .tr")
+              .eq(idx)
+              .find(".td")
+              .eq(9)
+              .html("");
+            $("#wzBody .tr")
+              .eq(idx)
+              .find(".td")
+              .eq(9)
+              .html(
+                '<div class="crane-btn column" data-bidx="' +
+                  btnIdx +
+                  '" data-ridx="' +
+                  idx +
+                  '"><span>' +
+                  craneNames[btnIdx] +
+                  "</span></div>"
+              );
+            bindCraneBtn(idx);
+          });
+          console.log("del linkMap btnidx", btnIndx, linkMap[btnIndx]);
+          if (btnIndx > 0 && linkMap[btnIndx].length == 0)
+            $(".weight-btn")
+              .eq(btnIndx)
+              .css("background-image", "url(/img/dl.png)");
+          initActiveRect(selectRowIndex);
+        }
+      });
+    });
   }
 
-  function showWzCount() {
-    let selectObj = tableList[selectRowIndex];
-    count = Number(selectObj.goodsNum - selectObj.oconsignDetailOknum);
+  function showWzCount(currentBtnIdx) {
+    let selectIdxArray = linkMap[currentBtnIdx];
+    let count = 0;
+    selectIdxArray.map(itm => {
+      let selectObj = tableList[itm];
+      count += Number(selectObj.goodsNum - selectObj.oconsignDetailOknum);
+    });
     $("#countIpt").val(count);
   }
 });

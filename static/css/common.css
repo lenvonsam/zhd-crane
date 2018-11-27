@@ -138,3 +138,114 @@ input:focus {
 .zhd-keyboard .num-wrap .num span {
   color: #262626;
 }
+
+.zhd-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  left: 0;
+  bottom: 0;
+  z-index: 100;
+  display: none;
+}
+
+.zhd-modal .bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: #000;
+  opacity: 0.5;
+}
+
+.zhd-modal .content {
+  position: absolute;
+  width: 600px;
+  height: 370px;
+  background: #fff;
+  z-index: 10;
+  opacity: 0;
+  transform: scale(0);
+  border-radius: 6px;
+  box-sizing: border-box;
+  top: calc((100% - 370px) / 2);
+  left: calc((100% - 600px) / 2);
+}
+
+.zhd-modal .content .title {
+  height: 270px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: 35px;
+  color: #64819e;
+  box-sizing: border-box;
+  padding-left: 60px;
+  padding-right: 60px;
+}
+
+.zhd-modal .content .modal-btn {
+  width: 210px;
+  height: 74px;
+  display: inline-block;
+  text-align: center;
+  padding-top: 18px;
+  box-sizing: border-box;
+  font-size: 28px;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+.zhd-modal .content .modal-btn:hover {
+  cursor: pointer;
+}
+
+.zhd-modal .content .modal-btn.confirm {
+  background-image: url('../img/modal_confirm.png');
+  color: #fff;
+  margin-left: 60px;
+  margin-right: 60px;
+}
+
+.zhd-modal .content .modal-btn.cancel {
+  background-image: url('../img/modal_cancel.png');
+  color: #64819e;
+}
+
+.zhd-loading {
+  position: fixed;
+  display: none;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  top: 0;
+  z-index: 1000;
+}
+
+.zhd-loading .bg{
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  top: 0;
+  background: #000;
+  opacity: 0.6;
+}
+
+.zhd-loading .content {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 40px;
+  font-weight: bold;
+}

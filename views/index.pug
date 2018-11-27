@@ -6,6 +6,13 @@ append scripts
   script(src="/lib/socket.io.js")
   script(src="/js/index.js")
 block content
+  script(type="test/template", id="zhdModal")
+    .zhd-modal(id="${modalId}")
+      .bg
+      .content
+        .title ${modalTitle}
+        .modal-btn.confirm 确定
+        .modal-btn.cancel 取消
   script(type="text/template", id="weightBtns")
     .row.top-section.relative(style="bottom: -50px")
       <% _.each(btns, function(itm, index){ %>
@@ -74,7 +81,8 @@ block content
               #countAdd.col
           .col.center.relative
             span.float-title 重量（吨）
-            #weightInfoWrap.weight
+            #weightInfoWrap.weight.relative
+              span#weightWrapAdd(style="position: absolute; top: -5px; right: -65px; font-size: 58px; color: #fff;z-index: 30;") +
               span#weightInfo
       #secBtns.row
       //- .row
