@@ -53,7 +53,9 @@ $(function() {
       "**" +
       origin.productareaName +
       "**" +
-      origin.goodsMaterial;
+      origin.goodsMaterial +
+      "**" +
+      origin.goodsProperty1;
     var compareStr =
       compare.partsnameName +
       "**" +
@@ -61,7 +63,9 @@ $(function() {
       "**" +
       compare.productareaName +
       "**" +
-      compare.goodsMaterial;
+      compare.goodsMaterial +
+      "**" +
+      origin.goodsProperty1;
     console.log(compareStr, orginStr);
     return orginStr == compareStr;
   }
@@ -330,8 +334,10 @@ $(function() {
     var btnIndex = -1;
     Object.keys(linkMap).map(itm => {
       let idx = linkMap[itm].findIndex(item => item == selectRowIndex);
-      if (idx >= 0) btnIndex = idx;
+      if (idx >= 0) btnIndex = itm;
     });
+    console.log("currentSelect idx:>>", selectRowIndex);
+    console.log("currentBtnIdx:>>", btnIndex);
     if (btnIndex == -1) {
       return "请先选中关联设备的物资";
     } else if (linkMap[btnIndex].length == 1) {
@@ -387,36 +393,36 @@ $(function() {
 
   // 单个出库
   function singleOutStorage(currentObj, currentTd, cnt, weight, idx, max) {
-    if (idx == 0) loading("批量出库中，请耐心等待...");
-    // if (idx == max) userChooseBtnIdx = -1;
-    request("/lockTd", {
-      tdNo: currentTd
-    })
-      .then(resp => {
-        console.log(resp);
-        if (resp.status == 0) {
-          console.log("锁库成功");
-          request("/outStorage", {
-            oconsignBillcode: currentObj.oconsignBillcode,
-            oconsignBillbatch: currentObj.oconsignBillbatch,
-            goodsNum: cnt,
-            goodsWeight: weight
-          })
-            .then(res => {
-              console.log(res);
-              if (res.status == 0) {
-                if (res.message.startsWith("[待审核]")) {
-                  // var result = window.confirm(`此条物资需要审核确认\n 出库重量:${w}\n 出库数量:${cnt}`)
-                  hideLoad();
-                  $("body").append(
-                    modalTemp({
-                      modalId: "modal" + currentObj.oconsignBillbatch,
-                      modalTitle: `提单号:${
-                        currentObj.sbillBillcode
-                      }中此条物资需要审核确认\n 出库重量:${weight}\n 出库数量:${cnt}`
-                    })
-                  );
-                  setTimeout(function() {
+    return new Promise((resolve, reject) => {
+      if (idx == 0) loading("批量出库中，请耐心等待...");
+      // if (idx == max) userChooseBtnIdx = -1;
+      request("/lockTd", {
+        tdNo: currentTd
+      })
+        .then(resp => {
+          console.log(resp);
+          if (resp.status == 0) {
+            console.log("锁库成功");
+            request("/outStorage", {
+              oconsignBillcode: currentObj.oconsignBillcode,
+              oconsignBillbatch: currentObj.oconsignBillbatch,
+              goodsNum: cnt,
+              goodsWeight: weight
+            })
+              .then(res => {
+                console.log(res);
+                if (res.status == 0) {
+                  if (res.message.startsWith("[待审核]")) {
+                    // var result = window.confirm(`此条物资需要审核确认\n 出库重量:${w}\n 出库数量:${cnt}`)
+                    hideLoad();
+                    $("body").append(
+                      modalTemp({
+                        modalId: "modal" + currentObj.oconsignBillbatch,
+                        modalTitle: `提单号:${
+                          currentObj.sbillBillcode
+                        }中此条物资需要审核确认\n 出库重量:${weight}\n 出库数量:${cnt}`
+                      })
+                    );
                     showModal("#modal" + currentObj.oconsignBillbatch, function(
                       result
                     ) {
@@ -429,12 +435,30 @@ $(function() {
                         })
                           .then(rp => {
                             if (rp.status == 0) {
-                              outStorageSuccess(currentObj);
+                              outStorageSuccess(currentObj, false, function() {
+                                console.log(
+                                  "吊秤审核成功",
+                                  userChooseBtnIdx,
+                                  linkMap[userChooseBtnIdx]
+                                );
+                                userChooseBtnIdx == -1
+                                  ? reject()
+                                  : resolve({
+                                      currentIdx: 0,
+                                      arr: linkMap[userChooseBtnIdx]
+                                    });
+                              });
                             } else {
                               showMsg(rp.message);
                               request("/unlockTd", {
                                 tdNo: currentTd
                               });
+                              userChooseBtnIdx == -1
+                                ? reject()
+                                : resolve({
+                                    currentIdx: idx + 1,
+                                    arr: linkMap[userChooseBtnIdx]
+                                  });
                             }
                           })
                           .catch(e => {
@@ -444,68 +468,224 @@ $(function() {
                             });
                             if (idx == max) hideLoad();
                             showMsg(e);
+                            userChooseBtnIdx == -1
+                              ? reject()
+                              : resolve({
+                                  currentIdx: idx + 1,
+                                  arr: linkMap[userChooseBtnIdx]
+                                });
                           });
                       } else {
                         if (idx == max) hideLoad();
                         outStorageSuccess(currentObj, true);
+                        reject();
                       }
                     });
-                  }, 300);
+                  } else {
+                    if (idx == max) hideLoad();
+                    outStorageSuccess(currentObj, false, function() {
+                      userChooseBtnIdx == -1
+                        ? reject()
+                        : resolve({
+                            currentIdx: 0,
+                            arr: linkMap[userChooseBtnIdx]
+                          });
+                    });
+                  }
+                } else if (res.status == -2) {
+                  if (idx == max) hideLoad();
+                  showMsg("账户已禁用");
+                  request("/unlockTd", {
+                    tdNo: currentTd
+                  });
+                  reject();
                 } else {
                   if (idx == max) hideLoad();
-                  outStorageSuccess(currentObj);
+                  showMsg(res.message || "网络异常");
+                  request("/unlockTd", {
+                    tdNo: currentTd
+                  });
+                  userChooseBtnIdx == -1
+                    ? reject()
+                    : resolve({
+                        currentIdx: idx + 1,
+                        arr: linkMap[userChooseBtnIdx]
+                      });
+                  // resolve(idx + 1, linkMap[userChooseBtnIdx]);
                 }
-              } else if (res.status == -2) {
-                if (idx == max) hideLoad();
-                showMsg("账户已禁用");
-                request("/unlockTd", {
-                  tdNo: currentTd
-                });
-              } else {
+              })
+              .catch(e => {
+                console.log(e);
                 if (idx == max) hideLoad();
                 showMsg(res.message || "网络异常");
                 request("/unlockTd", {
                   tdNo: currentTd
                 });
-              }
-            })
-            .catch(e => {
-              console.log(e);
-              if (idx == max) hideLoad();
-              showMsg(res.message || "网络异常");
-              request("/unlockTd", {
-                tdNo: currentTd
+                showMsg(e);
+                userChooseBtnIdx == -1
+                  ? reject()
+                  : resolve({
+                      currentIdx: idx + 1,
+                      arr: linkMap[userChooseBtnIdx]
+                    });
+                // resolve(idx + 1, linkMap[userChooseBtnIdx]);
               });
-              showMsg(e);
-            });
-        } else if (resp.status == -2) {
+          } else if (resp.status == -2) {
+            if (idx == max) hideLoad();
+            showMsg("账户已禁用");
+            reject();
+          } else {
+            if (idx == max) hideLoad();
+            showMsg(resp.message || "网络异常");
+            userChooseBtnIdx == -1
+              ? reject()
+              : resolve({
+                  currentIdx: idx + 1,
+                  arr: linkMap[userChooseBtnIdx]
+                });
+            // resolve(idx + 1, linkMap[userChooseBtnIdx]);
+          }
+        })
+        .catch(err => {
+          console.log(err);
           if (idx == max) hideLoad();
-          showMsg("账户已禁用");
-        } else {
-          if (idx == max) hideLoad();
-          showMsg(resp.message || "网络异常");
-        }
-      })
-      .catch(err => {
-        console.log(err);
-        if (idx == max) hideLoad();
-        showMsg(err);
-      });
+          showMsg(err);
+          userChooseBtnIdx == -1
+            ? reject()
+            : resolve({ currentIdx: idx + 1, arr: linkMap[userChooseBtnIdx] });
+          // resolve(idx + 1, linkMap[userChooseBtnIdx]);
+        });
+    });
+    // if (idx == 0) loading("批量出库中，请耐心等待...");
+    // // if (idx == max) userChooseBtnIdx = -1;
+    // request("/lockTd", {
+    //   tdNo: currentTd
+    // })
+    //   .then(resp => {
+    //     console.log(resp);
+    //     if (resp.status == 0) {
+    //       console.log("锁库成功");
+    //       request("/outStorage", {
+    //         oconsignBillcode: currentObj.oconsignBillcode,
+    //         oconsignBillbatch: currentObj.oconsignBillbatch,
+    //         goodsNum: cnt,
+    //         goodsWeight: weight
+    //       })
+    //         .then(res => {
+    //           console.log(res);
+    //           if (res.status == 0) {
+    //             if (res.message.startsWith("[待审核]")) {
+    //               // var result = window.confirm(`此条物资需要审核确认\n 出库重量:${w}\n 出库数量:${cnt}`)
+    //               hideLoad();
+    //               $("body").append(
+    //                 modalTemp({
+    //                   modalId: "modal" + currentObj.oconsignBillbatch,
+    //                   modalTitle: `提单号:${
+    //                     currentObj.sbillBillcode
+    //                   }中此条物资需要审核确认\n 出库重量:${weight}\n 出库数量:${cnt}`
+    //                 })
+    //               );
+    //               setTimeout(function() {
+    //                 showModal("#modal" + currentObj.oconsignBillbatch, function(
+    //                   result
+    //                 ) {
+    //                   if (result) {
+    //                     var outstorageNo = res.message.split("|")[1];
+    //                     request("/outStorageAudit", {
+    //                       billCode: outstorageNo,
+    //                       status: 1,
+    //                       remark: "吊秤审核"
+    //                     })
+    //                       .then(rp => {
+    //                         if (rp.status == 0) {
+    //                           outStorageSuccess(currentObj);
+    //                         } else {
+    //                           showMsg(rp.message);
+    //                           request("/unlockTd", {
+    //                             tdNo: currentTd
+    //                           });
+    //                         }
+    //                       })
+    //                       .catch(e => {
+    //                         console.log(e);
+    //                         request("/unlockTd", {
+    //                           tdNo: currentTd
+    //                         });
+    //                         if (idx == max) hideLoad();
+    //                         showMsg(e);
+    //                       });
+    //                   } else {
+    //                     if (idx == max) hideLoad();
+    //                     outStorageSuccess(currentObj, true);
+    //                   }
+    //                 });
+    //               }, 300);
+    //             } else {
+    //               if (idx == max) hideLoad();
+    //               outStorageSuccess(currentObj);
+    //             }
+    //           } else if (res.status == -2) {
+    //             if (idx == max) hideLoad();
+    //             showMsg("账户已禁用");
+    //             request("/unlockTd", {
+    //               tdNo: currentTd
+    //             });
+    //           } else {
+    //             if (idx == max) hideLoad();
+    //             showMsg(res.message || "网络异常");
+    //             request("/unlockTd", {
+    //               tdNo: currentTd
+    //             });
+    //           }
+    //         })
+    //         .catch(e => {
+    //           console.log(e);
+    //           if (idx == max) hideLoad();
+    //           showMsg(res.message || "网络异常");
+    //           request("/unlockTd", {
+    //             tdNo: currentTd
+    //           });
+    //           showMsg(e);
+    //         });
+    //     } else if (resp.status == -2) {
+    //       if (idx == max) hideLoad();
+    //       showMsg("账户已禁用");
+    //     } else {
+    //       if (idx == max) hideLoad();
+    //       showMsg(resp.message || "网络异常");
+    //     }
+    //   })
+    //   .catch(err => {
+    //     console.log(err);
+    //     if (idx == max) hideLoad();
+    //     showMsg(err);
+    //   });
   }
 
   function getFixWeight(val) {
     console.log("single weight:>>", val);
-    let newVal = val * 10000 + "";
+    let newVal = Math.round(Number(val) * 10000) + "";
     console.log("newval:>>", newVal);
-    let prefix = newVal.substring(0, newVal.length - 2);
+    let prefix = "0";
+    if (newVal.length > 2) {
+      prefix = newVal.substring(0, newVal.length - 2);
+    }
     let num = newVal.substring(newVal.length - 2, newVal.length - 1);
     let lastNum = newVal.substring(newVal.length - 1, newVal.length);
+    console.log("取值:>>>", num, ";", lastNum);
     if (Number(lastNum) > 0 && Number(num) < 9) {
       return Number(Number(prefix + "" + (Number(num) + 1)) / 1000).toFixed(3);
     } else {
-      return Number(
-        (Number(newVal.substring(0, newVal.length - 1)) + 1) / 1000
-      ).toFixed(3);
+      console.log("不存在");
+      if (lastNum > 0) {
+        return Number(
+          (Number(newVal.substring(0, newVal.length - 1)) + 1) / 1000
+        ).toFixed(3);
+      } else {
+        return Number(
+          Number(newVal.substring(0, newVal.length - 1)) / 1000
+        ).toFixed(3);
+      }
     }
   }
   $("#weightWrapAdd").click(function(e) {
@@ -526,8 +706,8 @@ $(function() {
     }
     if (userChooseBtnIdx == -1) {
       if (selectRowIndex == -1) {
-        showMsg('请选择出库的物资')
-        return
+        showMsg("请选择出库的物资");
+        return;
       }
       var selectObj = tableList[selectRowIndex];
       if (
@@ -543,27 +723,30 @@ $(function() {
     if (userChooseBtnIdx > -1) {
       let detailIdx = linkMap[userChooseBtnIdx];
       if (detailIdx.length > 1) {
-        detailIdx.map((index, idx) => {
-          let currentObj = tableList[index];
-          let currentTd = currentObj.sbillBillcode;
-          let currentCnt = Number(
-            currentObj.goodsNum - currentObj.oconsignDetailOknum
-          );
-          console.log("currentCnt:>>", currentCnt, "; w:>>", w, ";cnt:>>", cnt);
-          let currentWeight = getFixWeight(
-            Number((w / cnt) * currentCnt).toFixed(4)
-          );
-          console.log("idx:>>", idx, ";currentWeight:>>", currentWeight);
-          singleOutStorage(
-            currentObj,
-            currentTd,
-            currentCnt,
-            currentWeight,
-            idx,
-            detailIdx.length - 1
-          );
-        });
+        console.log("batch outstorage");
+        batchWeight(0, detailIdx, w, cnt);
+        // detailIdx.map((index, idx) => {
+        //   let currentObj = tableList[index];
+        //   let currentTd = currentObj.sbillBillcode;
+        //   let currentCnt = Number(
+        //     currentObj.goodsNum - currentObj.oconsignDetailOknum
+        //   );
+        //   console.log("currentCnt:>>", currentCnt, "; w:>>", w, ";cnt:>>", cnt);
+        //   let currentWeight = getFixWeight(
+        //     Number((Number(w) / Number(cnt)) * currentCnt).toFixed(4)
+        //   );
+        //   console.log("idx:>>", idx, ";currentWeight:>>", currentWeight);
+        //   singleOutStorage(
+        //     currentObj,
+        //     currentTd,
+        //     currentCnt,
+        //     currentWeight,
+        //     idx,
+        //     detailIdx.length - 1
+        //   );
+        // });
       } else {
+        console.log("single bang outstorage");
         let currentObj = tableList[detailIdx[0]];
         let currentTd = currentObj.sbillBillcode;
         singleOutStorage(currentObj, currentTd, cnt, w, 0, 0);
@@ -574,6 +757,34 @@ $(function() {
       singleOutStorage(currentObj, currentTd, cnt, w, 0, 0);
     }
   });
+
+  function batchWeight(idx, detailArray, w, cnt) {
+    let currentObj = tableList[detailArray[idx]];
+    let currentTd = currentObj.sbillBillcode;
+    let currentCnt = Number(
+      currentObj.goodsNum - currentObj.oconsignDetailOknum
+    );
+    let currentWeight = getFixWeight(
+      Number((Number(w) / Number(cnt)) * currentCnt).toFixed(4)
+    );
+    singleOutStorage(
+      currentObj,
+      currentTd,
+      currentCnt,
+      currentWeight,
+      idx,
+      detailArray.length - 1
+    ).then(
+      res => {
+        console.log("currentIndx:>>", res);
+        if (res.currentIdx < res.arr.length && userChooseBtnIdx > -1)
+          batchWeight(res.currentIdx, res.arr, w, cnt);
+      },
+      () => {
+        console.error("暂停");
+      }
+    );
+  }
 
   // 退出按钮
   $(".main-close").click(() => {
@@ -622,7 +833,7 @@ $(function() {
       }
     });
   }
-  function outStorageSuccess(currentObj, manAudit = false) {
+  function outStorageSuccess(currentObj, manAudit = false, cb) {
     // debugger
     let uniqueCode = currentObj.sbillBillbatch;
     console.log("uniqueCode:>>>" + uniqueCode);
@@ -682,7 +893,7 @@ $(function() {
       $(".weight-btn")
         .eq(userChooseBtnIdx)
         .css("background-image", "url(/img/dl.png)");
-      dwt[userChooseBtnIdx] = [];
+      dwt[userChooseBtnIdx] = 0;
       $(".weight-btn")
         .eq(userChooseBtnIdx)
         .find("span")
@@ -694,6 +905,7 @@ $(function() {
     console.log(linkMap);
     if (manAudit) showMsg("请去电脑后台人工审核出库");
     else showMsg("该物资已出库成功");
+    if (cb) cb();
   }
 
   function resetLinkmap() {
@@ -798,7 +1010,7 @@ $(function() {
             bindCraneBtn(idx);
           });
           console.log("del linkMap btnidx", btnIndx, linkMap[btnIndx]);
-          if (btnIndx > 0 && linkMap[btnIndx].length == 0)
+          if (btnIndx >= 0 && linkMap[btnIndx].length == 0)
             $(".weight-btn")
               .eq(btnIndx)
               .css("background-image", "url(/img/dl.png)");
