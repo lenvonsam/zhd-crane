@@ -69,13 +69,26 @@ $(function() {
     console.log(compareStr, orginStr);
     return orginStr == compareStr;
   }
+  // 板材物资合并秤重规则
+  // pntreeName 物资大类
+  // partsnameName 品名
+  // warehouseName 仓库名称
+  // goodsSpec1 厚度(mm)
+  // goodsSpec2 宽度(mm)
+  function plankCompare (origin, compare) {
+    var originStr = origin.goodsSpec1 + '**' + origin.goodsSpec2 + '**' + origin.warehouseName
+    var compareStr = compare.goodsSpec1 + '**' + origin.goodsSpec2 + '**' + origin.warehouseName
+    console.log('plank origin:>>', originStr, '; compare:>>', compareStr)
+    return originStr == compareStr
+  }
   $(".weight-btn").click(function() {
     if (selectRowIndex == -1) {
       showMsg("请先选择物资");
       return;
     }
+    plankWeightArr = []
     let selectObj = tableList[selectRowIndex];
-    console.log(selectObj);
+    console.log('selectObj:>>' , selectObj);
     let cnt = Number(selectObj.goodsNum - selectObj.oconsignDetailOknum);
     if (
       (selectObj.goodsMetering == "理计" && selectObj.dataAwedit == 0) ||
@@ -127,11 +140,23 @@ $(function() {
       console.log("orign idx:>>", linkMap[btnIdx][0]);
       let origin = tableList[linkMap[btnIdx][0]];
       let compare = tableList[selectRowIndex];
-      console.log("origin obj", origin);
-      console.log("compare obj", compare, compare.goodsSpec);
-      if (!isTheSame(origin, compare)) {
-        showMsg("此物资不能与之前的物资合并一起称重");
-        return;
+      // console.log("origin obj", origin);
+      // console.log("compare obj", compare, compare.goodsSpec);
+      if (origin.pntreeName == '板材') {
+        if (origin.warehouseName == '板材定开') {
+          if (!plankCompare(origin, compare)) {
+            showMsg('此物资不能不与之前物资合并一起称重')
+            return
+          } 
+        } else {
+          showMsg('之前物资不是板材定开库的物资，不能合并一起称重')
+          return
+        }
+      } else {
+        if (!isTheSame(origin, compare)) {
+          showMsg("此物资不能与之前的物资合并一起称重");
+          return;
+        }
       }
     }
     if (selectRowIndex >= 0) {
@@ -757,16 +782,43 @@ $(function() {
       singleOutStorage(currentObj, currentTd, cnt, w, 0, 0);
     }
   });
-
+  let plankWeightArr = []
   function batchWeight(idx, detailArray, w, cnt) {
     let currentObj = tableList[detailArray[idx]];
     let currentTd = currentObj.sbillBillcode;
     let currentCnt = Number(
       currentObj.goodsNum - currentObj.oconsignDetailOknum
     );
+    // if (idx == 0) plankWeightArr = []
     let currentWeight = getFixWeight(
       Number((Number(w) / Number(cnt)) * currentCnt).toFixed(4)
     );
+    let tempWeight = 0
+    let tempWstr = ''
+    if (currentObj.pntreeName == '板材' && (idx < detailArray.length - 1)) {
+      if (currentObj.partsnameName == '花纹板') {
+        tempWeight = (((Number(currentObj.goodsSpec1) + 0.3) * 7.85) / 1000) * (Number(currentObj.goodsSpec2) / 1000) * Number(currentObj.goodsProperty1) * currentCnt
+        tempWstr = tempWeight.toFixed(4)
+        currentWeight = getFixWeight(tempWstr)
+        plankWeightArr.push(currentWeight)
+      } else {
+        tempWeight = (Number(currentObj.goodsSpec1) * 7.85 / 1000) * (Number(currentObj.goodsSpec2) / 1000) * Number(currentObj.goodsProperty1) * currentCnt
+        tempWstr = tempWeight.toFixed(4)
+        currentWeight = getFixWeight(tempWstr)
+        plankWeightArr.push(currentWeight)
+      }
+    } else if (currentObj.pntreeName == '板材' && (idx == detailArray.length - 1)) {
+      let t = 0
+      if (plankWeightArr.length > 0) {
+        plankWeightArr.map(itm => {
+          t += Number(itm)
+        })
+      }
+      tempWeight = Number(w) - t 
+      if (tempWeight < 0) tempWeight = 0.001
+      currentWeight = tempWeight.toFixed(3)
+    }
+    console.log('outstorage idx:>>', idx, ';plankWeightArr:>>', plankWeightArr, ';currentWeight:>>', currentWeight)
     singleOutStorage(
       currentObj,
       currentTd,
