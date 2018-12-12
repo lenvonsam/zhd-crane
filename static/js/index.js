@@ -277,6 +277,13 @@ $(function() {
             showMsg("此提单号查无物资明细");
             return;
           }
+          // if (res.data.data.length > 0) {
+          //   var firstObj = res.data.data[0]
+          //   if (firstObj.wsFlag == 1) {
+          //     showMsg('系统暂不支持型云提单出库')
+          //     return
+          //   }
+          // }
           if (tableList.length == 0) {
             tableList = res.data.data;
             updateTableData(tableList);
@@ -749,7 +756,16 @@ $(function() {
       let detailIdx = linkMap[userChooseBtnIdx];
       if (detailIdx.length > 1) {
         console.log("batch outstorage");
-        batchWeight(0, detailIdx, w, cnt);
+        let arr = detailIdx.map(itm => tableList[itm])
+        let cnt = tableList[selectRowIndex]
+        let idx = arr.filter(itm => itm.sbillBillbatch == cnt.sbillBillbatch)
+        if (idx >= 0) {
+          batchWeight(0, detailIdx, w, cnt);
+        } else {
+          let currentObj = tableList[selectRowIndex];
+          let currentTd = currentObj.sbillBillcode;
+          singleOutStorage(currentObj, currentTd, cnt, w, 0, 0);
+        }
         // detailIdx.map((index, idx) => {
         //   let currentObj = tableList[index];
         //   let currentTd = currentObj.sbillBillcode;
@@ -773,6 +789,9 @@ $(function() {
       } else {
         console.log("single bang outstorage");
         let currentObj = tableList[detailIdx[0]];
+        if (detailIdx.length == 0) currentObj = tableList[selectRowIndex]
+        let selectObj = tableList[selectRowIndex]
+        if (selectObj.sbillBillbatch != currentObj.sbillBillbatch) currentObj = tableList[selectRowIndex]
         let currentTd = currentObj.sbillBillcode;
         singleOutStorage(currentObj, currentTd, cnt, w, 0, 0);
       }
