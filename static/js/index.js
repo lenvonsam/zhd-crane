@@ -277,13 +277,13 @@ $(function() {
             showMsg("此提单号查无物资明细");
             return;
           }
-          if (res.data.data.length > 0) {
-            var firstObj = res.data.data[0]
-            if (firstObj.wsFlag == 1) {
-              showMsg('系统暂不支持型云提单出库')
-              return
-            }
-          }
+          // if (res.data.data.length > 0) {
+          //   var firstObj = res.data.data[0]
+          //   if (firstObj.wsFlag == 1) {
+          //     showMsg('系统暂不支持型云提单出库')
+          //     return
+          //   }
+          // }
           if (tableList.length == 0) {
             tableList = res.data.data;
             updateTableData(tableList);
