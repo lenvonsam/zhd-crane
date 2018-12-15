@@ -36,6 +36,27 @@ $(function() {
   let w3 = 0;
   let w4 = 0;
 
+  // 单个出库物资记录数量
+  var singleGoodsCount = {};
+  // 单个磅计物资出库是否可改数量以及分批称重数量
+  var dwtCounts = {
+    0: {
+      canEdit: false,
+      records: []
+    },
+    1: {
+      canEdit: false,
+      records: []
+    },
+    2: {
+      canEdit: false,
+      records: []
+    },
+    3: {
+      canEdit: false,
+      records: []
+    }
+  };
   var factWeight = "";
   var userChooseBtnIdx = -1;
   var dwt = [w1, w2, w3, w4];
@@ -75,20 +96,30 @@ $(function() {
   // warehouseName 仓库名称
   // goodsSpec1 厚度(mm)
   // goodsSpec2 宽度(mm)
-  function plankCompare (origin, compare) {
-    var originStr = origin.goodsSpec1 + '**' + origin.goodsSpec2 + '**' + origin.warehouseName
-    var compareStr = compare.goodsSpec1 + '**' + origin.goodsSpec2 + '**' + origin.warehouseName
-    console.log('plank origin:>>', originStr, '; compare:>>', compareStr)
-    return originStr == compareStr
+  function plankCompare(origin, compare) {
+    var originStr =
+      origin.goodsSpec1 +
+      "**" +
+      origin.goodsSpec2 +
+      "**" +
+      origin.warehouseName;
+    var compareStr =
+      compare.goodsSpec1 +
+      "**" +
+      origin.goodsSpec2 +
+      "**" +
+      origin.warehouseName;
+    console.log("plank origin:>>", originStr, "; compare:>>", compareStr);
+    return originStr == compareStr;
   }
   $(".weight-btn").click(function() {
     if (selectRowIndex == -1) {
       showMsg("请先选择物资");
       return;
     }
-    plankWeightArr = []
+    plankWeightArr = [];
     let selectObj = tableList[selectRowIndex];
-    console.log('selectObj:>>' , selectObj);
+    console.log("selectObj:>>", selectObj);
     let cnt = Number(selectObj.goodsNum - selectObj.oconsignDetailOknum);
     if (
       (selectObj.goodsMetering == "理计" && selectObj.dataAwedit == 0) ||
@@ -102,10 +133,11 @@ $(function() {
     console.log("btnidx:>>", btnIdx);
     console.log("btnRowIndx:>> ", linkMap[btnIdx]);
     console.log("dwt weight:>>", dwt[btnIdx]);
-    if (Number(dwt[btnIdx]) > 0 && linkMap[btnIdx].length == 0) {
-      showMsg("请将磅秤重置为零，才能进行设备绑定");
-      return;
-    }
+    // TODO 暂时注释
+    // if (Number(dwt[btnIdx]) > 0 && linkMap[btnIdx].length == 0) {
+    //   showMsg("请将磅秤重置为零，才能进行设备绑定");
+    //   return;
+    // }
     let idx = linkMap[btnIdx].findIndex(itm => itm == selectRowIndex);
     // let idx = Object.keys(linkMap)
     // .map(itm => linkMap[itm])
@@ -119,6 +151,22 @@ $(function() {
       factWeight = Number(dwt[btnIdx] / 1000).toFixed(3);
       updateFactWeight(factWeight);
       userChooseBtnIdx = btnIdx;
+      if (
+        linkMap[userChooseBtnIdx].length == 1 &&
+        dwtCounts[userChooseBtnIdx].canEdit
+      ) {
+        dwtCounts[userChooseBtnIdx].records.push(Number(dwt[btnIdx]));
+        $("#wbtCnt" + userChooseBtnIdx).text(
+          dwtCounts[userChooseBtnIdx].records.length + "次"
+        );
+        var totalWeight = 0;
+        console.log("dwt records:>>", dwtCounts[userChooseBtnIdx].records);
+        dwtCounts[userChooseBtnIdx].records.map(itm => {
+          totalWeight += itm;
+        });
+        factWeight = Number(totalWeight / 1000).toFixed(3);
+        updateFactWeight(factWeight);
+      }
       return;
     }
     var otherIdxs = [];
@@ -142,15 +190,15 @@ $(function() {
       let compare = tableList[selectRowIndex];
       // console.log("origin obj", origin);
       // console.log("compare obj", compare, compare.goodsSpec);
-      if (origin.pntreeName == '板材') {
-        if (origin.warehouseName == '板材定开') {
+      if (origin.pntreeName == "板材") {
+        if (origin.warehouseName == "板材定开") {
           if (!plankCompare(origin, compare)) {
-            showMsg('此物资不能不与之前物资合并一起称重')
-            return
-          } 
+            showMsg("此物资不能不与之前物资合并一起称重");
+            return;
+          }
         } else {
-          showMsg('之前物资不是板材定开库的物资，不能合并一起称重')
-          return
+          showMsg("之前物资不是板材定开库的物资，不能合并一起称重");
+          return;
         }
       } else {
         if (!isTheSame(origin, compare)) {
@@ -161,7 +209,6 @@ $(function() {
     }
     if (selectRowIndex >= 0) {
       // let result = window.confirm("你确定要关联此设备吗?");
-
       $("body").append(
         modalTemp({
           modalId: "linkDevice",
@@ -202,21 +249,77 @@ $(function() {
           $(".weight-btn")
             .eq(btnIdx)
             .css("background-image", "url(/img/gl.png)");
+          if (linkMap[btnIdx].length == 1) {
+            // 增加多次称重模块
+            showMultiCranePart(true, userChooseBtnIdx);
+          } else {
+            // 取消多称重模块
+            showMultiCranePart(false, userChooseBtnIdx);
+          }
         }
       });
     } else {
-      console.log("currentidx:>>" + selectRowIndex);
-      console.log("btnidx:>>" + btnIdx);
       console.error("进入未处理的判断");
-      // if (selectRowIndex == -1) {
-      //   showMsg("请选择关联设备的物资");
-      // } else if (selectRowIndex != linkMap[btnIdx]) {
-      //   linkMap[btnIdx] == -1
-      //     ? showMsg("该物资已被关联到其他设备")
-      //     : showMsg("此设备已关联其他物资");
-      // }
     }
   });
+
+  // 显示多次称重模块
+  function showMultiCranePart(show, userChooseBtnIdx) {
+    var topid = "btntop" + userChooseBtnIdx;
+    var cbid = "cb" + userChooseBtnIdx;
+    var cid = "wbtnc" + userChooseBtnIdx;
+    var cntid = "wbtCnt" + userChooseBtnIdx;
+    if (show) {
+      $(".weight-btn-top-part")
+        .eq(userChooseBtnIdx)
+        .append(
+          '<div style="position: absolute; right: 10%; top: 0;" id="' +
+            topid +
+            '">多次称重:<input id="' +
+            cbid +
+            '" type="checkbox" data-id="' +
+            userChooseBtnIdx +
+            '"/> <span>次数:</span><span id="' +
+            cntid +
+            '">0次</span>  <span class="mr-15" style="border: 1px solid white; display:inline-block; font-size: 12px; padding: 2px 5px; border-radius: 3px;" id="' +
+            cid +
+            '" data-id="' +
+            userChooseBtnIdx +
+            '">取消</span></div>'
+        );
+      $("#" + cbid).change(function() {
+        console.log($(this).is(":checked"));
+        var idx = $(this).data("id");
+        console.log("cbx idx:>>", idx);
+        dwtCounts[idx]["canEdit"] = $(this).is(":checked");
+      });
+      $("#" + cid).click(function() {
+        var btnIdx = $(this).data("id");
+        console.log("btnidx:>>", btnIdx);
+        if (dwtCounts[btnIdx].canEdit) {
+          console.log(dwtCounts[btnIdx]);
+          if (dwtCounts[btnIdx]["records"].length > 0) {
+            dwtCounts[btnIdx]["records"].pop();
+          }
+          let cnt = dwtCounts[btnIdx]["records"].length;
+          $("#" + cntid).text(cnt + "次");
+          var totalWeight = 0;
+          console.log("dwt records:>>", dwtCounts[userChooseBtnIdx].records);
+          dwtCounts[userChooseBtnIdx].records.map(itm => {
+            totalWeight += itm;
+          });
+          factWeight = Number(totalWeight / 1000).toFixed(3);
+          updateFactWeight(factWeight);
+        }
+      });
+    } else {
+      dwtCounts[userChooseBtnIdx].canEdit = false;
+      dwtCounts[userChooseBtnIdx].records = [];
+      $("#" + cbid).unbind();
+      $("#" + cid).unbind();
+      $("#" + topid).remove();
+    }
+  }
 
   // websocket
   var socket = io();
@@ -370,10 +473,20 @@ $(function() {
     });
     console.log("currentSelect idx:>>", selectRowIndex);
     console.log("currentBtnIdx:>>", btnIndex);
-    if (btnIndex == -1) {
+    let selectObj = tableList[selectRowIndex];
+    if (
+      (selectObj.goodsMetering == "理计" && selectObj.dataAwedit == 0) ||
+      selectObj.mtype == 0
+    ) {
+      return "理计不能修改数量";
+    } else if (btnIndex == -1) {
       return "请先选中关联设备的物资";
     } else if (linkMap[btnIndex].length == 1) {
-      return "ok";
+      if (dwtCounts[btnIndex].canEdit) {
+        return "多次称重不能修改重量";
+      } else {
+        return "ok";
+      }
     } else {
       return "多个物资不能更改数量";
     }
@@ -403,6 +516,11 @@ $(function() {
       countVal--;
       if (countVal < 0) countVal = 0;
     }
+    var selectObj = tableList[selectRowIndex];
+    var idx = Object.keys(singleGoodsCount).findIndex(
+      itm => itm == selectObj.sbillBillbatch
+    );
+    if (idx >= 0) singleGoodsCount[selectObj.sbillBillbatch] = Number(countVal);
     $("#countIpt").val(countVal);
   });
   $("#countAdd").click(() => {
@@ -418,13 +536,26 @@ $(function() {
     } else {
       countVal++;
     }
+    var selectObj = tableList[selectRowIndex];
+    var idx = Object.keys(singleGoodsCount).findIndex(
+      itm => itm == selectObj.sbillBillbatch
+    );
+    if (idx >= 0) singleGoodsCount[selectObj.sbillBillbatch] = Number(countVal);
     $("#countIpt").val(countVal);
   });
   // 显示物资重量
   $("#weightInfo").text("");
 
   // 单个出库
-  function singleOutStorage(currentObj, currentTd, cnt, weight, idx, max) {
+  function singleOutStorage(
+    currentObj,
+    currentTd,
+    cnt,
+    weight,
+    idx,
+    max,
+    bottomIdx = -1
+  ) {
     return new Promise((resolve, reject) => {
       if (idx == 0) loading("批量出库中，请耐心等待...");
       // if (idx == max) userChooseBtnIdx = -1;
@@ -433,14 +564,28 @@ $(function() {
       })
         .then(resp => {
           console.log(resp);
+          var body = {
+            oconsignBillcode: currentObj.oconsignBillcode,
+            oconsignBillbatch: currentObj.oconsignBillbatch,
+            goodsNum: cnt,
+            goodsWeight: weight
+          };
+          console.log("bottomidx:>>", bottomIdx);
+          if (bottomIdx >= 0) {
+            // 如果有多次清空数据
+            console.log("清空数据", dwtCounts[bottomIdx]);
+            if (dwtCounts[bottomIdx].canEdit) {
+              body.stocks = dwtCounts[bottomIdx].records.join(";");
+              dwtCounts[bottomIdx].canEdit = false;
+              dwtCounts[bottomIdx].records = [];
+              $("#cb" + bottomIdx).unbind();
+              $("#wbtnc" + bottomIdx).unbind();
+              $("#btntop" + bottomIdx).remove();
+            }
+          }
           if (resp.status == 0) {
             console.log("锁库成功");
-            request("/outStorage", {
-              oconsignBillcode: currentObj.oconsignBillcode,
-              oconsignBillbatch: currentObj.oconsignBillbatch,
-              goodsNum: cnt,
-              goodsWeight: weight
-            })
+            request("/outStorage", body)
               .then(res => {
                 console.log(res);
                 if (res.status == 0) {
@@ -588,110 +733,6 @@ $(function() {
           // resolve(idx + 1, linkMap[userChooseBtnIdx]);
         });
     });
-    // if (idx == 0) loading("批量出库中，请耐心等待...");
-    // // if (idx == max) userChooseBtnIdx = -1;
-    // request("/lockTd", {
-    //   tdNo: currentTd
-    // })
-    //   .then(resp => {
-    //     console.log(resp);
-    //     if (resp.status == 0) {
-    //       console.log("锁库成功");
-    //       request("/outStorage", {
-    //         oconsignBillcode: currentObj.oconsignBillcode,
-    //         oconsignBillbatch: currentObj.oconsignBillbatch,
-    //         goodsNum: cnt,
-    //         goodsWeight: weight
-    //       })
-    //         .then(res => {
-    //           console.log(res);
-    //           if (res.status == 0) {
-    //             if (res.message.startsWith("[待审核]")) {
-    //               // var result = window.confirm(`此条物资需要审核确认\n 出库重量:${w}\n 出库数量:${cnt}`)
-    //               hideLoad();
-    //               $("body").append(
-    //                 modalTemp({
-    //                   modalId: "modal" + currentObj.oconsignBillbatch,
-    //                   modalTitle: `提单号:${
-    //                     currentObj.sbillBillcode
-    //                   }中此条物资需要审核确认\n 出库重量:${weight}\n 出库数量:${cnt}`
-    //                 })
-    //               );
-    //               setTimeout(function() {
-    //                 showModal("#modal" + currentObj.oconsignBillbatch, function(
-    //                   result
-    //                 ) {
-    //                   if (result) {
-    //                     var outstorageNo = res.message.split("|")[1];
-    //                     request("/outStorageAudit", {
-    //                       billCode: outstorageNo,
-    //                       status: 1,
-    //                       remark: "吊秤审核"
-    //                     })
-    //                       .then(rp => {
-    //                         if (rp.status == 0) {
-    //                           outStorageSuccess(currentObj);
-    //                         } else {
-    //                           showMsg(rp.message);
-    //                           request("/unlockTd", {
-    //                             tdNo: currentTd
-    //                           });
-    //                         }
-    //                       })
-    //                       .catch(e => {
-    //                         console.log(e);
-    //                         request("/unlockTd", {
-    //                           tdNo: currentTd
-    //                         });
-    //                         if (idx == max) hideLoad();
-    //                         showMsg(e);
-    //                       });
-    //                   } else {
-    //                     if (idx == max) hideLoad();
-    //                     outStorageSuccess(currentObj, true);
-    //                   }
-    //                 });
-    //               }, 300);
-    //             } else {
-    //               if (idx == max) hideLoad();
-    //               outStorageSuccess(currentObj);
-    //             }
-    //           } else if (res.status == -2) {
-    //             if (idx == max) hideLoad();
-    //             showMsg("账户已禁用");
-    //             request("/unlockTd", {
-    //               tdNo: currentTd
-    //             });
-    //           } else {
-    //             if (idx == max) hideLoad();
-    //             showMsg(res.message || "网络异常");
-    //             request("/unlockTd", {
-    //               tdNo: currentTd
-    //             });
-    //           }
-    //         })
-    //         .catch(e => {
-    //           console.log(e);
-    //           if (idx == max) hideLoad();
-    //           showMsg(res.message || "网络异常");
-    //           request("/unlockTd", {
-    //             tdNo: currentTd
-    //           });
-    //           showMsg(e);
-    //         });
-    //     } else if (resp.status == -2) {
-    //       if (idx == max) hideLoad();
-    //       showMsg("账户已禁用");
-    //     } else {
-    //       if (idx == max) hideLoad();
-    //       showMsg(resp.message || "网络异常");
-    //     }
-    //   })
-    //   .catch(err => {
-    //     console.log(err);
-    //     if (idx == max) hideLoad();
-    //     showMsg(err);
-    //   });
   }
 
   function getFixWeight(val) {
@@ -756,14 +797,15 @@ $(function() {
       let detailIdx = linkMap[userChooseBtnIdx];
       if (detailIdx.length > 1) {
         console.log("batch outstorage");
-        let arr = detailIdx.map(itm => tableList[itm])
-        let cnt = tableList[selectRowIndex]
-        let idx = arr.filter(itm => itm.sbillBillbatch == cnt.sbillBillbatch)
+        let arr = detailIdx.map(itm => tableList[itm]);
+        let cnt = tableList[selectRowIndex];
+        let idx = arr.filter(itm => itm.sbillBillbatch == cnt.sbillBillbatch);
         if (idx >= 0) {
           batchWeight(0, detailIdx, w, cnt);
         } else {
           let currentObj = tableList[selectRowIndex];
           let currentTd = currentObj.sbillBillcode;
+          delete singleGoodsCount[currentObj.sbillBillbatch];
           singleOutStorage(currentObj, currentTd, cnt, w, 0, 0);
         }
         // detailIdx.map((index, idx) => {
@@ -789,19 +831,22 @@ $(function() {
       } else {
         console.log("single bang outstorage");
         let currentObj = tableList[detailIdx[0]];
-        if (detailIdx.length == 0) currentObj = tableList[selectRowIndex]
-        let selectObj = tableList[selectRowIndex]
-        if (selectObj.sbillBillbatch != currentObj.sbillBillbatch) currentObj = tableList[selectRowIndex]
+        if (detailIdx.length == 0) currentObj = tableList[selectRowIndex];
+        let selectObj = tableList[selectRowIndex];
+        if (selectObj.sbillBillbatch != currentObj.sbillBillbatch)
+          currentObj = tableList[selectRowIndex];
         let currentTd = currentObj.sbillBillcode;
-        singleOutStorage(currentObj, currentTd, cnt, w, 0, 0);
+        delete singleGoodsCount[selectObj.sbillBillbatch];
+        singleOutStorage(currentObj, currentTd, cnt, w, 0, 0, userChooseBtnIdx);
       }
     } else {
       let currentObj = tableList[selectRowIndex];
       let currentTd = currentObj.sbillBillcode;
+      delete singleGoodsCount[currentObj.sbillBillbatch];
       singleOutStorage(currentObj, currentTd, cnt, w, 0, 0);
     }
   });
-  let plankWeightArr = []
+  let plankWeightArr = [];
   function batchWeight(idx, detailArray, w, cnt) {
     let currentObj = tableList[detailArray[idx]];
     let currentTd = currentObj.sbillBillcode;
@@ -812,32 +857,51 @@ $(function() {
     let currentWeight = getFixWeight(
       Number((Number(w) / Number(cnt)) * currentCnt).toFixed(4)
     );
-    let tempWeight = 0
-    let tempWstr = ''
-    if (currentObj.pntreeName == '板材' && (idx < detailArray.length - 1)) {
-      if (currentObj.partsnameName == '花纹板') {
-        tempWeight = (((Number(currentObj.goodsSpec1) + 0.3) * 7.85) / 1000) * (Number(currentObj.goodsSpec2) / 1000) * Number(currentObj.goodsProperty1) * currentCnt
-        tempWstr = tempWeight.toFixed(4)
-        currentWeight = getFixWeight(tempWstr)
-        plankWeightArr.push(currentWeight)
+    let tempWeight = 0;
+    let tempWstr = "";
+    if (currentObj.pntreeName == "板材" && idx < detailArray.length - 1) {
+      if (currentObj.partsnameName == "花纹板") {
+        tempWeight =
+          (((Number(currentObj.goodsSpec1) + 0.3) * 7.85) / 1000) *
+          (Number(currentObj.goodsSpec2) / 1000) *
+          Number(currentObj.goodsProperty1) *
+          currentCnt;
+        tempWstr = tempWeight.toFixed(4);
+        currentWeight = getFixWeight(tempWstr);
+        plankWeightArr.push(currentWeight);
       } else {
-        tempWeight = (Number(currentObj.goodsSpec1) * 7.85 / 1000) * (Number(currentObj.goodsSpec2) / 1000) * Number(currentObj.goodsProperty1) * currentCnt
-        tempWstr = tempWeight.toFixed(4)
-        currentWeight = getFixWeight(tempWstr)
-        plankWeightArr.push(currentWeight)
+        tempWeight =
+          ((Number(currentObj.goodsSpec1) * 7.85) / 1000) *
+          (Number(currentObj.goodsSpec2) / 1000) *
+          Number(currentObj.goodsProperty1) *
+          currentCnt;
+        tempWstr = tempWeight.toFixed(4);
+        currentWeight = getFixWeight(tempWstr);
+        plankWeightArr.push(currentWeight);
       }
-    } else if (currentObj.pntreeName == '板材' && (idx == detailArray.length - 1)) {
-      let t = 0
+    } else if (
+      currentObj.pntreeName == "板材" &&
+      idx == detailArray.length - 1
+    ) {
+      let t = 0;
       if (plankWeightArr.length > 0) {
         plankWeightArr.map(itm => {
-          t += Number(itm)
-        })
+          t += Number(itm);
+        });
       }
-      tempWeight = Number(w) - t 
-      if (tempWeight < 0) tempWeight = 0.001
-      currentWeight = tempWeight.toFixed(3)
+      tempWeight = Number(w) - t;
+      if (tempWeight < 0) tempWeight = 0.001;
+      currentWeight = tempWeight.toFixed(3);
     }
-    console.log('outstorage idx:>>', idx, ';plankWeightArr:>>', plankWeightArr, ';currentWeight:>>', currentWeight)
+    console.log(
+      "outstorage idx:>>",
+      idx,
+      ";plankWeightArr:>>",
+      plankWeightArr,
+      ";currentWeight:>>",
+      currentWeight
+    );
+    delete singleGoodsCount[currentObj.sbillBillbatch];
     singleOutStorage(
       currentObj,
       currentTd,
@@ -897,6 +961,11 @@ $(function() {
       linkMap[btnIdx] = selectArray;
       console.log("after unbind crane btn:>>", linkMap[btnIdx]);
       $(this).remove();
+      if (linkMap[btnIdx].length == 1) {
+        showMultiCranePart(true, btnIdx)
+      } else {
+        showMultiCranePart(false, btnIdx)
+      }
       if (selectArray.length == 0) {
         $(".weight-btn")
           .eq(btnIdx)
@@ -1006,20 +1075,27 @@ $(function() {
       // 判断是否可以直接出库
       let selectObj = tableList[selectRowIndex];
       console.log(selectObj);
+      let td = selectObj.sbillBillbatch;
       let cnt = Number(selectObj.goodsNum - selectObj.oconsignDetailOknum);
       if (
         (selectObj.goodsMetering == "理计" && selectObj.dataAwedit == 0) ||
         selectObj.mtype == 0
       ) {
-        $("#countIpt").val(cnt);
         let weight = formatWeight(
           Number(cnt * selectObj.goodsProperty1 * selectObj.goodsProperty2)
         );
         if (selectObj.mtype == 0) weight = selectObj.goodsWeight;
         $("#weightInfo").text(weight);
-      } else {
         $("#countIpt").val(cnt);
+      } else {
+        let idx = Object.keys(singleGoodsCount).findIndex(itm => itm == td);
+        if (idx < 0) {
+          singleGoodsCount[td] = cnt;
+        } else {
+          cnt = singleGoodsCount[td];
+        }
         $("#weightInfo").text("");
+        $("#countIpt").val(cnt);
       }
     });
     $("#wzBody .tr .td:first-child").click(function(e) {
@@ -1098,6 +1174,10 @@ $(function() {
       let selectObj = tableList[itm];
       count += Number(selectObj.goodsNum - selectObj.oconsignDetailOknum);
     });
+    if (selectIdxArray.length == 1) {
+      let obj = tableList[selectIdxArray[0]];
+      count = singleGoodsCount[obj.sbillBillbatch];
+    }
     $("#countIpt").val(count);
   }
 });
