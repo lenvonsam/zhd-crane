@@ -19,7 +19,8 @@ block content
         .col.relative
           .weight-btn-top-part.relative
             span A${index + 1} (公斤)
-          .weight-btn(data-index="${index}")
+          .weight-btn.relative(data-index="${index}")
+            div(style="position: absolute; left: -35px; top: 68px; font-size: 26px;") A${index + 1}
             span 0
           //- image(style="position: absolute; bottom: -126px; left: -40px; z-index: 10;display: none;", src="/img/taph.png")
       <%});%>

@@ -155,7 +155,7 @@ $(function() {
         linkMap[userChooseBtnIdx].length == 1 &&
         dwtCounts[userChooseBtnIdx].canEdit
       ) {
-        dwtCounts[userChooseBtnIdx].records.push(Number(dwt[btnIdx]));
+        if (Number(dwt[btnIdx]) > 0) dwtCounts[userChooseBtnIdx].records.push(Number(dwt[btnIdx]));
         $("#wbtCnt" + userChooseBtnIdx).text(
           dwtCounts[userChooseBtnIdx].records.length + "次"
         );
@@ -574,14 +574,12 @@ $(function() {
           if (bottomIdx >= 0) {
             // 如果有多次清空数据
             console.log("清空数据", dwtCounts[bottomIdx]);
-            if (dwtCounts[bottomIdx].canEdit) {
-              body.stocks = dwtCounts[bottomIdx].records.join(";");
-              dwtCounts[bottomIdx].canEdit = false;
-              dwtCounts[bottomIdx].records = [];
-              $("#cb" + bottomIdx).unbind();
-              $("#wbtnc" + bottomIdx).unbind();
-              $("#btntop" + bottomIdx).remove();
-            }
+            if (dwtCounts[bottomIdx].records.length > 0) body.stocks = dwtCounts[bottomIdx].records.join(";");
+            dwtCounts[bottomIdx].canEdit = false;
+            dwtCounts[bottomIdx].records = [];
+            $("#cb" + bottomIdx).unbind();
+            $("#wbtnc" + bottomIdx).unbind();
+            $("#btntop" + bottomIdx).remove();
           }
           if (resp.status == 0) {
             console.log("锁库成功");
@@ -796,17 +794,18 @@ $(function() {
     if (userChooseBtnIdx > -1) {
       let detailIdx = linkMap[userChooseBtnIdx];
       if (detailIdx.length > 1) {
-        console.log("batch outstorage");
         let arr = detailIdx.map(itm => tableList[itm]);
-        let cnt = tableList[selectRowIndex];
-        let idx = arr.filter(itm => itm.sbillBillbatch == cnt.sbillBillbatch);
+        let ct = tableList[selectRowIndex];
+        let idx = arr.findIndex(itm => itm.sbillBillbatch == ct.sbillBillbatch);
+        console.log(idx)
         if (idx >= 0) {
+          console.log("batch outstorage");
           batchWeight(0, detailIdx, w, cnt);
         } else {
           let currentObj = tableList[selectRowIndex];
           let currentTd = currentObj.sbillBillcode;
           delete singleGoodsCount[currentObj.sbillBillbatch];
-          singleOutStorage(currentObj, currentTd, cnt, w, 0, 0);
+          singleOutStorage(currentObj, currentTd, cnt, w, 0, 0, userChooseBtnIdx);
         }
         // detailIdx.map((index, idx) => {
         //   let currentObj = tableList[index];
@@ -843,7 +842,7 @@ $(function() {
       let currentObj = tableList[selectRowIndex];
       let currentTd = currentObj.sbillBillcode;
       delete singleGoodsCount[currentObj.sbillBillbatch];
-      singleOutStorage(currentObj, currentTd, cnt, w, 0, 0);
+      singleOutStorage(currentObj, currentTd, cnt, w, 0, 0, userChooseBtnIdx);
     }
   });
   let plankWeightArr = [];
