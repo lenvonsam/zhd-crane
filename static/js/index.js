@@ -273,15 +273,15 @@ $(function() {
       $(".weight-btn-top-part")
         .eq(userChooseBtnIdx)
         .append(
-          '<div style="position: absolute; right: 10%; top: 0;" id="' +
+          '<div style="font-size: 22px; height: 38px" class="row" id="' +
             topid +
-            '">多次称重:<input id="' +
+            '"><div style="flex: 0 0 100px;">多次称重:</div><div class="cbx"><input id="' +
             cbid +
             '" type="checkbox" data-id="' +
             userChooseBtnIdx +
-            '"/> <span>次数:</span><span id="' +
+            '"/></div> <span class="text-center" style="flex: 0 0 70px;">次数:</span><span style="flex: 0 0 66px;" id="' +
             cntid +
-            '">0次</span>  <span class="mr-15" style="border: 1px solid white; display:inline-block; font-size: 12px; padding: 2px 5px; border-radius: 3px;" id="' +
+            '">0次</span>  <span style="border: 1px solid white; display:inline-block; font-size: 12px; padding: 2px 5px; border-radius: 3px;" id="' +
             cid +
             '" data-id="' +
             userChooseBtnIdx +
@@ -291,7 +291,14 @@ $(function() {
         console.log($(this).is(":checked"));
         var idx = $(this).data("id");
         console.log("cbx idx:>>", idx);
-        dwtCounts[idx]["canEdit"] = $(this).is(":checked");
+        var cked = $(this).is(":checked");
+        dwtCounts[idx]["canEdit"] = cked;
+        if (cked) {
+          $(this).parent().addClass('checked')
+        } else {
+          $(this).parent().removeClass('checked')
+        }
+        
       });
       $("#" + cid).click(function() {
         var btnIdx = $(this).data("id");
@@ -571,7 +578,14 @@ $(function() {
             goodsWeight: weight
           };
           console.log("bottomidx:>>", bottomIdx);
-          if (bottomIdx >= 0) {
+          let isBang = true
+          if (
+            (currentObj.goodsMetering == "理计" && currentObj.dataAwedit == 0) ||
+            currentObj.mtype == 0
+          ) {
+            isBang = false
+          }
+          if (bottomIdx >= 0 && isBang) {
             // 如果有多次清空数据
             console.log("清空数据", dwtCounts[bottomIdx]);
             if (dwtCounts[bottomIdx].records.length > 0) body.stocks = dwtCounts[bottomIdx].records.join(";");
@@ -977,6 +991,14 @@ $(function() {
     let uniqueCode = currentObj.sbillBillbatch;
     console.log("uniqueCode:>>>" + uniqueCode);
     console.log(linkMap);
+    // 出库物资是还是磅计，默认是磅计
+    let isBang = true
+    if (
+      (currentObj.goodsMetering == "理计" && currentObj.dataAwedit == 0) ||
+      currentObj.mtype == 0
+    ) {
+      isBang = false
+    }
     var tableIndex = tableList.findIndex(
       itm => itm.sbillBillbatch == uniqueCode
     );
@@ -993,7 +1015,7 @@ $(function() {
     });
     // console.log("weightBtnIdx:>>>" + weightBtnIdx);
     // linkMap[weightBtnIdx] = -1;
-    if (userChooseBtnIdx > -1) {
+    if (userChooseBtnIdx > -1 && isBang) {
       var currentWeightArr = linkMap[userChooseBtnIdx];
       currentWeightArr = currentWeightArr.filter(itm => itm != tableIndex);
       linkMap[userChooseBtnIdx] = currentWeightArr;
@@ -1028,7 +1050,7 @@ $(function() {
     initActiveRect(selectRowIndex);
     $("#countIpt").val("");
     $("#weightInfo").text("");
-    if (userChooseBtnIdx > -1) {
+    if (userChooseBtnIdx > -1 && isBang) {
       $(".weight-btn")
         .eq(userChooseBtnIdx)
         .css("background-image", "url(/img/dl.png)");
