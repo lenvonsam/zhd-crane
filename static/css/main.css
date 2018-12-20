@@ -264,3 +264,31 @@
   cursor: pointer;
 }
 
+.weight-btn-top-part {
+  height: 38px;
+  box-sizing: border-box;
+}
+.weight-btn-top-part .cbx {
+  flex: 0 0 35px;
+  position: relative;
+  width: 30px;
+  height: 30px;
+  display: inline-block;
+  background-image: url('../img/wxz.png');
+  background-size: cover;
+  margin-bottom: 5px;
+}
+.weight-btn-top-part .cbx.checked {
+  background-image: url('../img/xzz.png');
+}
+
+
+.weight-btn-top-part .cbx input[type=checkbox] {
+  opacity: 0;
+  position: absolute;
+  top: 10px;
+  left: 8px;
+  right: 0;
+  bottom: 0;
+  z-index: 20;
+}

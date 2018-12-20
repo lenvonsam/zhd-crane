@@ -17,8 +17,9 @@ block content
     .row.top-section.relative(style="bottom: -50px")
       <% _.each(btns, function(itm, index){ %>
         .col.relative
-          span A${index + 1} (公斤)
-          .weight-btn(data-index="${index}")
+          .weight-btn-top-part.relative
+          .weight-btn.relative(data-index="${index}")
+            div(style="position: absolute; left: -35px; top: 68px; font-size: 26px;") A${index + 1}
             span 0
           //- image(style="position: absolute; bottom: -126px; left: -40px; z-index: 10;display: none;", src="/img/taph.png")
       <%});%>
@@ -68,7 +69,7 @@ block content
           .grid 设备
         #wzBody.relative
           .active-rect
-    div(style="flex: 0 0 340px;")
+    div(style="flex: 0 0 360px;")
       .row
         .row.top-section.relative(style="bottom: -20px")
           span.float-title 数量

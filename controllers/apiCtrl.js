@@ -1,5 +1,6 @@
 const httpHelp = require('../utils/http')
 const PROXYURL = 'http://192.168.20.148:8080/warehouse-online/warehouse'
+// const PROXYURL = 'http://localhost:7568/warehouse'
 
 module.exports = {
   async logout (ctx) {
