@@ -462,6 +462,14 @@ $(function() {
         }
       });
     } else {
+      // 减掉取消绑定的重量
+      var totalWeight = 0
+      dwtCounts[userChooseBtnIdx].records.map(itm => {
+        totalWeight += Number(itm)
+      })
+      var showWeight = Number($('#weightInfo').text()) * 1000
+      factWeight = Number((showWeight - totalWeight) / 1000).toFixed(3)
+      updateFactWeight(factWeight)
       dwtCounts[userChooseBtnIdx].canEdit = false;
       dwtCounts[userChooseBtnIdx].records = [];
       $("#" + cbid).unbind();
@@ -778,6 +786,22 @@ $(function() {
             goodsWeight: weight
           };
           console.log("bottomidx:>>", bottomIdx);
+          // 操作记录
+          var optBody = {
+            outNo: currentObj.oconsignBillcode,
+            outBatchNo: currentObj.oconsignBillbatch,
+            tdNo: currentObj.sbillBillcode,
+            goodNo: currentObj.sbillBillbatch,
+            goodName: currentObj.partsnameName,
+            standard: currentObj.goodsSpec,
+            material: currentObj.goodsMaterial,
+            supply: currentObj.productareaName,
+            length: currentObj.goodsProperty1,
+            weight: weight,
+            count: cnt
+          }
+          if (currentObj.goodsProperty5) optBody.toleranceRange = currentObj.goodsProperty5
+          if (currentObj.goodsProperty4) optBody.weightRange = currentObj.goodsProperty4
           let isBang = true;
           if (
             (currentObj.goodsMetering == "理计" &&
@@ -790,10 +814,15 @@ $(function() {
             // 如果有多次清空数据
             // 是否是一个物资多秤
             let selectidx = linkMap[bottomIdx][0];
+            console.log('selectidx', selectidx)
+            if (selectidx == undefined) selectidx = selectRowIndex
             let otherStockArray = [];
+            let multiCraneIdx = [];
+            multiCraneIdx.push(bottomIdx)
             Object.keys(linkMap).map(k => {
               let ix = linkMap[k].findIndex(im => im == selectidx);
               if (ix >= 0 && k != bottomIdx) {
+                multiCraneIdx.push(k)
                 if (dwtCounts[k].records.length > 0) {
                   otherStockArray.push(dwtCounts[k].records.join(";"));
                 }
@@ -817,16 +846,22 @@ $(function() {
             console.log("清空数据", dwtCounts[bottomIdx]);
             if (dwtCounts[bottomIdx].records.length > 0) {
               body.stocks = dwtCounts[bottomIdx].records.join(";");
-              if (otherStockArray.length > 0) {
-                body.stocks = body.stocks + "|" + otherStockArray.join("|");
-              }
             }
+            if (otherStockArray.length > 0) {
+              body.stocks = body.stocks + "|" + otherStockArray.join("|");
+            }
+            optBody.multiOutRecords = body.stocks
+            optBody.craneIndex = multiCraneIdx.join(';')
             dwtCounts[bottomIdx].canEdit = false;
             dwtCounts[bottomIdx].records = [];
             $("#cb" + bottomIdx).unbind();
             $("#wbtnc" + bottomIdx).unbind();
             $("#btntop" + bottomIdx).remove();
+          } else {
+            // 理计出库记录
+            optBody.craneIndex = "-1"
           }
+          request('/save/crane/operator', optBody)
           if (resp.status == 0) {
             console.log("锁库成功");
             request("/outStorage", body)
@@ -835,6 +870,7 @@ $(function() {
                 if (res.status == 0) {
                   if (res.message.startsWith("[待审核]")) {
                     // var result = window.confirm(`此条物资需要审核确认\n 出库重量:${w}\n 出库数量:${cnt}`)
+                    request('/update/crane/operator', {goodNo: currentObj.sbillBillbatch, status: 3})
                     hideLoad();
                     $("body").append(
                       modalTemp({
@@ -904,6 +940,7 @@ $(function() {
                     });
                   } else {
                     if (idx == max) hideLoad();
+                    request('/update/crane/operator', {goodNo: currentObj.sbillBillbatch, status: 1})
                     outStorageSuccess(currentObj, false, function() {
                       userChooseBtnIdx == -1
                         ? reject()
@@ -922,6 +959,7 @@ $(function() {
                   reject();
                 } else {
                   if (idx == max) hideLoad();
+                  request('/update/crane/operator', {goodNo: currentObj.sbillBillbatch, status: 2})
                   showMsg(res.message || "网络异常");
                   request("/unlockTd", {
                     tdNo: currentTd
@@ -1061,26 +1099,6 @@ $(function() {
             userChooseBtnIdx
           );
         }
-        // detailIdx.map((index, idx) => {
-        //   let currentObj = tableList[index];
-        //   let currentTd = currentObj.sbillBillcode;
-        //   let currentCnt = Number(
-        //     currentObj.goodsNum - currentObj.oconsignDetailOknum
-        //   );
-        //   console.log("currentCnt:>>", currentCnt, "; w:>>", w, ";cnt:>>", cnt);
-        //   let currentWeight = getFixWeight(
-        //     Number((Number(w) / Number(cnt)) * currentCnt).toFixed(4)
-        //   );
-        //   console.log("idx:>>", idx, ";currentWeight:>>", currentWeight);
-        //   singleOutStorage(
-        //     currentObj,
-        //     currentTd,
-        //     currentCnt,
-        //     currentWeight,
-        //     idx,
-        //     detailIdx.length - 1
-        //   );
-        // });
       } else {
         console.log("single bang outstorage");
         let currentObj = tableList[detailIdx[0]];
@@ -1170,6 +1188,18 @@ $(function() {
       },
       () => {
         console.error("暂停");
+        console.log('userChooseIdx::', userChooseBtnIdx)
+        console.log('linkMap:>>', linkMap[userChooseBtnIdx]);
+        // 取消吊秤按钮
+        linkMap[userChooseBtnIdx].map(itm => {
+          var craneBtn = $('#wzBody .tr').eq(itm).find('.td').eq(9).find('.crane-btn')
+          craneBtn.unbind()
+          craneBtn.remove()
+        })
+        linkMap[userChooseBtnIdx] = []
+        userChooseBtnIdx = -1
+        // if (res.currentIdx < res.arr.length && userChooseBtnIdx > -1)
+          // batchWeight(res.currentIdx, res.arr, w, cnt);
       }
     );
   }
