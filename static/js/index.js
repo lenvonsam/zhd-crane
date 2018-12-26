@@ -463,13 +463,13 @@ $(function() {
       });
     } else {
       // 减掉取消绑定的重量
-      var totalWeight = 0
+      var totalWeight = 0;
       dwtCounts[userChooseBtnIdx].records.map(itm => {
-        totalWeight += Number(itm)
-      })
-      var showWeight = Number($('#weightInfo').text()) * 1000
-      factWeight = Number((showWeight - totalWeight) / 1000).toFixed(3)
-      updateFactWeight(factWeight)
+        totalWeight += Number(itm);
+      });
+      var showWeight = Number($("#weightInfo").text()) * 1000;
+      factWeight = Number((showWeight - totalWeight) / 1000).toFixed(3);
+      updateFactWeight(factWeight);
       dwtCounts[userChooseBtnIdx].canEdit = false;
       dwtCounts[userChooseBtnIdx].records = [];
       $("#" + cbid).unbind();
@@ -799,9 +799,11 @@ $(function() {
             length: currentObj.goodsProperty1,
             weight: weight,
             count: cnt
-          }
-          if (currentObj.goodsProperty5) optBody.toleranceRange = currentObj.goodsProperty5
-          if (currentObj.goodsProperty4) optBody.weightRange = currentObj.goodsProperty4
+          };
+          if (currentObj.goodsProperty5)
+            optBody.toleranceRange = currentObj.goodsProperty5;
+          if (currentObj.goodsProperty4)
+            optBody.weightRange = currentObj.goodsProperty4;
           let isBang = true;
           if (
             (currentObj.goodsMetering == "理计" &&
@@ -814,15 +816,15 @@ $(function() {
             // 如果有多次清空数据
             // 是否是一个物资多秤
             let selectidx = linkMap[bottomIdx][0];
-            console.log('selectidx', selectidx)
-            if (selectidx == undefined) selectidx = selectRowIndex
+            console.log("selectidx", selectidx);
+            if (selectidx == undefined) selectidx = selectRowIndex;
             let otherStockArray = [];
             let multiCraneIdx = [];
-            multiCraneIdx.push(bottomIdx)
+            multiCraneIdx.push(bottomIdx);
             Object.keys(linkMap).map(k => {
               let ix = linkMap[k].findIndex(im => im == selectidx);
               if (ix >= 0 && k != bottomIdx) {
-                multiCraneIdx.push(k)
+                multiCraneIdx.push(k);
                 if (dwtCounts[k].records.length > 0) {
                   otherStockArray.push(dwtCounts[k].records.join(";"));
                 }
@@ -850,8 +852,8 @@ $(function() {
             if (otherStockArray.length > 0) {
               body.stocks = body.stocks + "|" + otherStockArray.join("|");
             }
-            optBody.multiOutRecords = body.stocks
-            optBody.craneIndex = multiCraneIdx.join(';')
+            optBody.multiOutRecords = body.stocks;
+            optBody.craneIndex = multiCraneIdx.join(";");
             dwtCounts[bottomIdx].canEdit = false;
             dwtCounts[bottomIdx].records = [];
             $("#cb" + bottomIdx).unbind();
@@ -859,9 +861,9 @@ $(function() {
             $("#btntop" + bottomIdx).remove();
           } else {
             // 理计出库记录
-            optBody.craneIndex = "-1"
+            optBody.craneIndex = "-1";
           }
-          request('/save/crane/operator', optBody)
+          request("/save/crane/operator", optBody);
           if (resp.status == 0) {
             console.log("锁库成功");
             request("/outStorage", body)
@@ -870,7 +872,10 @@ $(function() {
                 if (res.status == 0) {
                   if (res.message.startsWith("[待审核]")) {
                     // var result = window.confirm(`此条物资需要审核确认\n 出库重量:${w}\n 出库数量:${cnt}`)
-                    request('/update/crane/operator', {goodNo: currentObj.sbillBillbatch, status: 3})
+                    request("/update/crane/operator", {
+                      goodNo: currentObj.sbillBillbatch,
+                      status: 3
+                    });
                     hideLoad();
                     $("body").append(
                       modalTemp({
@@ -940,7 +945,10 @@ $(function() {
                     });
                   } else {
                     if (idx == max) hideLoad();
-                    request('/update/crane/operator', {goodNo: currentObj.sbillBillbatch, status: 1})
+                    request("/update/crane/operator", {
+                      goodNo: currentObj.sbillBillbatch,
+                      status: 1
+                    });
                     outStorageSuccess(currentObj, false, function() {
                       userChooseBtnIdx == -1
                         ? reject()
@@ -959,7 +967,10 @@ $(function() {
                   reject();
                 } else {
                   if (idx == max) hideLoad();
-                  request('/update/crane/operator', {goodNo: currentObj.sbillBillbatch, status: 2})
+                  request("/update/crane/operator", {
+                    goodNo: currentObj.sbillBillbatch,
+                    status: 2
+                  });
                   showMsg(res.message || "网络异常");
                   request("/unlockTd", {
                     tdNo: currentTd
@@ -1163,6 +1174,25 @@ $(function() {
       tempWeight = Number(w) - t;
       if (tempWeight < 0) tempWeight = 0.001;
       currentWeight = tempWeight.toFixed(3);
+    } else if (
+      currentObj.pntreeName != "板材" &&
+      idx < detailArray.length - 1
+    ) {
+      plankWeightArr.push(currentWeight);
+    } else if (
+      currentObj.pntreeName != "板材" &&
+      idx == detailArray.length - 1
+    ) {
+      console.log("不是板材到最后", plankWeightArr);
+      let t = 0;
+      if (plankWeightArr.length > 0) {
+        plankWeightArr.map(itm => {
+          t += Number(itm);
+        });
+      }
+      tempWeight = Number(w) - t;
+      if (tempWeight < 0) tempWeight = 0.001;
+      currentWeight = tempWeight.toFixed(3);
     }
     console.log(
       "outstorage idx:>>",
@@ -1188,18 +1218,22 @@ $(function() {
       },
       () => {
         console.error("暂停");
-        console.log('userChooseIdx::', userChooseBtnIdx)
-        console.log('linkMap:>>', linkMap[userChooseBtnIdx]);
+        console.log("userChooseIdx::", userChooseBtnIdx);
+        console.log("linkMap:>>", linkMap[userChooseBtnIdx]);
         // 取消吊秤按钮
         linkMap[userChooseBtnIdx].map(itm => {
-          var craneBtn = $('#wzBody .tr').eq(itm).find('.td').eq(9).find('.crane-btn')
-          craneBtn.unbind()
-          craneBtn.remove()
-        })
-        linkMap[userChooseBtnIdx] = []
-        userChooseBtnIdx = -1
+          var craneBtn = $("#wzBody .tr")
+            .eq(itm)
+            .find(".td")
+            .eq(9)
+            .find(".crane-btn");
+          craneBtn.unbind();
+          craneBtn.remove();
+        });
+        linkMap[userChooseBtnIdx] = [];
+        userChooseBtnIdx = -1;
         // if (res.currentIdx < res.arr.length && userChooseBtnIdx > -1)
-          // batchWeight(res.currentIdx, res.arr, w, cnt);
+        // batchWeight(res.currentIdx, res.arr, w, cnt);
       }
     );
   }
@@ -1273,16 +1307,21 @@ $(function() {
     );
     let otherSelectRowObj = {};
     Object.keys(linkMap).map(itm => {
-      console.log('itm:>>' , itm)
+      console.log("itm:>>", itm);
       if (linkMap[itm].length >= 0) {
         var arr = linkMap[itm];
         arr.map(item => {
           if (item != tableIndex) {
             // 判断是否一个物资对应多个秤
-            let otherKeys = Object.keys(otherSelectRowObj)
-            let idx = otherKeys.findIndex(itm => itm == tableList[item]["sbillBillbatch"])
+            let otherKeys = Object.keys(otherSelectRowObj);
+            let idx = otherKeys.findIndex(
+              itm => itm == tableList[item]["sbillBillbatch"]
+            );
             if (idx >= 0) {
-              otherSelectRowObj[tableList[item]["sbillBillbatch"]] = itm + ';' + otherSelectRowObj[tableList[item]["sbillBillbatch"]]
+              otherSelectRowObj[tableList[item]["sbillBillbatch"]] =
+                itm +
+                ";" +
+                otherSelectRowObj[tableList[item]["sbillBillbatch"]];
             } else {
               otherSelectRowObj[tableList[item]["sbillBillbatch"]] = itm;
             }
@@ -1305,13 +1344,13 @@ $(function() {
     Object.keys(otherSelectRowObj).map(k => {
       let idx = tableList.findIndex(itm => itm.sbillBillbatch == k);
       let btnIdx = otherSelectRowObj[k];
-      console.log('success btnidx', btnIdx)
-      if (btnIdx.indexOf(';') > 0) {
+      console.log("success btnidx", btnIdx);
+      if (btnIdx.indexOf(";") > 0) {
         // 一个物资对应多秤
-        let arr = btnIdx.split(';')
-        arr.map((ar,ix) => {
-          linkMap[Number(ar)].push(idx)
-          console.log('ar:>>', ar, ';ix:>>', ix, '; typoef ar', typeof ar)
+        let arr = btnIdx.split(";");
+        arr.map((ar, ix) => {
+          linkMap[Number(ar)].push(idx);
+          console.log("ar:>>", ar, ";ix:>>", ix, "; typoef ar", typeof ar);
           if (ix == 0) {
             $("#wzBody .tr")
               .eq(idx)
@@ -1325,7 +1364,9 @@ $(function() {
               .html(
                 '<div class="crane-btn column" data-bidx="' +
                   ar +
-                  '"  data-ridx="'+idx+'"><span>' +
+                  '"  data-ridx="' +
+                  idx +
+                  '"><span>' +
                   craneNames[ar] +
                   "</span></div>"
               );
@@ -1337,12 +1378,14 @@ $(function() {
               .prepend(
                 '<div class="crane-btn column" data-bidx="' +
                   ar +
-                  '"  data-ridx="'+idx+'"><span>' +
+                  '"  data-ridx="' +
+                  idx +
+                  '"><span>' +
                   craneNames[ar] +
                   "</span></div>"
               );
           }
-        })
+        });
       } else {
         linkMap[btnIdx].push(idx);
         $("#wzBody .tr")
@@ -1357,7 +1400,9 @@ $(function() {
           .html(
             '<div class="crane-btn column" data-bidx="' +
               btnIdx +
-              '"  data-ridx="'+idx+'"><span>' +
+              '"  data-ridx="' +
+              idx +
+              '"><span>' +
               craneNames[btnIdx] +
               "</span></div>"
           );
