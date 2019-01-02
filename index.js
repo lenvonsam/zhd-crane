@@ -68,11 +68,11 @@ function socketHandler(socket, port, portIdx) {
         const bytes = commHelp.hexstring2btye(origin);
         const decodeStr = commHelp.decodeCraneHexstring(bytes);
         // const decodeStr = origin
-        if (Number(decodeStr) >= 0) {
-          console.log(`device port: [${port}] decode data:>>${decodeStr}`);
+        // if (Number(decodeStr) >= 0) {
+        console.log(`device port: [${port}] decode data:>>${decodeStr}`);
           // const decodeStr = origin
-          io.emit("factWeight", decodeStr, portIdx);
-        }
+        io.emit("factWeight", decodeStr, portIdx);
+        // }
         // socket.write(`device port: [${port}] has received data`);
       // } 
       // else {
