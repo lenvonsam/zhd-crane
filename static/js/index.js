@@ -897,6 +897,10 @@ $(function() {
                         })
                           .then(rp => {
                             if (rp.status == 0) {
+                              request("/update/crane/operator", {
+                                goodNo: currentObj.sbillBillbatch,
+                                status: 4
+                              });
                               outStorageSuccess(currentObj, false, function() {
                                 console.log(
                                   "吊秤审核成功",
@@ -911,6 +915,11 @@ $(function() {
                                     });
                               });
                             } else {
+                              request("/update/crane/operator", {
+                                goodNo: currentObj.sbillBillbatch,
+                                status: 5,
+                                errMsg: rp.message || '物资审核失败'
+                              });
                               showMsg(rp.message);
                               request("/unlockTd", {
                                 tdNo: currentTd
@@ -939,6 +948,10 @@ $(function() {
                           });
                       } else {
                         if (idx == max) hideLoad();
+                        request("/update/crane/operator", {
+                          goodNo: currentObj.sbillBillbatch,
+                          status: 6
+                        });
                         outStorageSuccess(currentObj, true);
                         reject();
                       }
@@ -969,7 +982,8 @@ $(function() {
                   if (idx == max) hideLoad();
                   request("/update/crane/operator", {
                     goodNo: currentObj.sbillBillbatch,
-                    status: 2
+                    status: 2,
+                    errMsg: res.message || '物资出库失败'
                   });
                   showMsg(res.message || "网络异常");
                   request("/unlockTd", {
