@@ -128,10 +128,7 @@ $(function() {
     let selectObj = tableList[selectRowIndex];
     console.log("selectObj:>>", selectObj);
     let cnt = Number(selectObj.goodsNum - selectObj.oconsignDetailOknum);
-    if (
-      (selectObj.goodsMetering == "理计" && selectObj.dataAwedit == 0) ||
-      selectObj.mtype == 0
-    ) {
+    if (selectObj.goodsMetering == "理计" || selectObj.mtype == 0) {
       showMsg("无需关联吊秤可以直接出库");
       return;
     }
@@ -918,7 +915,7 @@ $(function() {
                               request("/update/crane/operator", {
                                 goodNo: currentObj.sbillBillbatch,
                                 status: 5,
-                                errMsg: rp.message || '物资审核失败'
+                                errMsg: rp.message || "物资审核失败"
                               });
                               showMsg(rp.message);
                               request("/unlockTd", {
@@ -983,7 +980,7 @@ $(function() {
                   request("/update/crane/operator", {
                     goodNo: currentObj.sbillBillbatch,
                     status: 2,
-                    errMsg: res.message || '物资出库失败'
+                    errMsg: res.message || "物资出库失败"
                   });
                   showMsg(res.message || "网络异常");
                   request("/unlockTd", {
@@ -1090,10 +1087,7 @@ $(function() {
         return;
       }
       var selectObj = tableList[selectRowIndex];
-      if (
-        (selectObj.goodsMetering == "理计" && selectObj.dataAwedit == 0) ||
-        selectObj.mtype == 0
-      ) {
+      if (selectObj.goodsMetering == "理计" || selectObj.mtype == 0) {
       } else {
         showMsg("请选择出库的磅秤");
         return;
@@ -1474,10 +1468,7 @@ $(function() {
       console.log(selectObj);
       let td = selectObj.sbillBillbatch;
       let cnt = Number(selectObj.goodsNum - selectObj.oconsignDetailOknum);
-      if (
-        (selectObj.goodsMetering == "理计" && selectObj.dataAwedit == 0) ||
-        selectObj.mtype == 0
-      ) {
+      if (selectObj.goodsMetering == "理计" || selectObj.mtype == 0) {
         let weight = formatWeight(
           Number(cnt * selectObj.goodsProperty1 * selectObj.goodsProperty2)
         );
