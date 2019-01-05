@@ -686,10 +686,7 @@ $(function() {
     console.log("currentSelect idx:>>", selectRowIndex);
     console.log("currentBtnIdx:>>", btnIndex);
     let selectObj = tableList[selectRowIndex];
-    if (
-      (selectObj.goodsMetering == "理计" && selectObj.dataAwedit == 0) ||
-      selectObj.mtype == 0
-    ) {
+    if (selectObj.goodsMetering == "理计" || selectObj.mtype == 0) {
       return "理计不能修改数量";
     } else if (btnIndex == -1) {
       return "请先选中关联设备的物资";
@@ -802,11 +799,7 @@ $(function() {
           if (currentObj.goodsProperty4)
             optBody.weightRange = currentObj.goodsProperty4;
           let isBang = true;
-          if (
-            (currentObj.goodsMetering == "理计" &&
-              currentObj.dataAwedit == 0) ||
-            currentObj.mtype == 0
-          ) {
+          if (currentObj.goodsMetering == "理计" || currentObj.mtype == 0) {
             isBang = false;
           }
           if (bottomIdx >= 0 && isBang) {
@@ -1304,10 +1297,7 @@ $(function() {
     console.log(linkMap);
     // 出库物资是还是磅计，默认是磅计
     let isBang = true;
-    if (
-      (currentObj.goodsMetering == "理计" && currentObj.dataAwedit == 0) ||
-      currentObj.mtype == 0
-    ) {
+    if (currentObj.goodsMetering == "理计" || currentObj.mtype == 0) {
       isBang = false;
     }
     var tableIndex = tableList.findIndex(
