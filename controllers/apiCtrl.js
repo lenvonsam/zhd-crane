@@ -60,8 +60,13 @@ module.exports = {
         // let str = JSON.stringify(data.data)
         // console.log('cookie 保存', data.data)
         await ctx.cookies.set('currentUser', `${data.data.memberCode}|${data.data.operatorUserid}|${data.data.superWarehousemanFlag}`, {
+<<<<<<< HEAD
           domain: '192.168.20.170',
           maxAge: 5 * 60 * 60 * 1000,
+=======
+          domain: '192.168.80.200',
+          maxAge: 10 * 60 * 60 * 1000,
+>>>>>>> 0611d7964cb8b1de03f1e39826f555edb8d6766e
           httpOnly: false
         })
       }
