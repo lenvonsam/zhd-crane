@@ -25,6 +25,18 @@
   padding: 15px 15px;
 }
 
+.ml-5 {
+  margin-left: 5px;
+}
+
+.mr-5 {
+  margin-right: 5px;
+}
+
+.mr-30 {
+  margin-right: 30px;
+}
+
 .pl-15 {
   padding-left: 15px;
 }

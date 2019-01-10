@@ -1,0 +1,50 @@
+@charset "utf-8";
+/* 主菜单样式 */
+body {
+  margin: 0 !important;
+}
+.menu-bg {
+  background-image: url("../img/menu_bg.png");
+  background-size: cover;
+  box-sizing: border-box;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+}
+
+.menu-bg .menu-close {
+  width: 55px;
+  height: 60px;
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background-image: url("../img/gb.png");
+  background-size: cover;
+}
+
+.menu-bg .menu-btn-group {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  height: 350px;
+}
+
+.menu-bg .menu-btn-group .menu-btn {
+  width: 350px;
+  height: 350px;
+  background-size: cover;
+}
+
+.menu-bg .menu-btn-group .menu-btn.out-btn {
+  background-image: url("../img/out_btn.png");
+}
+
+.menu-bg .menu-btn-group .menu-btn.out-query-btn {
+  background-image: url("../img/out_query_btn.png");
+}
+
+.menu-bg .menu-btn-group:hover,
+.menu-bg .menu-close:hover {
+  cursor: pointer;
+}

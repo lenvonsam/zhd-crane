@@ -1241,8 +1241,8 @@ $(function() {
 
   // 退出按钮
   $(".main-close").click(() => {
-    logout();
-    window.location.href = "/login";
+    // logout();
+    window.location.href = "/menu";
   });
 
   // 计重

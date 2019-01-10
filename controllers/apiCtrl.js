@@ -11,9 +11,9 @@ module.exports = {
   },
   async proxy(ctx) {
     const body = ctx.request.body
-    console.log('warehouse proxy:>>>\n', body)
     let params = Object.assign({}, body.params)
     let user = ctx.cookies.get('currentUser')
+    console.log('user', user)
     let userArr = user ? user.split('|') : []
     if (body.url == '/outWaitStorageQuery') {
       if (userArr && userArr.length == 3) {
@@ -31,9 +31,13 @@ module.exports = {
         return
       }
     }
-    if (body.url == '/outStorage') {
+    if (body.url == '/outStorage' || body.url == '/outstorageAudit' || body.url == '/outStorageQuery') {
       if (userArr && userArr.length == 3) {
         params.userId = userArr[1]
+        if (body.url == '/outStorageQuery') {
+          params.superWarehousemanFlag = userArr[2]
+          params.memberCode = userArr[0]
+        }
       } else {
         ctx.body = {
           status: -2,
@@ -42,17 +46,18 @@ module.exports = {
         return
       }
     }
-    if (body.url == '/outStorageAudit') {
-      if (userArr && userArr.length == 3) {
-        params.userId = userArr[1]
-      } else {
-        ctx.body = {
-          status: -2,
-          message: '用户过期'
-        }
-        return
-      }
-    }
+    // if (body.url == '/outStorageAudit') {
+    //   if (userArr && userArr.length == 3) {
+    //     params.userId = userArr[1]
+    //   } else {
+    //     ctx.body = {
+    //       status: -2,
+    //       message: '用户过期'
+    //     }
+    //     return
+    //   }
+    // }
+    console.log('warehouse proxy:>>>\n', params)
     let data = body.method === 'get' ? (await httpHelp.httpGet(PROXYURL + body.url, params)) : (await httpHelp.httpPost(PROXYURL + body.url, params))
     console.log('warehouse proxy resp:>>\n', data)
     if (body.url == '/login') {

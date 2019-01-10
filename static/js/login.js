@@ -34,7 +34,7 @@ $(function () {
         hideLoad()
         if (resp.status == 0 && resp.data != null) {
           console.log("跳转")
-          window.location.href = "/"
+          window.location.href = "/menu"
         } else {
           showMsg(resp.message)
           // console.error(resp.message)
