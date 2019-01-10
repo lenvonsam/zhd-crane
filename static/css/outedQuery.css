@@ -197,3 +197,23 @@
 .outd-query-btn:hover {
   cursor: pointer;
 }
+
+/* 修改日期控件 */
+
+.daterangepicker .calendar-table th,
+.daterangepicker .calendar-table td {
+  width: 36px;
+  height: 28px;
+  font-size: 18px;
+}
+
+.daterangepicker.ltr .ranges {
+  width: 320px;
+}
+.daterangepicker .ranges ul {
+  width: 100%;
+}
+
+.daterangepicker .ranges li {
+  font-size: 20px;
+}
