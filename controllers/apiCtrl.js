@@ -31,7 +31,7 @@ module.exports = {
         return
       }
     }
-    if (body.url == '/outStorage' || body.url == '/outstorageAudit' || body.url == '/outStorageQuery') {
+    if (body.url == '/outStorage' || body.url == '/outStorageAudit' || body.url == '/outStorageQuery') {
       if (userArr && userArr.length == 3) {
         params.userId = userArr[1]
         if (body.url == '/outStorageQuery') {

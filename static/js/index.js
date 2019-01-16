@@ -1032,6 +1032,24 @@ $(function() {
     });
   }
 
+  function getCraneWeight(val) {
+    debugger
+    if (val.indexOf(".") < 0) {
+      return val;
+    } else {
+      var dotStr = val.substring(val.indexOf(".") + 1);
+      if (dotStr.length == 1) {
+        return val.substring(0, val.indexOf(".") + 1) + dotStr + "00";
+      } else if (dotStr.length == 2) {
+        return val.substring(0, val.indexOf(".") + 1) + dotStr + "0";
+      } else {
+        return (
+          val.substring(0, val.indexOf(".") + 1) + dotStr.substring(0, 2) + "0"
+        );
+      }
+    }
+  }
+
   function getFixWeight(val) {
     console.log("single weight:>>", val);
     let newVal = Math.round(Number(val) * 10000) + "";
@@ -1058,6 +1076,7 @@ $(function() {
       }
     }
   }
+
   $("#weightWrapAdd").click(function(e) {
     e.stopPropagation();
     var val = $("#weightInfo").text();
@@ -1151,6 +1170,9 @@ $(function() {
           currentCnt;
         tempWstr = tempWeight.toFixed(4);
         currentWeight = getFixWeight(tempWstr);
+        console.log('currentWeight:>>', currentWeight)
+        currentWeight = getCraneWeight(currentWeight)
+        console.log('crane weight:>>', currentWeight)
         plankWeightArr.push(currentWeight);
       } else {
         tempWeight =
@@ -1160,6 +1182,9 @@ $(function() {
           currentCnt;
         tempWstr = tempWeight.toFixed(4);
         currentWeight = getFixWeight(tempWstr);
+        console.log('currentWeight:>>', currentWeight)
+        currentWeight = getCraneWeight(currentWeight)
+        console.log('crane weight:>>', currentWeight)
         plankWeightArr.push(currentWeight);
       }
     } else if (
@@ -1173,12 +1198,16 @@ $(function() {
         });
       }
       tempWeight = Number(w) - t;
-      if (tempWeight < 0) tempWeight = 0.001;
+      // if (tempWeight < 0) tempWeight = 0.001;
+      if (tempWeight < 0) tempWeight = 0.0;
       currentWeight = tempWeight.toFixed(3);
     } else if (
       currentObj.pntreeName != "板材" &&
       idx < detailArray.length - 1
     ) {
+      console.log('currentWeight:>>', currentWeight)
+      currentWeight = getCraneWeight(currentWeight)
+      console.log('crane weight:>>', currentWeight)
       plankWeightArr.push(currentWeight);
     } else if (
       currentObj.pntreeName != "板材" &&
@@ -1192,7 +1221,7 @@ $(function() {
         });
       }
       tempWeight = Number(w) - t;
-      if (tempWeight < 0) tempWeight = 0.001;
+      if (tempWeight < 0) tempWeight = 0.0;
       currentWeight = tempWeight.toFixed(3);
     }
     console.log(
