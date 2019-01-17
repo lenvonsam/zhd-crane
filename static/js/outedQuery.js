@@ -162,7 +162,7 @@ $(function() {
         } else if (k == 'employeeName' || k == 'companyAbbreviate') {
           var showStr = ''
           if (itm[k]) showStr = itm[k]
-          if (itm['employeeMobile']) showStr += '<br>' + itm['employeeMobile']
+          if (itm['employeeMobile'] && k == 'employeeName') showStr += '<br>' + itm['employeeMobile']
           tdStr +=
             '<div class="td">'+showStr+'</div>'
         } else if (k != "other") {
@@ -193,6 +193,9 @@ $(function() {
           if (!res.data.data) {
             $("#wzBody").html("");
             showMsg("暂无数据");
+            $("#totalPage").text("共0页");
+            $("#totalWzCount").text("总数量：0");
+            $("#totalWzWeight").text("总重量：0");
             return;
           }
           handlerData(res.data.data);
