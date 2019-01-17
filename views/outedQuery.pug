@@ -1,0 +1,62 @@
+extends layout/basic.pug
+
+append css
+  link(href="http://netdna.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css", ref="stylesheet")
+  link(href="/css/page.css", rel="stylesheet")
+  link(href="/css/daterangepicker.css", rel="stylesheet")
+  link(href="/css/outedQuery.css", rel="stylesheet")
+append scripts
+  script(src="/lib/pager.js")
+  script(src="/lib/moment.min.js")
+  script(src="/lib/daterangepicker.js")
+  script(src="/js/outedQuery.js")
+
+block content
+  .outd-query-head.row
+    image(src="/img/bgys.png", style="height: 160px; position: absolute; top: 0px; left: 0px;")
+    .outd-query-brand= pageBrand
+    div(style="flex-basis: 100px") 日期
+    .row(style="flex-basis: 362px")
+      .outd-query-ipt.row
+          input#timeRange
+    div(style="flex-basis: 80px") TD
+    .row(style="flex-basis: 362px")
+      .outd-query-ipt.row
+          input#tdNo
+    .row(style="flex-basis: 128px")
+      #topAddBtn.outd-query-btn
+          span 添加
+    .row(style="flex-basis: 132px")
+      #topClearBtn.outd-query-btn
+          span 清空
+    .outd-query-close
+  .outd-th.row.center.relative
+      div(style="background: #000; position: absolute; top: 0; bottom: 0; left: 0; right: 0; opacity: 0.2; z-index: -1;")
+      .grid 提单号
+      .grid 单位名称
+      .grid 品名
+      .grid 规格
+      .grid 长度
+      .grid 产地
+      .grid 数量
+      .grid 重量
+      .grid 业务员
+      .grid 其他信息
+      .grid 状态
+  .outd-query-body
+    .table-wrap
+      .table
+        #wzBody.relative
+    div(style="flex: 0 0 85px;")
+      .text-right.padding(style="padding-right: 40px; text-align: right; color: #fff; font-size: 18px;")
+        span#totalWzCount 总数量：0 
+        span#totalWzWeight.ml-5 总重量：0
+    div(style="flex: 0 0 60px;display:flex;align-items: flex-end; padding-right: 30px;")
+      .col.row(style="color: white; justify-content: flex-end;")
+        span#totalPage.mr-5 共 0条
+        ul#page1.pagination
+        .pageJump
+          span.mr-5 跳转到
+          input#pgIpt(style="border-radius: 4px;")
+          span.mr-5.ml-5 页
+          button.button(style="border-radius: 4px;") 确定

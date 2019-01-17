@@ -1,0 +1,219 @@
+@charset "utf-8";
+
+/*首页样式*/
+.outd-query-bg {
+  background-image: url("../img/bg.png");
+  background-size: cover;
+  position: relative;
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+}
+
+.outd-query-head {
+  padding: 15px 15px;
+  position: relative;
+  color: #fff;
+  font-size: 40px;
+}
+
+.outd-query-head .outd-query-brand {
+  padding-left: 30px;
+  flex: 1;
+}
+
+.outd-query-body {
+  width: 100%;
+  height: calc(100vh - 165px);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+}
+
+.outd-query-body .count-btn {
+  height: 80px;
+  width: 473px;
+  display: flex;
+  background-image: url("../img/jj.png");
+  background-size: cover;
+}
+
+.outd-query-body .count-btn .col {
+  height: 80px;
+}
+
+.outd-query-body .top-section {
+  width: 1300px;
+  margin: 0 auto;
+  color: #fff;
+}
+
+.outd-query-body .table-wrap {
+  flex: 1;
+  position: relative;
+}
+.outd-query-body .table-wrap .table {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  left: 0;
+  color: #fff;
+}
+
+/* .outd-query-body .table-wrap {
+  background: #000;
+  opacity: 0.2;
+} */
+
+.outd-query-body .table {
+  z-index: 20;
+  overflow: auto;
+}
+
+.outd-query-body .table .td .status-btn {
+  background-size: cover;
+  width: 91px;
+  height: 52px;
+  display: inline-block;
+  position: relative;
+  box-sizing: border-box;
+}
+.outd-query-body .table .td .status-btn.pass {
+  background-image: url("../img/ysh.png");
+}
+.outd-query-body .table .td .status-btn.wait {
+  background-image: url("../img/wsh.png");
+}
+.outd-query-body .table .td .status-btn.giveup {
+  background-image: url("../img/qs.png");
+}
+.outd-query-body .table::-webkit-scrollbar {
+  width: 20px;
+  height: 10px;
+}
+
+/*滚动条里面小方块*/
+.outd-query-body .table::-webkit-scrollbar-thumb {
+  border-radius: 5px;
+  /*-webkit-box-shadow: inset 0 0 5px rgba(0,0,0,0.2);*/
+  background: rgba(113, 140, 177, 0.8);
+}
+
+.outd-query-body .table::-webkit-scrollbar-track {
+  /*滚动条里面轨道*/
+  /*-webkit-box-shadow: inset 0 0 5px rgba(0,0,0,0.2);*/
+  border-radius: 0;
+  background: rgba(0, 0, 0, 0.1);
+}
+
+.outd-query-body .table::-webkit-scrollbar-corner {
+  display: none;
+}
+
+.outd-th.row .grid,
+.outd-query-body .table .tr .td {
+  flex: 0 0 168px;
+  font-weight: bold;
+}
+.outd-th.row .grid:last-child,
+.outd-query-body .table .tr .td:last-child {
+  flex: 1;
+}
+
+.outd-th {
+  font-size: 24px;
+  padding: 15px 0px;
+  color: #fff;
+}
+
+.outd-query-body .table .tr {
+  /* height: 68px; */
+  position: relative;
+  padding: 15px 0px;
+}
+
+.outd-query-body .float-title {
+  position: absolute;
+  top: 0px;
+  left: -120px;
+  font-size: 24px;
+  color: #fff;
+}
+
+.outd-query-btn {
+  width: 128px;
+  height: 60px;
+  display: inline-block;
+  background-image: url("../img/tjk.png");
+  background-size: cover;
+  font-size: 24px;
+  text-align: center;
+  padding-top: 12px;
+  box-sizing: border-box;
+}
+
+.outd-query-close {
+  width: 55px;
+  height: 60px;
+  display: inline-block;
+  background-image: url("../img/gb.png");
+  background-size: cover;
+}
+
+.outd-query-close:hover {
+  cursor: pointer;
+}
+
+.outd-query-ipt {
+  width: 352px;
+  height: 66px;
+  display: inline-block;
+  background-image: url("../img/tdkx.png");
+  background-size: cover;
+  font-size: 24px;
+  box-sizing: border-box;
+  padding: 15px 15px;
+}
+
+.outd-query-ipt input,
+.outd-query-body .count-btn input {
+  background: transparent;
+  margin: 0;
+  padding: 0;
+  border: 0px;
+  height: 30px;
+  width: 100%;
+  font-size: 24px;
+  color: #fff;
+}
+
+.outd-query-body .count-btn input {
+  height: 50px;
+  font-size: 34px;
+}
+
+.outd-query-btn:hover {
+  cursor: pointer;
+}
+
+/* 修改日期控件 */
+
+.daterangepicker .calendar-table th,
+.daterangepicker .calendar-table td {
+  width: 36px;
+  height: 28px;
+  font-size: 18px;
+}
+
+.daterangepicker.ltr .ranges {
+  width: 320px;
+}
+.daterangepicker .ranges ul {
+  width: 100%;
+}
+
+.daterangepicker .ranges li {
+  font-size: 20px;
+}
