@@ -74,6 +74,7 @@ $(function() {
     startTime = "";
     endTime = "";
     $("#timeRange").val("");
+    $('#tdNo').val("");
   });
   $("#timeRange").daterangepicker(
     {
