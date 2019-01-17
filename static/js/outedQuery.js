@@ -200,7 +200,7 @@ $(function() {
             initPaginate(res.data.pageCount, currentPage);
             $("#totalPage").text("共" + res.data.pageCount + "页");
             $("#totalWzCount").text("总数量：" + res.data.pageNo);
-            $("#totalWzWeight").text("总重量：" + res.data.pageSize);
+            $("#totalWzWeight").text("总重量：" + Number((res.data.pageSize) / 1000).toFixed(3));
           }
         } else showMsg(res.message || "网络异常");
       })
