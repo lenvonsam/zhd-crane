@@ -1033,18 +1033,18 @@ $(function() {
   }
 
   function getCraneWeight(val) {
-    debugger
+    // debugger
     if (val.indexOf(".") < 0) {
       return val;
     } else {
       var dotStr = val.substring(val.indexOf(".") + 1);
       if (dotStr.length == 1) {
-        return val.substring(0, val.indexOf(".") + 1) + dotStr + "00";
+        return val.substring(0, val.indexOf(".") + 1) + dotStr + "05";
       } else if (dotStr.length == 2) {
-        return val.substring(0, val.indexOf(".") + 1) + dotStr + "0";
+        return val.substring(0, val.indexOf(".") + 1) + dotStr + "5";
       } else {
         return (
-          val.substring(0, val.indexOf(".") + 1) + dotStr.substring(0, 2) + "0"
+          val.substring(0, val.indexOf(".") + 1) + dotStr.substring(0, 2) + "5"
         );
       }
     }
