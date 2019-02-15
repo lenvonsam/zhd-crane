@@ -119,6 +119,7 @@ $(function() {
     console.log("plank origin:>>", originStr, "; compare:>>", compareStr);
     return originStr == compareStr;
   }
+
   $(".weight-btn").click(function() {
     if (selectRowIndex == -1) {
       showMsg("请先选择物资");
@@ -132,7 +133,6 @@ $(function() {
       showMsg("无需关联吊秤可以直接出库");
       return;
     }
-    console.log("click me");
     let btnIdx = Number($(this).data("index"));
     console.log("btnidx:>>", btnIdx);
     console.log("btnRowIndx:>> ", linkMap[btnIdx]);
@@ -152,23 +152,11 @@ $(function() {
       // var originWeight = Number($('#weightInfo').text()) * 1000
       // console.log('ismulti:>>>', isMulti, ';originwt:>>', originWeight)
       factWeight = Number(dwt[btnIdx] / 1000).toFixed(3);
-      // if (isMulti) {
-      //   // 是否是第一次
-      //   let unicode = selectObj.sbillBillbatch
-      //   let unidx = Object.keys(singleMutliCrane).findIndex(itm => itm == unicode)
-      //   factWeight = Number((Number(dwt[btnIdx]) + originWeight) / 1000).toFixed(3);
-      //   if (unidx < 0) {
-      //     singleMutliCrane[unicode] = {
-      //       btnIdx: factWeight
-      //     }
-      //   } else {
-
-      //   }
-      // }
       updateFactWeight(factWeight);
       userChooseBtnIdx = btnIdx;
+      console.log('isMuti:>>', isMulti)
       if (
-        linkMap[userChooseBtnIdx].length == 1 &&
+        // isMulti &&
         dwtCounts[userChooseBtnIdx].canEdit
       ) {
         if (Number(dwt[btnIdx]) > 0)
@@ -199,31 +187,17 @@ $(function() {
           factWeight = Number((otherWeight + totalWeight) / 1000).toFixed(3);
         }
         updateFactWeight(factWeight);
+      } else {
+        dwtCounts[userChooseBtnIdx].records = []
+        dwtCounts[userChooseBtnIdx].beforeCancelCount = 0
+        $("#wbtCnt" + userChooseBtnIdx).text(
+          dwtCounts[userChooseBtnIdx].records.length + "次"
+        );
       }
-      return;
-    }
-    var otherIdxs = [];
-    let originIdx = -1;
-    Object.keys(linkMap).map(itm => {
-      if (itm != btnIdx) {
-        linkMap[itm].map(item => {
-          if (item == selectRowIndex) originIdx = itm;
-          otherIdxs.push(item);
-        });
-      }
-    });
-    idx = otherIdxs.findIndex(itm => itm == selectRowIndex);
-    // 判断是否是一个物资多秤的情况
-    let canOneToMoreCrane =
-      originIdx >= 0 &&
-      linkMap[btnIdx].length == 0 &&
-      linkMap[originIdx].length == 1;
-    if (idx >= 0 && !canOneToMoreCrane) {
-      showMsg("此物资已关联其他设备");
       return;
     }
     // 判断时候相同物资明细
-    if (linkMap[btnIdx].length > 0 && !canOneToMoreCrane) {
+    if (linkMap[btnIdx].length > 0) {
       console.log("selectrowindex:>>>", selectRowIndex);
       console.log("orign idx:>>", linkMap[btnIdx][0]);
       let origin = tableList[linkMap[btnIdx][0]];
@@ -231,18 +205,6 @@ $(function() {
       let idx = tableList.findIndex(
         itm => itm.sbillBillbatch == origin.sbillBillbatch
       );
-      let repeatId = -1;
-      Object.keys(linkMap).map(itm => {
-        if (itm != btnIdx) {
-          linkMap[itm].map(im => {
-            if (im == idx) repeatId = im;
-          });
-        }
-      });
-      if (repeatId > -1) {
-        showMsg("多个吊秤只允许绑定一个物资");
-        return;
-      }
       let compare = tableList[selectRowIndex];
       console.log("origin obj", origin, origin.sbillBillbatch);
       console.log("compare obj", compare, compare.sbillBillbatch);
@@ -263,8 +225,21 @@ $(function() {
         }
       }
     }
+    // 判断
     if (selectRowIndex >= 0) {
-      // let result = window.confirm("你确定要关联此设备吗?");
+      // 判断是新增绑定物资还是在原有绑定基础上新增物资
+      // 默认是新增绑定
+      var canMoreToMoreCrane = false
+      var otherIdx = -1
+      Object.keys(linkMap).map(itm => {
+        if (itm != btnIdx) {
+          let idx = linkMap[itm].findIndex(item => item == selectRowIndex)
+          if (idx > -1) {
+            otherIdx = idx
+          }
+        }
+      })
+      if (!(otherIdx == -1 && linkMap[btnIdx].length == 0)) canMoreToMoreCrane = true
       $("body").append(
         modalTemp({
           modalId: "linkDevice",
@@ -273,32 +248,57 @@ $(function() {
       );
       showModal("#linkDevice", function(result) {
         if (result) {
+          console.log('canMoreToMoreCrane:>>', canMoreToMoreCrane)
           linkMap[btnIdx].push(selectRowIndex);
+          var choosedArr = linkMap[btnIdx]
+          var moreCraneIdxs = []
+          var moreCraneSelectIdxs = []
+          Object.keys(linkMap).map(k => {
+            choosedArr.map(subk => {
+              var arr = linkMap[k]
+              var idx = arr.findIndex(itm => itm == subk)
+              if (idx > -1) {
+                let subidx = moreCraneIdxs.findIndex(im => im == k)
+                if (subidx == -1) moreCraneIdxs.push(k)
+                moreCraneSelectIdxs = moreCraneSelectIdxs.concat(moreCraneSelectIdxs, arr)
+                // console.log('idx:>>', idx, 'arr:>>', arr, 'moreCraneIdxs', moreCraneSelectIdxs)
+              }
+            })
+          })
+          // 去重复
+          moreCraneSelectIdxs = Array.from(new Set(moreCraneSelectIdxs))
+          console.log('去重复后 moreCraneSelect:', moreCraneSelectIdxs)
           $(".weight-btn")
             .eq(btnIdx)
             .next()
             .css("display", "block");
-          // 一个物资绑多个秤
-          if (canOneToMoreCrane) {
+          // 多个物资绑多个秤
+          if (canMoreToMoreCrane) {
             console.log(
               "selectRowIndex:>>",
               selectRowIndex,
               "; btnidx:>>",
               btnIdx
             );
-            $("#wzBody .tr")
-              .eq(selectRowIndex)
+            // 选出多个设备
+            moreCraneSelectIdxs.map(itm => {
+              $("#wzBody .tr")
+              .eq(itm)
               .find(".td")
               .eq(9)
-              .append(
-                '<div class="crane-btn column" data-bidx="' +
-                  btnIdx +
-                  '" data-ridx="' +
-                  selectRowIndex +
-                  '"><span>' +
-                  craneNames[btnIdx] +
-                  "</span></div>"
-              );
+              .html("");
+              var rowStr = '';
+              moreCraneIdxs.map(item => {
+                linkMap[item] = moreCraneSelectIdxs
+                rowStr += '<div class="crane-btn column" data-bidx="'+item+'" data-ridx="'+itm+'"><span>'+craneNames[item]+'</span></div>'
+              })
+            $("#wzBody .tr")
+              .eq(itm)
+              .find(".td")
+              .eq(9)
+              .html(rowStr);                
+              bindCraneBtn(itm);
+            })
           } else {
             $("#wzBody .tr")
               .eq(selectRowIndex)
@@ -318,11 +318,10 @@ $(function() {
                   craneNames[btnIdx] +
                   "</span></div>"
               );
+            bindCraneBtn(selectRowIndex);
           }
-
-          bindCraneBtn(selectRowIndex);
           showWzCount(btnIdx);
-          if (canOneToMoreCrane) {
+          if (canMoreToMoreCrane) {
             factWeight = Number(dwt[btnIdx] / 1000).toFixed(3);
             updateFactWeight(factWeight);
           }
@@ -331,10 +330,10 @@ $(function() {
           $(".weight-btn")
             .eq(btnIdx)
             .css("background-image", "url(/img/gl.png)");
-          if (linkMap[btnIdx].length == 1) {
-            // 增加多次称重模块
+            showMultiCranePart(false, userChooseBtnIdx);
             showMultiCranePart(true, userChooseBtnIdx);
-            if (canOneToMoreCrane) {
+          if (canMoreToMoreCrane) {
+            // 增加多次称重模块
               // 默认勾选上
               $("#cb" + userChooseBtnIdx).attr("checked", "checked");
               $("#cb" + userChooseBtnIdx)
@@ -352,11 +351,7 @@ $(function() {
                   dwtCounts[itm].canEdit = true;
                 }
               });
-            }
-          } else {
-            // 取消多称重模块
-            showMultiCranePart(false, userChooseBtnIdx);
-          }
+          } 
         }
       });
     } else {
@@ -818,6 +813,7 @@ $(function() {
                 if (dwtCounts[k].records.length > 0) {
                   otherStockArray.push(dwtCounts[k].records.join(";"));
                 }
+                if (linkMap[k].length == 1) {
                 dwtCounts[k].canEdit = false;
                 dwtCounts[k].records = [];
                 dwtCounts[k].beforeCancelCount = 0;
@@ -833,9 +829,9 @@ $(function() {
                 $(".weight-btn")
                   .eq(k)
                   .css("background-image", 'url("/img/dl.png")');
+                }
               }
             });
-            console.log("清空数据", dwtCounts[bottomIdx]);
             if (dwtCounts[bottomIdx].records.length > 0) {
               body.stocks = dwtCounts[bottomIdx].records.join(";");
             }
@@ -844,11 +840,13 @@ $(function() {
             }
             optBody.multiOutRecords = body.stocks;
             optBody.craneIndex = multiCraneIdx.join(";");
+            if (linkMap[bottomIdx].length == 1) {
             dwtCounts[bottomIdx].canEdit = false;
             dwtCounts[bottomIdx].records = [];
             $("#cb" + bottomIdx).unbind();
             $("#wbtnc" + bottomIdx).unbind();
             $("#btntop" + bottomIdx).remove();
+            }
           } else {
             // 理计出库记录
             optBody.craneIndex = "-1";
@@ -1108,6 +1106,7 @@ $(function() {
     // 批量出库
     if (userChooseBtnIdx > -1) {
       let detailIdx = linkMap[userChooseBtnIdx];
+      // FIXME 出库
       if (detailIdx.length > 1) {
         let arr = detailIdx.map(itm => tableList[itm]);
         let ct = tableList[selectRowIndex];
@@ -1239,7 +1238,8 @@ $(function() {
       currentCnt,
       currentWeight,
       idx,
-      detailArray.length - 1
+      detailArray.length - 1,
+      userChooseBtnIdx
     ).then(
       res => {
         console.log("currentIndx:>>", res);
@@ -1250,7 +1250,12 @@ $(function() {
         console.error("暂停");
         console.log("userChooseIdx::", userChooseBtnIdx);
         console.log("linkMap:>>", linkMap[userChooseBtnIdx]);
+        let keys = Object.keys(linkMap).filter(itm => itm != userChooseBtnIdx)
+        // FIXME 判断是不是多物资多秤
         // 取消吊秤按钮
+        console.log('other keys:>>', keys)
+        let firstSelect = linkMap[userChooseBtnIdx][0]
+        console.log('firstSelect:>>', firstSelect)
         linkMap[userChooseBtnIdx].map(itm => {
           var craneBtn = $("#wzBody .tr")
             .eq(itm)
@@ -1260,7 +1265,37 @@ $(function() {
           craneBtn.unbind();
           craneBtn.remove();
         });
+        showMultiCranePart(false, userChooseBtnIdx);
+        $('#btntop' + userChooseBtnIdx).remove()
         linkMap[userChooseBtnIdx] = [];
+        $(".weight-btn")
+        .eq(userChooseBtnIdx)
+        .css("background-image", "url(/img/dl.png)");
+        $(".weight-btn")
+        .eq(userChooseBtnIdx)
+        .find("span")
+        .eq(0)
+        .text('0')
+        console.log('linkMap:>>', linkMap)
+        keys.map(itm => {
+          console.log('itm', itm, ';', linkMap[itm])
+          let idx = (linkMap[itm]).findIndex(item => item == firstSelect)
+          if (idx >= 0) {
+            linkMap[itm] = []
+            dwt[itm] = 0
+            showMultiCranePart(false, itm);
+            $(".weight-btn")
+              .eq(itm)
+              .css("background-image", "url(/img/dl.png)");
+            $(".weight-btn")
+              .eq(itm)
+              .find("span")
+              .eq(0)
+              .text('0')
+          }
+        })
+        factWeight = 0
+        updateFactWeight(factWeight)
         userChooseBtnIdx = -1;
         // if (res.currentIdx < res.arr.length && userChooseBtnIdx > -1)
         // batchWeight(res.currentIdx, res.arr, w, cnt);
@@ -1303,16 +1338,12 @@ $(function() {
       let btnIdx = $(this).data("bidx");
       let rowIdx = $(this).data("ridx");
       $(this).unbind();
-      let selectArray = linkMap[btnIdx];
-      selectArray = selectArray.filter(itm => itm != rowIdx);
+      let selectArray = [];
+      // selectArray = selectArray.filter(itm => itm != rowIdx);
       linkMap[btnIdx] = selectArray;
       console.log("after unbind crane btn:>>", linkMap[btnIdx]);
-      $(this).remove();
-      if (linkMap[btnIdx].length == 1) {
-        showMultiCranePart(true, btnIdx);
-      } else {
-        showMultiCranePart(false, btnIdx);
-      }
+      $('.crane-btn[data-bidx="'+btnIdx+'"]').remove();
+      showMultiCranePart(false, btnIdx);
       if (selectArray.length == 0) {
         $(".weight-btn")
           .eq(btnIdx)
@@ -1358,11 +1389,13 @@ $(function() {
     });
     // console.log("weightBtnIdx:>>>" + weightBtnIdx);
     // linkMap[weightBtnIdx] = -1;
-    if (userChooseBtnIdx > -1 && isBang) {
-      var currentWeightArr = linkMap[userChooseBtnIdx];
-      currentWeightArr = currentWeightArr.filter(itm => itm != tableIndex);
-      linkMap[userChooseBtnIdx] = currentWeightArr;
-    }
+    // if (userChooseBtnIdx > -1 && isBang) {
+    //   Object.keys(linkMap).map(k => {
+    //     var currentWeightArr = linkMap[k];
+    //     currentWeightArr = currentWeightArr.filter(itm => itm != tableIndex);
+    //     linkMap[k] = currentWeightArr;
+    //   })
+    // }
     $(".crane-btn").unbind();
     tableList = tableList.filter(itm => itm.sbillBillbatch != uniqueCode);
     selectRowIndex = -1;
@@ -1449,6 +1482,7 @@ $(function() {
         .find("span")
         .eq(0)
         .text(dwt[userChooseBtnIdx]);
+      showMultiCranePart((linkMap[userChooseBtnIdx].length > 0), userChooseBtnIdx)
       if (linkMap[userChooseBtnIdx].length == 0) userChooseBtnIdx = -1;
     }
     console.log("出库后的按钮映射");
@@ -1495,6 +1529,7 @@ $(function() {
         $("#weightInfo").text(weight);
         $("#countIpt").val(cnt);
       } else {
+        userChooseBtnIdx = -1
         let idx = Object.keys(singleGoodsCount).findIndex(itm => itm == td);
         if (idx < 0) {
           singleGoodsCount[td] = cnt;
@@ -1538,13 +1573,13 @@ $(function() {
           let btnIndx = -1;
           let otherSelectRowObj = {};
           console.log("currentTD:>>" + currentTD);
-          // 选择的一对多 1 其他的一堆多
+          // 选择的多对多 
+          Object.keys(linkMap).map(k => {
+            linkMap[k] = linkMap[k].filter(itm => itm != rowidx)
+          })
           Object.keys(linkMap).map(k => {
             if (linkMap[k].length > 0) {
               linkMap[k].map(idx => {
-                if (idx == rowidx) {
-                  btnIndx = k;
-                } else {
                   let keys = Object.keys(otherSelectRowObj);
                   let indx = keys.findIndex(
                     im => im == tableList[idx]["sbillBillbatch"]
@@ -1558,7 +1593,6 @@ $(function() {
                   } else {
                     otherSelectRowObj[tableList[idx]["sbillBillbatch"]] = k;
                   }
-                }
               });
             }
           });
@@ -1569,23 +1603,28 @@ $(function() {
             itm => itm["sbillBillbatch"] != currentTD
           );
           // TODO 判断当前选择物资是否是一对多个秤
-          let otherArr = [];
-          Object.keys(linkMap).map(k => {
-            let idx = linkMap[k].findIndex(im => im == rowidx);
-            if (idx >= 0 && k != btnIndx) otherArr.push(k);
-          });
-          if (otherArr.length > 0) {
-            // 清空对于底部按钮
-            otherArr.map(itm => {
-              $(".weight-btn")
-                .eq(itm)
-                .css("background-image", "url(/img/dl.png)");
-              showMultiCranePart(false, itm);
-            });
-          }
+          // let otherArr = [];
+          // Object.keys(linkMap).map(k => {
+          //   let idx = linkMap[k].findIndex(im => im == rowidx);
+          //   if (idx >= 0 && k != btnIndx) otherArr.push(k);
+          // });
+          // if (otherArr.length > 0) {
+          //   // 清空对于底部按钮
+          //   otherArr.map(itm => {
+          //     $(".weight-btn")
+          //       .eq(itm)
+          //       .css("background-image", "url(/img/dl.png)");
+          //     showMultiCranePart(false, itm);
+          //   });
+          // }
           // ======
           updateTableData(tableList);
           resetLinkmap();
+          // 清空底部按钮
+          Object.keys(linkMap).map(k => {
+            $('.weight-btn').eq(k).css('background-image', 'url(/img/dl.png)')
+            showMultiCranePart(false, k)
+          })
           Object.keys(otherSelectRowObj).map(k => {
             let idx = tableList.findIndex(itm => itm.sbillBillbatch == k);
             let btnIdx = otherSelectRowObj[k];
@@ -1652,12 +1691,16 @@ $(function() {
             bindCraneBtn(idx);
           });
           console.log("del linkMap btnidx", btnIndx, linkMap[btnIndx]);
-          if (btnIndx >= 0 && linkMap[btnIndx].length == 0) {
-            $(".weight-btn")
-              .eq(btnIndx)
-              .css("background-image", "url(/img/dl.png)");
-            showMultiCranePart(false, btnIndx);
-          }
+          Object.keys(linkMap).map(k => {
+            $('.weight-btn').eq(k).css('background-image', (linkMap[k].length > 0) ? 'url(/img/gl.png)' : 'url(/img/dl.png)')
+            showMultiCranePart((linkMap[k].length > 0), k)
+          })
+          // if (btnIndx >= 0 && linkMap[btnIndx].length == 0) {
+          //   $(".weight-btn")
+          //     .eq(btnIndx)
+          //     .css("background-image", "url(/img/dl.png)");
+          //   showMultiCranePart(false, btnIndx);
+          // }
           initActiveRect(selectRowIndex);
         }
       });

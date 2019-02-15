@@ -59,10 +59,12 @@ $(function() {
   });
   $("#topAddBtn").click(() => {
     tdNo = $("#tdNo").val();
+    console.log('tdNo', tdNo)
     if (tdNo.length == 0 && startTime.length == 0 && endTime.length == 0) {
       showMsg("请选择查询选项");
       return;
     }
+    if (tdNo.length == 0) delete queryObj.sbillBillcode
     $(".zhd-keyboard").css("display", "none");
     if (tdNo.length > 0) queryObj.sbillBillcode = "TD" + tdNo;
     if (startTime.length > 0) queryObj.startDate = startTime;
@@ -71,9 +73,9 @@ $(function() {
   });
   $("#topClearBtn").click(() => {
     $(".zhd-keyboard").css("display", "none");
-    startTime = "";
-    endTime = "";
-    $("#timeRange").val("");
+    // startTime = "";
+    // endTime = "";
+    // $("#timeRange").val("");
     $('#tdNo').val("");
   });
   $("#timeRange").daterangepicker(
