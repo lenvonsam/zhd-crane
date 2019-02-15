@@ -65,7 +65,7 @@ module.exports = {
         // let str = JSON.stringify(data.data)
         // console.log('cookie 保存', data.data)
         await ctx.cookies.set('currentUser', `${data.data.memberCode}|${data.data.operatorUserid}|${data.data.superWarehousemanFlag}`, {
-          domain: '192.168.80.200',
+          domain: '172.16.16.80.200',
           maxAge: 10 * 60 * 60 * 1000,
           httpOnly: false
         })
