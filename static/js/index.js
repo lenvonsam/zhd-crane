@@ -209,7 +209,7 @@ $(function() {
       console.log("origin obj", origin, origin.sbillBillbatch);
       console.log("compare obj", compare, compare.sbillBillbatch);
       if (origin.pntreeName == "板材") {
-        if (origin.warehouseName == "板材定开") {
+        if (origin.warehouseName == "板材定开" || origin.warehouseName == "开平厂") {
           if (!plankCompare(origin, compare)) {
             showMsg("此物资不能不与之前物资合并一起称重");
             return;
