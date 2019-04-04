@@ -1154,6 +1154,7 @@ $(function() {
     let currentCnt = Number(
       currentObj.goodsNum - currentObj.oconsignDetailOknum
     );
+    
     // if (idx == 0) plankWeightArr = []
     let currentWeight = getFixWeight(
       Number((Number(w) / Number(cnt)) * currentCnt).toFixed(4)
@@ -1161,31 +1162,42 @@ $(function() {
     let tempWeight = 0;
     let tempWstr = "";
     if (currentObj.pntreeName == "板材" && idx < detailArray.length - 1) {
-      if (currentObj.partsnameName == "花纹板") {
-        tempWeight =
-          (((Number(currentObj.goodsSpec1) + 0.3) * 7.85) / 1000) *
-          (Number(currentObj.goodsSpec2) / 1000) *
-          Number(currentObj.goodsProperty1) *
-          currentCnt;
-        tempWstr = tempWeight.toFixed(4);
-        currentWeight = getFixWeight(tempWstr);
-        console.log('currentWeight:>>', currentWeight)
-        currentWeight = getCraneWeight(currentWeight)
-        console.log('crane weight:>>', currentWeight)
-        plankWeightArr.push(currentWeight);
-      } else {
-        tempWeight =
-          ((Number(currentObj.goodsSpec1) * 7.85) / 1000) *
-          (Number(currentObj.goodsSpec2) / 1000) *
-          Number(currentObj.goodsProperty1) *
-          currentCnt;
-        tempWstr = tempWeight.toFixed(4);
-        currentWeight = getFixWeight(tempWstr);
-        console.log('currentWeight:>>', currentWeight)
-        currentWeight = getCraneWeight(currentWeight)
-        console.log('crane weight:>>', currentWeight)
-        plankWeightArr.push(currentWeight);
-      }
+      // if (currentObj.partsnameName == "花纹板") {
+      //   tempWeight =
+      //     (((Number(currentObj.goodsSpec1) + 0.3) * 7.85) / 1000) *
+      //     (Number(currentObj.goodsSpec2) / 1000) *
+      //     Number(currentObj.goodsProperty1) *
+      //     currentCnt;
+      //   tempWstr = tempWeight.toFixed(4);
+      //   currentWeight = getFixWeight(tempWstr);
+      //   console.log('currentWeight:>>', currentWeight)
+      //   currentWeight = getCraneWeight(currentWeight)
+      //   console.log('crane weight:>>', currentWeight)
+      //   plankWeightArr.push(currentWeight);
+      // } else {
+      //   tempWeight =
+      //     ((Number(currentObj.goodsSpec1) * 7.85) / 1000) *
+      //     (Number(currentObj.goodsSpec2) / 1000) *
+      //     Number(currentObj.goodsProperty1) *
+      //     currentCnt;
+      //   tempWstr = tempWeight.toFixed(4);
+      //   currentWeight = getFixWeight(tempWstr);
+      //   console.log('currentWeight:>>', currentWeight)
+      //   currentWeight = getCraneWeight(currentWeight)
+      //   console.log('crane weight:>>', currentWeight)
+      //   plankWeightArr.push(currentWeight);
+      // }
+      // 最新算法 长度 * 数量 * (重量 / 总数量)
+      let totalMeters = 0;
+      detailArray.map(itm => {
+        let tempObj = tableList[itm]
+        totalMeters += Number((tempObj.goodsNum - tempObj.oconsignDetailOknum) * tempObj.goodsProperty1)
+      })
+      debugger
+      tempWeight = (Number((currentObj.goodsNum - currentObj.oconsignDetailOknum) * currentObj.goodsProperty1) / totalMeters) * w
+      tempWstr = tempWeight.toFixed(4)
+      currentWeight = getFixWeight(tempWstr)
+      plankWeightArr.push(currentWeight)
     } else if (
       currentObj.pntreeName == "板材" &&
       idx == detailArray.length - 1
