@@ -1103,9 +1103,13 @@ $(function() {
         return;
       }
     }
+    totalPlankArr = []
     // 批量出库
     if (userChooseBtnIdx > -1) {
       let detailIdx = linkMap[userChooseBtnIdx];
+      detailIdx.map(itm => {
+        totalPlankArr.push(tableList[itm])
+      })
       // FIXME 出库
       if (detailIdx.length > 1) {
         let arr = detailIdx.map(itm => tableList[itm]);
@@ -1148,13 +1152,18 @@ $(function() {
     }
   });
   let plankWeightArr = [];
+  // 总重量板子组
+  let totalPlankArr = [];
   function batchWeight(idx, detailArray, w, cnt) {
     let currentObj = tableList[detailArray[idx]];
     let currentTd = currentObj.sbillBillcode;
     let currentCnt = Number(
       currentObj.goodsNum - currentObj.oconsignDetailOknum
     );
-    
+    console.log('detailArray:>>', detailArray)
+    console.log('totalplankarr:>>', totalPlankArr)
+    console.log('total w:>>', w)
+    // debugger
     // if (idx == 0) plankWeightArr = []
     let currentWeight = getFixWeight(
       Number((Number(w) / Number(cnt)) * currentCnt).toFixed(4)
@@ -1189,11 +1198,9 @@ $(function() {
       // }
       // 最新算法 长度 * 数量 * (重量 / 总数量)
       let totalMeters = 0;
-      detailArray.map(itm => {
-        let tempObj = tableList[itm]
+      totalPlankArr.map(tempObj => {
         totalMeters += Number((tempObj.goodsNum - tempObj.oconsignDetailOknum) * tempObj.goodsProperty1)
       })
-      debugger
       tempWeight = (Number((currentObj.goodsNum - currentObj.oconsignDetailOknum) * currentObj.goodsProperty1) / totalMeters) * w
       tempWstr = tempWeight.toFixed(4)
       currentWeight = getFixWeight(tempWstr)
@@ -1494,8 +1501,12 @@ $(function() {
         .find("span")
         .eq(0)
         .text(dwt[userChooseBtnIdx]);
-      showMultiCranePart((linkMap[userChooseBtnIdx].length > 0), userChooseBtnIdx)
-      if (linkMap[userChooseBtnIdx].length == 0) userChooseBtnIdx = -1;
+      // debugger
+      // showMultiCranePart((linkMap[userChooseBtnIdx].length > 0), userChooseBtnIdx)
+      if (linkMap[userChooseBtnIdx].length == 0) {
+        showMultiCranePart(false, userChooseBtnIdx)
+        userChooseBtnIdx = -1;
+      }
     }
     console.log("出库后的按钮映射");
     console.log(linkMap);
