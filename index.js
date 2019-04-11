@@ -57,8 +57,8 @@ const socketPorts = [3001, 3002, 3003, 3004];
 
 function socketHandler(socket, port, portIdx) {
   // console.log(`socket port:>>${port}`)
-  socket.setEncoding('utf8')
-  // socket.setEncoding("hex");
+  // socket.setEncoding('utf8')
+  socket.setEncoding("hex");
   socket.setTimeout(0);
   try {
     socket.on("data", data => {
@@ -79,7 +79,7 @@ function socketHandler(socket, port, portIdx) {
       // else {
         // socket.write(`device port: [${port}] data invalid`);
       }
-      if (Number(origin) > 0) io.emit('factWeight', origin, portIdx)
+      // if (Number(origin) > 0) io.emit('factWeight', origin, portIdx)
       // socket.write(origin)
       socket.write('')
     });
