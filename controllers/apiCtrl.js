@@ -1,12 +1,26 @@
 const httpHelp = require('../utils/http')
-const PROXYURL = 'http://192.168.80.99:8080/warehouse-dev/warehouse'
-// const PROXYURL = 'http://localhost:7568/warehouse'
+// const PROXYURL = 'http://192.168.80.99:8080/warehouse-dev/warehouse'
+const PROXYURL = 'http://localhost:7568/warehouse'
 
 module.exports = {
   async logout (ctx) {
     await ctx.cookies.set('currentUser', null)
     ctx.body = {
       status: 0
+    }
+  },
+  async warehouseName (ctx) {
+    let val = ctx.cookies.get('currentUser') || null
+    if (val) {
+      let arr = val.split('|')
+      ctx.body = {
+        wname: arr[1]
+      }
+    } else {
+      await ctx.render("login", {
+        pageTitle: "型云吊秤登录",
+        loginType: 1
+      })
     }
   },
   async proxy(ctx) {

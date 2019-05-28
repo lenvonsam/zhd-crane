@@ -1,6 +1,71 @@
 $(function() {
+  // 仓库名称
+  var wname = '';
+  // 仓库名对应的操作员编码
+  var wnameMap = {
+    '01': ['01', '02', '03', '04', '05', '06', '07'],
+    '03': ['01', '02', '03', '04', '05'],
+    '05': ['01', '02', '03', '04', '05', '06'],
+    '06': ['01', '02', '03', '04', '05', '06', '07'],
+    '07': ['01', '02', '03', '04', '05'],
+    '10': ['01', '02', '03', '04'],
+    '11': ['01', '02', '03', '04'],
+    '12': ['01', '02', '03', '04', '05', '06', '07']
+  };
+  // 选择操作员
+  var wnameCheckArr = []
   $("body").removeClass("main-bg");
   $("body").addClass("main-bg");
+  // 获取登录者对应的仓库名称
+  getWarehouseName().then(data => {
+    console.log('data', data)
+    wname = data.wname;
+    var str = '<span>操作人员编号：</span>';
+    wnameMap[wname].map(itm => {
+      str += '<input class="cbx-employee mr-15 ml-15" readonly type="checkbox" data-name="'+ wname + itm+'"/><span data-name="'+ itm +'" class="cbx-name">'+itm+'</span>';
+    });
+    $('#topEmployee').html('')
+    $('#topEmployee').append(str)
+    $('.cbx-name').click(function() {
+      var name = $(this).data('name');
+      var idx = Number(name) - 1;
+      console.log('idx:>>', idx)
+      var cbxcheck = $('.cbx-employee').eq(idx).is(":checked");
+      $('.cbx-employee').eq(idx).prop('checked', !cbxcheck);
+      console.log('cbxcheck:>>', cbxcheck);
+      if (!cbxcheck) {
+        wnameCheckArr.push(wname + name);
+      } else {
+        wnameCheckArr = wnameCheckArr.filter(itm => itm !== (wname + name));
+      }
+      console.log('wname arr:>>', wnameCheckArr)
+    });
+    $('.cbx-employee').change(function() {
+      var name = $(this).data('name');
+      var check = $(this).is(":checked");
+      console.log('cbx:>>', check);
+      if (check) {
+        var idx = wnameCheckArr.findIndex(itm => itm === name);
+        if (idx < 0) {
+          wnameCheckArr.push(name)
+        }
+      } else {
+        wnameCheckArr = wnameCheckArr.filter(itm => itm !== name);
+      }
+      console.log('wname arr:>>', wnameCheckArr)
+    });
+  }).catch(err => {
+    console.log(err)
+  })
+
+  function clearTopCbx() {
+    $('.cbx-employee:checked').each(function() {
+      $(this).prop('checked', false)
+    })
+    wnameCheckArr = []
+  }
+
+  
   // 初始化底部磅秤按钮
   var datas = {
     btns: [
@@ -774,6 +839,8 @@ $(function() {
             goodsNum: cnt,
             goodsWeight: weight
           };
+          // 
+          if (wnameCheckArr.length > 0) body.delivers = wnameCheckArr.join(',')
           console.log("bottomidx:>>", bottomIdx);
           // 操作记录
           var optBody = {
@@ -857,6 +924,9 @@ $(function() {
             request("/outStorage", body)
               .then(res => {
                 console.log(res);
+                if (res.status != 0) {
+                  clearTopCbx()
+                }
                 if (res.status == 0) {
                   if (res.message.startsWith("[待审核]")) {
                     // var result = window.confirm(`此条物资需要审核确认\n 出库重量:${w}\n 出库数量:${cnt}`)
@@ -989,11 +1059,11 @@ $(function() {
               .catch(e => {
                 console.log(e);
                 if (idx == max) hideLoad();
-                showMsg(res.message || "网络异常");
+                showMsg(e.message || "网络异常");
                 request("/unlockTd", {
                   tdNo: currentTd
                 });
-                showMsg(e);
+                // showMsg(e);
                 userChooseBtnIdx == -1
                   ? reject()
                   : resolve({
@@ -1266,6 +1336,7 @@ $(function() {
           batchWeight(res.currentIdx, res.arr, w, cnt);
       },
       () => {
+        clearTopCbx()
         console.error("暂停");
         console.log("userChooseIdx::", userChooseBtnIdx);
         console.log("linkMap:>>", linkMap[userChooseBtnIdx]);
@@ -1371,6 +1442,7 @@ $(function() {
     });
   }
   function outStorageSuccess(currentObj, manAudit = false, cb) {
+    clearTopCbx()
     let uniqueCode = currentObj.sbillBillbatch;
     console.log("uniqueCode:>>>" + uniqueCode);
     console.log(linkMap);

@@ -42,7 +42,8 @@
   height: 80px;
 }
 
-.main-body .top-section {
+.main-body .top-section,
+.main-body #topEmployee {
   width: 1300px;
   margin: 0 auto;
   color: #fff;
