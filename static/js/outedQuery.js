@@ -161,8 +161,12 @@ $(function() {
             tdStr +=
               '<div class="td"><div class="status-btn wait"></div></div>';
           }
-        } else if (k == 'employeeName' || k == 'companyAbbreviate') {
-          var showStr = ''
+        } 
+        else if (k == 'sbillBillcode') {
+          tdStr += '<div class="td">' + (itm['sbillBillcode'] == null ? '/' : itm[k]) + "</div>";
+        } 
+        else if (k == 'employeeName' || k == 'companyAbbreviate') {
+          var showStr = '/'
           if (itm[k]) showStr = itm[k]
           if (itm['employeeMobile'] && k == 'employeeName') showStr += '<br>' + itm['employeeMobile']
           tdStr +=
