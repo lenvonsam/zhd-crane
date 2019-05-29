@@ -1453,7 +1453,7 @@ $(function() {
     });
   }
   function outStorageSuccess(currentObj, manAudit = false, cb) {
-    clearTopCbx()
+    // clearTopCbx()
     let uniqueCode = currentObj.sbillBillbatch;
     console.log("uniqueCode:>>>" + uniqueCode);
     console.log(linkMap);
@@ -1462,6 +1462,7 @@ $(function() {
     if (currentObj.goodsMetering == "理计" || currentObj.mtype == 0) {
       isBang = false;
     }
+    if (!isBang) clearTopCbx()
     var tableIndex = tableList.findIndex(
       itm => itm.sbillBillbatch == uniqueCode
     );
@@ -1587,6 +1588,7 @@ $(function() {
       // debugger
       // showMultiCranePart((linkMap[userChooseBtnIdx].length > 0), userChooseBtnIdx)
       if (linkMap[userChooseBtnIdx].length == 0) {
+        clearTopCbx()
         showMultiCranePart(false, userChooseBtnIdx)
         userChooseBtnIdx = -1;
       }
