@@ -8,7 +8,7 @@ $(function() {
     '05': ['01', '02', '03', '04', '05', '06'],
     '06': ['01', '02', '03', '04', '05', '06', '07'],
     '07': ['01', '02', '03', '04', '05'],
-    '10': ['01', '02', '03', '04'],
+    '10': ['01', '02', '03', '04', '05', '06', '07'],
     '11': ['01', '02', '03', '04'],
     '12': ['01', '02', '03', '04', '05', '06', '07']
   };
@@ -31,47 +31,59 @@ $(function() {
   getWarehouseName().then(data => {
     console.log('data', data)
     wname = data.wname;
-    var str = '<span>操作人员编号：</span>';
+    // var str = '<span>操作人员编号：</span>';
+    var str = '';
     wnameMap[wname].map(itm => {
-      str += '<input class="cbx-employee mr-15 ml-15" readonly type="checkbox" data-name="'+ wname + itm+'"/><span data-name="'+ itm +'" class="cbx-name">'+itm+'</span>';
+      // str += '<input class="cbx-employee mr-15 ml-15" readonly type="checkbox" data-name="'+ wname + itm+'"/><span data-name="'+ itm +'" class="cbx-name">'+itm+'</span>';
+      str += '<div class="employ-cbx" data-name="'+ wname + itm +'">'+itm+'</div>';
     });
     $('#topEmployee').html('')
     $('#topEmployee').append(str)
-    $('.cbx-name').click(function() {
+    $('.employ-cbx').click(function() {
       var name = $(this).data('name');
-      var idx = Number(name) - 1;
+      var idx = Number($(this).text()) - 1;
       console.log('idx:>>', idx)
-      var cbxcheck = $('.cbx-employee').eq(idx).is(":checked");
-      $('.cbx-employee').eq(idx).prop('checked', !cbxcheck);
-      console.log('cbxcheck:>>', cbxcheck);
-      if (!cbxcheck) {
-        wnameCheckArr.push(wname + name);
+      console.log($(this).hasClass('checked'))
+      if (!$(this).hasClass('checked')) {
+        $(this).addClass('checked')
+        wnameCheckArr.push(name);
       } else {
-        wnameCheckArr = wnameCheckArr.filter(itm => itm !== (wname + name));
+        $(this).removeClass('checked')
+        wnameCheckArr = wnameCheckArr.filter(itm => itm !== name)
       }
+
+      // var cbxcheck = $('.cbx-employee').eq(idx).is(":checked");
+      // $('.cbx-employee').eq(idx).prop('checked', !cbxcheck);
+      // console.log('cbxcheck:>>', cbxcheck);
+      // if (!cbxcheck) {
+      //   wnameCheckArr.push(wname + name);
+      // } else {
+      //   wnameCheckArr = wnameCheckArr.filter(itm => itm !== (wname + name));
+      // }
       console.log('wname arr:>>', wnameCheckArr)
     });
-    $('.cbx-employee').change(function() {
-      var name = $(this).data('name');
-      var check = $(this).is(":checked");
-      console.log('cbx:>>', check);
-      if (check) {
-        var idx = wnameCheckArr.findIndex(itm => itm === name);
-        if (idx < 0) {
-          wnameCheckArr.push(name)
-        }
-      } else {
-        wnameCheckArr = wnameCheckArr.filter(itm => itm !== name);
-      }
-      console.log('wname arr:>>', wnameCheckArr)
-    });
+    // $('.cbx-employee').change(function() {
+    //   var name = $(this).data('name');
+    //   var check = $(this).is(":checked");
+    //   console.log('cbx:>>', check);
+    //   if (check) {
+    //     var idx = wnameCheckArr.findIndex(itm => itm === name);
+    //     if (idx < 0) {
+    //       wnameCheckArr.push(name)
+    //     }
+    //   } else {
+    //     wnameCheckArr = wnameCheckArr.filter(itm => itm !== name);
+    //   }
+    //   console.log('wname arr:>>', wnameCheckArr)
+    // });
   }).catch(err => {
     console.log(err)
   })
 
   function clearTopCbx() {
-    $('.cbx-employee:checked').each(function() {
-      $(this).prop('checked', false)
+    $('.employ-cbx').each(function() {
+      if ($(this).hasClass('checked'))
+        $(this).removeClass('checked')
     })
     wnameCheckArr = []
   }
