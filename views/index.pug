@@ -69,23 +69,24 @@ block content
           .grid 设备
         #wzBody.relative
           .active-rect
-    div(style="flex: 0 0 380px;")
-      .row
-        .row.top-section.relative(style="bottom: -20px")
-          span.float-title 数量
-          .col
-            .count-btn
-              #countMinus.col
-              .col.column
-                .col.row
-                  input#countIpt.center
-              #countAdd.col
-          .col.center.relative
-            span.float-title 重量（吨）
-            #weightInfoWrap.weight.relative
-              span#weightWrapAdd(style="position: absolute; top: -5px; right: -65px; font-size: 58px; color: #fff;z-index: 30;") +
-              span#weightInfo
-      #topEmployee(style="bottom:-30px;position: relative;padding-left:15px;padding-right:15px;box-sizing: border-box;font-size: 18px")
+    div(style="flex: 0 0 430px;")
+      .top-section.employ-bar
+        .float-title.pt-15 操作人编号
+        #topEmployee
+      .row.top-section.relative(style="bottom: -30px")
+        span.float-title 数量
+        .col
+          .count-btn
+            #countMinus.col
+            .col.column
+              .col.row
+                input#countIpt.center
+            #countAdd.col
+        .col.center.relative
+          span.float-title 重量（吨）
+          #weightInfoWrap.weight.relative
+            span#weightWrapAdd(style="position: absolute; top: -5px; right: -65px; font-size: 58px; color: #fff;z-index: 30;") +
+            span#weightInfo
       #secBtns.row
       //- .row
         .bottom
