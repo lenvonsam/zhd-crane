@@ -81,8 +81,9 @@ $(function() {
   })
 
   function clearTopCbx() {
-    $('.cbx-employee:checked').each(function() {
-      $(this).prop('checked', false)
+    $('.employ-cbx').each(function() {
+      if ($(this).hasClass('checked'))
+        $(this).removeClass('checked')
     })
     wnameCheckArr = []
   }
