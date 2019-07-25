@@ -28,9 +28,23 @@ block content
       .tr.row.center(data-rowindex="${idx}")
         <%_.each(keys, function(key, subi) {%>
           <% if (key == "goodCount") {%>
-            .td ${Number(itm.goodsNum - itm.oconsignDetailOknum)}
+            <% if (Number(itm.pickType) === 1) { %>
+              .td ${Number(itm.detailOkNnum)}
+            <% } else { %>
+              .td ${Number(itm.goodsNum - itm.oconsignDetailOknum)}
+            <% } %>
           <% } else if (subi == 0) {%>
             .td(data-idx="${idx}") ${itm[key]}
+          <% } else if (key == "goodsProperty5") {%>
+            .td
+              div 公差：${itm.goodsProperty5}
+              div 重量：${itm.goodsProperty4}
+          <% } else if (key == "other") {%>
+            .td
+              <% if (Number(itm.pickType) === 1) { %>
+                div 车牌：${itm.datasCarnum}
+                div 打印数量：${itm.goodsNum}
+              <% } %>
           <% } else {%>
             .td ${itm[key]}
           <% } %>
@@ -64,8 +78,8 @@ block content
           .grid 产地
           .grid 材质
           .grid 可出库数量
-          .grid 公差范围
-          .grid 重量范围
+          .grid 范围
+          .grid 其他
           .grid 设备
         #wzBody.relative
           .active-rect
