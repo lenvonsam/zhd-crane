@@ -1969,13 +1969,14 @@ function floorWeight(val) {
   if (isNaN(w)) {
     return "0";
   } else {
-    let str = w.toString();
-    let dotStr = str.substring(str.indexOf("."));
-    if (dotStr.length > 4) {
-      return str.substring(0, str.indexOf(".") + 4);
-    } else {
-      return w.toFixed(3);
-    }
+    return w.toFixed(3)
+    // let str = w.toString();
+    // let dotStr = str.substring(str.indexOf("."));
+    // if (dotStr.length > 4) {
+    //   return str.substring(0, str.indexOf(".") + 4);
+    // } else {
+    //   return w.toFixed(3);
+    // }
   }
 }
 
