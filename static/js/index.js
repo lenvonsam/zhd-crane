@@ -844,7 +844,7 @@ $(function() {
     );
     if (idx >= 0) singleGoodsCount[selectObj.sbillBillbatch] = Number(countVal);
     if (selectObj.goodsMetering == "理计" || selectObj.mtype == 0) {
-      let weight = floorWeight(
+      let weight = formatWeight(
         Number(countVal * selectObj.goodsProperty1 * selectObj.goodsProperty2)
       );
       if (selectObj.mtype == 0) weight = selectObj.goodsWeight;
@@ -885,7 +885,7 @@ $(function() {
     );
     if (idx >= 0) singleGoodsCount[selectObj.sbillBillbatch] = Number(countVal);
     if (selectObj.goodsMetering == "理计" || selectObj.mtype == 0) {
-      let weight = floorWeight(
+      let weight = formatWeight(
         Number(countVal * selectObj.goodsProperty1 * selectObj.goodsProperty2)
       );
       if (selectObj.mtype == 0) weight = selectObj.goodsWeight;
@@ -1305,7 +1305,7 @@ $(function() {
       var selectObj = tableList[selectRowIndex];
       if (selectObj.goodsMetering == "理计" || selectObj.mtype == 0) {
         // 重新计算重量
-        let weight = floorWeight(
+        let weight = formatWeight(
           Number(cnt * selectObj.goodsProperty1 * selectObj.goodsProperty2)
         );
         if (selectObj.mtype == 0) weight = selectObj.goodsWeight;
@@ -1765,7 +1765,7 @@ $(function() {
         cnt = Number(selectObj.detailOkNnum)
       }
       if (selectObj.goodsMetering == "理计" || selectObj.mtype == 0) {
-        let weight = floorWeight(
+        let weight = formatWeight(
           Number(cnt * selectObj.goodsProperty1 * selectObj.goodsProperty2)
         );
         if (selectObj.mtype == 0) weight = selectObj.goodsWeight;
