@@ -771,7 +771,7 @@ $(function() {
     console.log("currentSelect idx:>>", selectRowIndex);
     console.log("currentBtnIdx:>>", btnIndex);
     let selectObj = tableList[selectRowIndex];
-    if (selectObj.goodsMetering == "理计" || selectObj.mtype == 0) {
+    if ((selectObj.goodsMetering == "理计" && Number(selectObj.pickType) == 0) || selectObj.mtype == 0) {
       return "理计不能修改数量";
     } else if (btnIndex == -1) {
       return "请先选中关联设备的物资";
