@@ -1765,7 +1765,7 @@ $(function() {
         cnt = Number(selectObj.detailOkNnum)
       }
       if (selectObj.goodsMetering == "理计" || selectObj.mtype == 0) {
-        let weight = formatWeight(
+        let weight = floorWeight(
           Number(cnt * selectObj.goodsProperty1 * selectObj.goodsProperty2)
         );
         if (selectObj.mtype == 0) weight = selectObj.goodsWeight;
