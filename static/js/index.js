@@ -1306,7 +1306,7 @@ $(function() {
       if (selectObj.goodsMetering == "理计" || selectObj.mtype == 0) {
         // 重新计算重量
         let weight = formatWeight(
-          Number(countVal * selectObj.goodsProperty1 * selectObj.goodsProperty2)
+          Number(cnt * selectObj.goodsProperty1 * selectObj.goodsProperty2)
         );
         if (selectObj.mtype == 0) weight = selectObj.goodsWeight;
         $("#weightInfo").text(weight);
