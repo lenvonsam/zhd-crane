@@ -771,11 +771,22 @@ $(function() {
     console.log("currentSelect idx:>>", selectRowIndex);
     console.log("currentBtnIdx:>>", btnIndex);
     let selectObj = tableList[selectRowIndex];
-    if ((selectObj.goodsMetering == "理计" && Number(selectObj.pickType) != 1) || selectObj.mtype == 0) {
-      return "理计不能修改数量";
-    } else if (selectObj.goodsMetering == "理计" && Number(selectObj.pickType) == 1) {
-      return "ok";
-    } else if (btnIndex == -1) {
+    /**
+     * 所有理计物资可以修改数量 
+     * @author samy
+     * @date 2019/07/29
+     * @content 需求来源 曹工和线下确认理计物资可以修改数量并能自动计算重量
+     * */
+    // if ((selectObj.goodsMetering == "理计" && Number(selectObj.pickType) != 1) || selectObj.mtype == 0) {
+    //   return "理计不能修改数量";
+    // } else if (selectObj.goodsMetering == "理计" && Number(selectObj.pickType) == 1) {
+    //   return "ok";
+    // } 
+    if (selectObj.mtype == 0) {
+      return '整卷开平不能修改数量';
+    } else if (selectObj.goodsMetering == '理计') {
+      return 'ok';
+    }  else if (btnIndex == -1) {
       return "请先选中关联设备的物资";
     } else if (linkMap[btnIndex].length == 1) {
       if (dwtCounts[btnIndex].canEdit) {
@@ -813,10 +824,32 @@ $(function() {
       if (countVal < 0) countVal = 0;
     }
     var selectObj = tableList[selectRowIndex];
+    // 判断理计物资不能超过出库最大值
+    if (selectObj.goodsMetering == "理计") {
+      let maxCount = 0;
+      if (Number(selectObj.pickType) == 1) {
+        // 凭证物资
+        maxCount = selectObj.detailOkNnum;
+      } else {
+        maxCount = Number(selectObj.goodsNum - selectObj.oconsignDetailOknum)
+      }
+      if (countVal > maxCount) {
+        showMsg('不能超过可出库数量')
+        countVal = maxCount
+        $('#countIpt').val(countVal)
+      }
+    }
     var idx = Object.keys(singleGoodsCount).findIndex(
       itm => itm == selectObj.sbillBillbatch
     );
     if (idx >= 0) singleGoodsCount[selectObj.sbillBillbatch] = Number(countVal);
+    if (selectObj.goodsMetering == "理计" || selectObj.mtype == 0) {
+      let weight = formatWeight(
+        Number(countVal * selectObj.goodsProperty1 * selectObj.goodsProperty2)
+      );
+      if (selectObj.mtype == 0) weight = selectObj.goodsWeight;
+      $("#weightInfo").text(weight);
+    }
     $("#countIpt").val(countVal);
   });
   $("#countAdd").click(() => {
@@ -833,10 +866,31 @@ $(function() {
       countVal++;
     }
     var selectObj = tableList[selectRowIndex];
+    if (selectObj.goodsMetering == "理计") {
+      let maxCount = 0;
+      if (Number(selectObj.pickType) == 1) {
+        // 凭证物资
+        maxCount = selectObj.detailOkNnum;
+      } else {
+        maxCount = Number(selectObj.goodsNum - selectObj.oconsignDetailOknum)
+      }
+      if (countVal > maxCount) {
+        showMsg('不能超过可出库数量')
+        countVal = maxCount
+        $('#countIpt').val(countVal)
+      }
+    }
     var idx = Object.keys(singleGoodsCount).findIndex(
       itm => itm == selectObj.sbillBillbatch
     );
     if (idx >= 0) singleGoodsCount[selectObj.sbillBillbatch] = Number(countVal);
+    if (selectObj.goodsMetering == "理计" || selectObj.mtype == 0) {
+      let weight = formatWeight(
+        Number(countVal * selectObj.goodsProperty1 * selectObj.goodsProperty2)
+      );
+      if (selectObj.mtype == 0) weight = selectObj.goodsWeight;
+      $("#weightInfo").text(weight);
+    }
     $("#countIpt").val(countVal);
   });
   // 显示物资重量
@@ -1216,6 +1270,23 @@ $(function() {
   $("#weightInfoWrap").click(() => {
     let w = $("#weightInfo").text();
     let cnt = $("#countIpt").val();
+    if (selectRowIndex > -1) {
+      var selectObj = tableList[selectRowIndex];
+      // 判断理计物资不能超过出库最大值
+      if (selectObj.goodsMetering == "理计") {
+        let maxCount = 0;
+        if (Number(selectObj.pickType) == 1) {
+          // 凭证物资
+          maxCount = selectObj.detailOkNnum;
+        } else {
+          maxCount = Number(selectObj.goodsNum - selectObj.oconsignDetailOknum)
+        }
+        if (cnt > maxCount) {
+          cnt = maxCount
+          $('#countIpt').val(countVal)
+        }
+      }
+    }
     console.log(cnt);
     console.log("currentUserChooseBtn", userChooseBtnIdx);
     if (Number(w) <= 0) {
@@ -1233,11 +1304,19 @@ $(function() {
       }
       var selectObj = tableList[selectRowIndex];
       if (selectObj.goodsMetering == "理计" || selectObj.mtype == 0) {
+        // 重新计算重量
+        let weight = formatWeight(
+          Number(countVal * selectObj.goodsProperty1 * selectObj.goodsProperty2)
+        );
+        if (selectObj.mtype == 0) weight = selectObj.goodsWeight;
+        $("#weightInfo").text(weight);
+        w = weight
       } else {
         showMsg("请选择出库的磅秤");
         return;
       }
     }
+    return
     totalPlankArr = []
     // 批量出库
     if (userChooseBtnIdx > -1) {
