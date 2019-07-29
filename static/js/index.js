@@ -1316,7 +1316,6 @@ $(function() {
         return;
       }
     }
-    return
     totalPlankArr = []
     // 批量出库
     if (userChooseBtnIdx > -1) {
