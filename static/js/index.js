@@ -588,8 +588,10 @@ $(function() {
     "productareaName",
     "goodsMaterial",
     "goodCount",
+    // 公差 goodsProperty5 重量 goodsProperty4
     "goodsProperty5",
-    "goodsProperty4"
+    // 其他 车牌号 
+    "other"
   ];
   $("#tdNo").focus(function(e) {
     $(".zhd-keyboard").css("display", "none");
@@ -607,7 +609,7 @@ $(function() {
     }
     $(".zhd-keyboard").css("display", "none");
     request("/outWaitStorageQuery", {
-      sbillBillcode: "TD" + tdNo
+      sbillBillcode: tdNo
     })
       .then(res => {
         console.log(res);
@@ -769,9 +771,22 @@ $(function() {
     console.log("currentSelect idx:>>", selectRowIndex);
     console.log("currentBtnIdx:>>", btnIndex);
     let selectObj = tableList[selectRowIndex];
-    if (selectObj.goodsMetering == "理计" || selectObj.mtype == 0) {
-      return "理计不能修改数量";
-    } else if (btnIndex == -1) {
+    /**
+     * 所有理计物资可以修改数量 
+     * @author samy
+     * @date 2019/07/29
+     * @content 需求来源 曹工和线下确认理计物资可以修改数量并能自动计算重量
+     * */
+    // if ((selectObj.goodsMetering == "理计" && Number(selectObj.pickType) != 1) || selectObj.mtype == 0) {
+    //   return "理计不能修改数量";
+    // } else if (selectObj.goodsMetering == "理计" && Number(selectObj.pickType) == 1) {
+    //   return "ok";
+    // } 
+    if (selectObj.mtype == 0) {
+      return '整卷开平不能修改数量';
+    } else if (selectObj.goodsMetering == '理计') {
+      return 'ok';
+    }  else if (btnIndex == -1) {
       return "请先选中关联设备的物资";
     } else if (linkMap[btnIndex].length == 1) {
       if (dwtCounts[btnIndex].canEdit) {
@@ -809,10 +824,32 @@ $(function() {
       if (countVal < 0) countVal = 0;
     }
     var selectObj = tableList[selectRowIndex];
+    // 判断理计物资不能超过出库最大值
+    if (selectObj.goodsMetering == "理计") {
+      let maxCount = 0;
+      if (Number(selectObj.pickType) == 1) {
+        // 凭证物资
+        maxCount = selectObj.detailOkNnum;
+      } else {
+        maxCount = Number(selectObj.goodsNum - selectObj.oconsignDetailOknum)
+      }
+      if (countVal > maxCount) {
+        showMsg('不能超过可出库数量')
+        countVal = maxCount
+        $('#countIpt').val(countVal)
+      }
+    }
     var idx = Object.keys(singleGoodsCount).findIndex(
       itm => itm == selectObj.sbillBillbatch
     );
     if (idx >= 0) singleGoodsCount[selectObj.sbillBillbatch] = Number(countVal);
+    if (selectObj.goodsMetering == "理计" || selectObj.mtype == 0) {
+      let weight = formatWeight(
+        Number(countVal * selectObj.goodsProperty1 * selectObj.goodsProperty2)
+      );
+      if (selectObj.mtype == 0) weight = selectObj.goodsWeight;
+      $("#weightInfo").text(weight);
+    }
     $("#countIpt").val(countVal);
   });
   $("#countAdd").click(() => {
@@ -829,10 +866,31 @@ $(function() {
       countVal++;
     }
     var selectObj = tableList[selectRowIndex];
+    if (selectObj.goodsMetering == "理计") {
+      let maxCount = 0;
+      if (Number(selectObj.pickType) == 1) {
+        // 凭证物资
+        maxCount = selectObj.detailOkNnum;
+      } else {
+        maxCount = Number(selectObj.goodsNum - selectObj.oconsignDetailOknum)
+      }
+      if (countVal > maxCount) {
+        showMsg('不能超过可出库数量')
+        countVal = maxCount
+        $('#countIpt').val(countVal)
+      }
+    }
     var idx = Object.keys(singleGoodsCount).findIndex(
       itm => itm == selectObj.sbillBillbatch
     );
     if (idx >= 0) singleGoodsCount[selectObj.sbillBillbatch] = Number(countVal);
+    if (selectObj.goodsMetering == "理计" || selectObj.mtype == 0) {
+      let weight = formatWeight(
+        Number(countVal * selectObj.goodsProperty1 * selectObj.goodsProperty2)
+      );
+      if (selectObj.mtype == 0) weight = selectObj.goodsWeight;
+      $("#weightInfo").text(weight);
+    }
     $("#countIpt").val(countVal);
   });
   // 显示物资重量
@@ -860,7 +918,8 @@ $(function() {
             oconsignBillcode: currentObj.oconsignBillcode,
             oconsignBillbatch: currentObj.oconsignBillbatch,
             goodsNum: cnt,
-            goodsWeight: weight
+            goodsWeight: weight,
+            pickType: currentObj.pickType
           };
           // 
           if (wnameCheckArr.length > 0) body.delivers = wnameCheckArr.join(',')
@@ -879,6 +938,7 @@ $(function() {
             weight: weight,
             count: cnt
           };
+          if (wnameCheckArr.length > 0) optBody.delivers = wnameCheckArr.join(',')
           if (currentObj.goodsProperty5)
             optBody.toleranceRange = currentObj.goodsProperty5;
           if (currentObj.goodsProperty4)
@@ -941,7 +1001,27 @@ $(function() {
             // 理计出库记录
             optBody.craneIndex = "-1";
           }
-          request("/save/crane/operator", optBody);
+          optBody.pickType = currentObj.pickType
+          // 添加凭证出库逻辑 2019年07月24日
+          if (Number(currentObj.pickType) === 1) {
+            body.picktokenBillcode = currentObj.picktokenBillcode
+            body.picktokenBillbatch = currentObj.picktokenBillbatch
+            body.datasCarnum = currentObj.datasCarnum
+            body.datasDriver = currentObj.datasDriver
+            body.datasIdentitynum = currentObj.datasIdentitynum
+            // 行为记录
+            optBody.picktokenBillcode = currentObj.picktokenBillcode
+            optBody.picktokenBillbatch = currentObj.picktokenBillbatch
+            optBody.datasCarnum = currentObj.datasCarnum
+            optBody.datasDriver = currentObj.datasDriver
+            optBody.datasIdentitynum = currentObj.datasIdentitynum
+          }
+          var optID = 0;
+          request("/save/crane/operator", optBody).then(res => {
+            if (res.status === 0) {
+              optID = res.code
+            }
+          });
           if (resp.status == 0) {
             console.log("锁库成功");
             request("/outStorage", body)
@@ -953,10 +1033,12 @@ $(function() {
                 if (res.status == 0) {
                   if (res.message.startsWith("[待审核]")) {
                     // var result = window.confirm(`此条物资需要审核确认\n 出库重量:${w}\n 出库数量:${cnt}`)
-                    request("/update/crane/operator", {
-                      goodNo: currentObj.sbillBillbatch,
-                      status: 3
-                    });
+                    if (optID > 0) {
+                      request("/update/crane/operator", {
+                        id: optID,
+                        status: 3
+                      });
+                    }
                     hideLoad();
                     $("body").append(
                       modalTemp({
@@ -978,10 +1060,12 @@ $(function() {
                         })
                           .then(rp => {
                             if (rp.status == 0) {
-                              request("/update/crane/operator", {
-                                goodNo: currentObj.sbillBillbatch,
-                                status: 4
-                              });
+                              if (optID > 0) {
+                                request("/update/crane/operator", {
+                                  id: optID,
+                                  status: 4
+                                });
+                              }
                               outStorageSuccess(currentObj, false, function() {
                                 console.log(
                                   "吊秤审核成功",
@@ -996,11 +1080,13 @@ $(function() {
                                     });
                               });
                             } else {
-                              request("/update/crane/operator", {
-                                goodNo: currentObj.sbillBillbatch,
-                                status: 5,
-                                errMsg: rp.message || "物资审核失败"
-                              });
+                              if (optID > 0) {
+                                request("/update/crane/operator", {
+                                  id: optID,
+                                  status: 5,
+                                  errMsg: rp.message || "物资审核失败"
+                                });
+                              }
                               showMsg(rp.message);
                               request("/unlockTd", {
                                 tdNo: currentTd
@@ -1029,20 +1115,24 @@ $(function() {
                           });
                       } else {
                         if (idx == max) hideLoad();
-                        request("/update/crane/operator", {
-                          goodNo: currentObj.sbillBillbatch,
-                          status: 6
-                        });
+                        if (optID > 0) {
+                          request("/update/crane/operator", {
+                            id: optID,
+                            status: 6
+                          });
+                        }
                         outStorageSuccess(currentObj, true);
                         reject();
                       }
                     });
                   } else {
                     if (idx == max) hideLoad();
-                    request("/update/crane/operator", {
-                      goodNo: currentObj.sbillBillbatch,
-                      status: 1
-                    });
+                    if (optID > 0) {
+                      request("/update/crane/operator", {
+                        id: optID,
+                        status: 1
+                      });
+                    }
                     outStorageSuccess(currentObj, false, function() {
                       userChooseBtnIdx == -1
                         ? reject()
@@ -1061,11 +1151,13 @@ $(function() {
                   reject();
                 } else {
                   if (idx == max) hideLoad();
-                  request("/update/crane/operator", {
-                    goodNo: currentObj.sbillBillbatch,
-                    status: 2,
-                    errMsg: res.message || "物资出库失败"
-                  });
+                  if (optID > 0) {
+                    request("/update/crane/operator", {
+                      id: optID,
+                      status: 2,
+                      errMsg: res.message || "物资出库失败"
+                    });
+                  }
                   showMsg(res.message || "网络异常");
                   request("/unlockTd", {
                     tdNo: currentTd
@@ -1178,10 +1270,31 @@ $(function() {
   $("#weightInfoWrap").click(() => {
     let w = $("#weightInfo").text();
     let cnt = $("#countIpt").val();
+    if (selectRowIndex > -1) {
+      var selectObj = tableList[selectRowIndex];
+      // 判断理计物资不能超过出库最大值
+      if (selectObj.goodsMetering == "理计") {
+        let maxCount = 0;
+        if (Number(selectObj.pickType) == 1) {
+          // 凭证物资
+          maxCount = selectObj.detailOkNnum;
+        } else {
+          maxCount = Number(selectObj.goodsNum - selectObj.oconsignDetailOknum)
+        }
+        if (cnt > maxCount) {
+          cnt = maxCount
+          $('#countIpt').val(countVal)
+        }
+      }
+    }
     console.log(cnt);
     console.log("currentUserChooseBtn", userChooseBtnIdx);
     if (Number(w) <= 0) {
       showMsg("重量必须大于0");
+      return;
+    }
+    if (wnameCheckArr.length === 0) {
+      showMsg('请选择操作人员');
       return;
     }
     if (userChooseBtnIdx == -1) {
@@ -1191,6 +1304,13 @@ $(function() {
       }
       var selectObj = tableList[selectRowIndex];
       if (selectObj.goodsMetering == "理计" || selectObj.mtype == 0) {
+        // 重新计算重量
+        let weight = formatWeight(
+          Number(cnt * selectObj.goodsProperty1 * selectObj.goodsProperty2)
+        );
+        if (selectObj.mtype == 0) weight = selectObj.goodsWeight;
+        $("#weightInfo").text(weight);
+        w = weight
       } else {
         showMsg("请选择出库的磅秤");
         return;
@@ -1641,6 +1761,9 @@ $(function() {
       console.log(selectObj);
       let td = selectObj.sbillBillbatch;
       let cnt = Number(selectObj.goodsNum - selectObj.oconsignDetailOknum);
+      if (Number(selectObj.pickType) === 1) {
+        cnt = Number(selectObj.detailOkNnum)
+      }
       if (selectObj.goodsMetering == "理计" || selectObj.mtype == 0) {
         let weight = formatWeight(
           Number(cnt * selectObj.goodsProperty1 * selectObj.goodsProperty2)
@@ -1841,6 +1964,21 @@ $(function() {
     $("#countIpt").val(count);
   }
 });
+function floorWeight(val) {
+  let w = Number(val);
+  if (isNaN(w)) {
+    return "0";
+  } else {
+    return w.toFixed(3)
+    // let str = w.toString();
+    // let dotStr = str.substring(str.indexOf("."));
+    // if (dotStr.length > 4) {
+    //   return str.substring(0, str.indexOf(".") + 4);
+    // } else {
+    //   return w.toFixed(3);
+    // }
+  }
+}
 
 function formatWeight(val) {
   let w = Number(val);

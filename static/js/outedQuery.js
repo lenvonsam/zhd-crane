@@ -205,12 +205,15 @@ $(function() {
             return;
           }
           handlerData(res.data.data);
-          // if (currentPage == 1) {
+          if (currentPage === 1) {
+            if (Number($('#pgIpt').val()) > currentPage) {
+              $('#pgIpt').val('');
+            }
             initPaginate(res.data.pageCount, currentPage);
             $("#totalPage").text("共" + res.data.pageCount + "页");
-            $("#totalWzCount").text("总数量：" + res.data.pageNo);
-            $("#totalWzWeight").text("总重量：" + Number((res.data.pageSize) / 1000).toFixed(3));
-          // }
+          }
+          $("#totalWzCount").text("总数量：" + res.data.pageNo);
+          $("#totalWzWeight").text("总重量：" + Number((res.data.pageSize) / 1000).toFixed(3));
         } else showMsg(res.message || "网络异常");
       })
       .catch(err => {

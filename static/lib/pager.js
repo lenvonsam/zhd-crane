@@ -335,6 +335,7 @@ function Page(opt) {
   };
   if (set.num <= 1) {
     $(".pagination").html("");
+    clickpages.init();
     return;
   } else if (parseInt(set.num) <= 6) {
     n = parseInt(set.num);
