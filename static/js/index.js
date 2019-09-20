@@ -35,7 +35,8 @@ $(function() {
     var str = '';
     wnameMap[wname].map(itm => {
       // str += '<input class="cbx-employee mr-15 ml-15" readonly type="checkbox" data-name="'+ wname + itm+'"/><span data-name="'+ itm +'" class="cbx-name">'+itm+'</span>';
-      str += '<div class="employ-cbx" data-name="'+ wname + itm +'">'+itm+'</div>';
+      // wname
+      str += '<div class="employ-cbx" data-name="'+ itm +'">'+itm+'</div>';
     });
     $('#topEmployee').html('')
     $('#topEmployee').append(str)
