@@ -1,17 +1,21 @@
 const httpHelp = require('../utils/http')
+<<<<<<< HEAD
 const PROXYURL = 'http://192.168.20.148:8080/warehouse-online/warehouse'
 // const PROXYURL = 'http://192.168.80.99:8080/warehouse-dev/warehouse'
+=======
+const PROXYURL = 'http://192.168.80.99:8080/warehouse-dev/warehouse'
+>>>>>>> fb92382bbad14a410713df337bb76f07090d4ea5
 // const PROXYURL = 'http://192.168.80.102:8686/warehouse/warehouse'
 // const PROXYURL = 'http://localhost:7568/warehouse'
 
 module.exports = {
-  async logout (ctx) {
+  async logout(ctx) {
     await ctx.cookies.set('currentUser', null)
     ctx.body = {
       status: 0
     }
   },
-  async warehouseName (ctx) {
+  async warehouseName(ctx) {
     let val = ctx.cookies.get('currentUser') || null
     if (val) {
       let arr = val.split('|')
@@ -19,8 +23,8 @@ module.exports = {
         wname: arr[1]
       }
     } else {
-      await ctx.render("login", {
-        pageTitle: "型云吊秤登录",
+      await ctx.render('login', {
+        pageTitle: '型云吊秤登录',
         loginType: 1
       })
     }
@@ -47,7 +51,11 @@ module.exports = {
         return
       }
     }
-    if (body.url == '/outStorage' || body.url == '/outStorageAudit' || body.url == '/outStorageQuery') {
+    if (
+      body.url == '/outStorage' ||
+      body.url == '/outStorageAudit' ||
+      body.url == '/outStorageQuery'
+    ) {
       if (userArr && userArr.length == 3) {
         params.userId = userArr[1]
         if (body.url == '/outStorageQuery') {
@@ -74,7 +82,10 @@ module.exports = {
     //   }
     // }
     console.log('warehouse proxy:>>>\n', params)
-    let data = body.method === 'get' ? (await httpHelp.httpGet(PROXYURL + body.url, params)) : (await httpHelp.httpPost(PROXYURL + body.url, params))
+    let data =
+      body.method === 'get'
+        ? await httpHelp.httpGet(PROXYURL + body.url, params)
+        : await httpHelp.httpPost(PROXYURL + body.url, params)
     console.log('warehouse proxy resp:>>\n', data)
     if (body.url == '/login') {
       if (data.status == 0 && data.data != null) {
@@ -82,7 +93,7 @@ module.exports = {
         // console.log('cookie 保存', data.data)
         await ctx.cookies.set('currentUser', `${data.data.memberCode}|${data.data.operatorUserid}|${data.data.superWarehousemanFlag}`, {
           domain: '192.168.20.170',
-          maxAge: 10 * 60 * 60 * 1000,
+          maxAge: 13 * 60 * 60 * 1000,
           httpOnly: false
         })
       }

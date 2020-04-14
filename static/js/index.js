@@ -1763,7 +1763,7 @@ $(function() {
       let td = selectObj.sbillBillbatch;
       let cnt = Number(selectObj.goodsNum - selectObj.oconsignDetailOknum);
       if (Number(selectObj.pickType) === 1) {
-        cnt = Number(selectObj.detailOkNnum)
+        cnt = Number(selectObj.goodsNum)
       }
       if (selectObj.goodsMetering == "理计" || selectObj.mtype == 0) {
         let weight = formatWeight(
