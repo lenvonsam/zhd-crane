@@ -1,10 +1,6 @@
 const httpHelp = require('../utils/http')
-<<<<<<< HEAD
 const PROXYURL = 'http://192.168.20.148:8080/warehouse-online/warehouse'
 // const PROXYURL = 'http://192.168.80.99:8080/warehouse-dev/warehouse'
-=======
-const PROXYURL = 'http://192.168.80.99:8080/warehouse-dev/warehouse'
->>>>>>> fb92382bbad14a410713df337bb76f07090d4ea5
 // const PROXYURL = 'http://192.168.80.102:8686/warehouse/warehouse'
 // const PROXYURL = 'http://localhost:7568/warehouse'
 
@@ -91,11 +87,15 @@ module.exports = {
       if (data.status == 0 && data.data != null) {
         // let str = JSON.stringify(data.data)
         // console.log('cookie 保存', data.data)
-        await ctx.cookies.set('currentUser', `${data.data.memberCode}|${data.data.operatorUserid}|${data.data.superWarehousemanFlag}`, {
-          domain: '192.168.20.170',
-          maxAge: 13 * 60 * 60 * 1000,
-          httpOnly: false
-        })
+        await ctx.cookies.set(
+          'currentUser',
+          `${data.data.memberCode}|${data.data.operatorUserid}|${data.data.superWarehousemanFlag}`,
+          {
+            domain: '192.168.20.170',
+            maxAge: 13 * 60 * 60 * 1000,
+            httpOnly: false
+          }
+        )
       }
     }
     ctx.body = data
