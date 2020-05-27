@@ -90,7 +90,7 @@ module.exports = {
           'currentUser',
           `${data.data.memberCode}|${data.data.operatorUserid}|${data.data.superWarehousemanFlag}`,
           {
-            domain: 'localhost',
+            domain: '192.168.80.200',
             maxAge: 13 * 60 * 60 * 1000,
             httpOnly: false
           }
