@@ -1,19 +1,44 @@
 extends layout/basic.pug
 
 append css
-  link(rel="stylesheet", href="/css/main.css")
+  link(href="/css/main.css", rel="stylesheet")
 append scripts
   script(src="/lib/socket.io.js")
   script(src="/js/index.js")
 block content
-  script(type="test/template", id="zhdModal")
+  #zhdCarNoFilterPop.zhd-carno(style="display:none; width: 225px")
+    .zhd-carno-filter.up-arrow(style="flex: 0 0 225px;")
+      div 提单对应车牌号
+      .sub-title (如车牌错误，请手动输入)
+      .list
+  #zhdCarNo.zhd-carno.flex(style="display: none")
+    .zhd-carno-filter
+      div 筛选记录
+      .sub-title (如果搜索不到请到右侧自行添加)
+      .list(style="max-height: 368px")
+    .zhd-carno-add.up-arrow
+      .row
+        .flex.align-center
+          input#keyboardCarType.center(style="width: 56px; height: 30px;font-size: 20px; margin-right: 2px", disabled, placeholder="省")
+          input#keyboardCarNo(style="width: 120px; height: 30px; font-size: 20px;padding-left: 5px", disabled, placeholder="车牌号")
+        .col(style="padding-left: 8%")
+          .row
+            #kbAdd.add-btn 添加
+            #kbReset.add-btn 重置
+            #kbClose.add-btn 关闭
+          //- .row.justify-center(style="background-color: #425c80; border-radius: 6px; color: #fff; width: 66px; letter-spacing: 2px; text-align: center; height: 34px")
+            span 添加
+      .zhd-carno-keyboard.mt-15
+        #carTypeKey.mt-10.row.row-wrap.content
+        #fullCarKey.mt-10.row.row-wrap.content(style="display: none;")
+  script(id="zhdModal", type="text/template")
     .zhd-modal(id="${modalId}")
       .bg
       .content
         .title ${modalTitle}
         .modal-btn.confirm 确定
         .modal-btn.cancel 取消
-  script(type="text/template", id="weightBtns")
+  script(id="weightBtns", type="text/template")
     .row.top-section.relative(style="bottom: -50px")
       <% _.each(btns, function(itm, index){ %>
         .col.relative
@@ -23,7 +48,7 @@ block content
             span 0
           //- image(style="position: absolute; bottom: -126px; left: -40px; z-index: 10;display: none;", src="/img/taph.png")
       <%});%>
-  script(type="text/template", id="tbodyPart")
+  script(id="tbodyPart", type="text/template")
     <% _.each(data, function(itm, idx){%>
       .tr.row.center(data-rowindex="${idx}")
         <%_.each(keys, function(key, subi) {%>
@@ -55,8 +80,15 @@ block content
   .main-head.row
     image(src="/img/bgys.png", style="height: 160px; position: absolute; top: 0px; left: 0px;")
     .main-brand= pageBrand
-    div(style="flex-basis: 80px") TD
-    .row(style="flex-basis: 498px")
+    div(style="flex-basis: 170px") 提货车号
+    #carnoIptWrap(style="flex-basis: 225px")
+      .main-ipt.row
+        input#tdCarNo.center(readOnly)
+    #manSelect.row(style="flex-basis: 128px")
+      .main-btn
+        span 手动输入
+    .flex.justify-center(style="flex-basis: 70px") TD
+    .row(style="flex-basis: 225px")
       .main-ipt.row
         input#tdNo
     .row(style="flex-basis: 128px")

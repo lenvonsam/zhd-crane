@@ -4,7 +4,7 @@ html(lang="en")
     title= pageTitle
     meta(charset="utf-8")
     block css
-      link(rel="stylesheet", href="/css/common.css")
+      link(href="/css/common.css", rel="stylesheet")
     script(src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js")
     script(src="/lib/bluebird.min.js")
     script(src="/js/request.js")
@@ -75,7 +75,6 @@ html(lang="en")
             //- .num-wrap(style="height: 38px; margin-top: 5px")
             //-   .num(data-index="13", style="height: 38px")
             //-     span(style="font-size: 30px") 确定
-            
     block content
     block scripts
 
