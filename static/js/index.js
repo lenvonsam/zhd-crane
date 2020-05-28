@@ -2,27 +2,27 @@ $(function() {
   // 仓库名称
   var wname = ''
   // 正式仓库名对应的操作员编码
-  var wnameMap = {
-    '01': ['01', '02', '03', '04', '05', '06', '07', '08'],
-    '03': ['01', '02', '03', '04', '05', '06'],
-    '05': ['01', '02', '03', '04', '05', '06'],
-    '06': ['01', '02', '03', '04', '05', '06', '07'],
-    '07': ['01', '02', '03', '04', '05', '06'],
-    '10': ['01', '02', '03', '04', '05', '06', '07'],
-    '11': ['01', '02', '03', '04'],
-    '12': ['01', '02', '03', '04', '05', '06', '07']
-  }
-  // 测试仓库名对应的操作员编码
   // var wnameMap = {
-  //   '01': ['01', '02', '03', '04', '05', '06', '07'],
-  //   '02': ['01', '02', '03', '04', '05'],
+  //   '01': ['01', '02', '03', '04', '05', '06', '07', '08'],
   //   '03': ['01', '02', '03', '04', '05', '06'],
-  //   '04': ['01', '02', '03', '04', '05', '06', '07'],
-  //   '05': ['01', '02', '03', '04', '05'],
-  //   '06': ['01', '02', '03', '04'],
-  //   '07': ['01', '02', '03', '04'],
-  //   '08': ['01', '02', '03', '04', '05', '06', '07']
-  // };
+  //   '05': ['01', '02', '03', '04', '05', '06'],
+  //   '06': ['01', '02', '03', '04', '05', '06', '07'],
+  //   '07': ['01', '02', '03', '04', '05', '06'],
+  //   '10': ['01', '02', '03', '04', '05', '06', '07'],
+  //   '11': ['01', '02', '03', '04'],
+  //   '12': ['01', '02', '03', '04', '05', '06', '07']
+  // }
+  // 测试仓库名对应的操作员编码
+  var wnameMap = {
+    '01': ['01', '02', '03', '04', '05', '06', '07'],
+    '02': ['01', '02', '03', '04', '05'],
+    '03': ['01', '02', '03', '04', '05', '06'],
+    '04': ['01', '02', '03', '04', '05', '06', '07'],
+    '05': ['01', '02', '03', '04', '05'],
+    '06': ['01', '02', '03', '04'],
+    '07': ['01', '02', '03', '04'],
+    '08': ['01', '02', '03', '04', '05', '06', '07']
+  }
   // 选择操作员
   var wnameCheckArr = []
   $('body').removeClass('main-bg')
@@ -100,14 +100,16 @@ $(function() {
   var globalCarType = ''
   var globalCarNo = ''
   var globalShowCarNo = ''
-  // 强制车牌
+  // 强制选择车牌号
   var forceSelectCarNo = false
+  // 强制输入车牌号
+  var forceInputCarNo = false
   var carNoReg = /^(([京津沪渝冀豫云辽黑湘皖鲁新苏浙赣鄂桂甘晋蒙陕吉闽贵粤青藏川宁琼使领][A-Za-z](([0-9]{5}[DFdf])|([DFdf]([A-Ha-hJ-Nj-nP-Zp-z0-9])[0-9]{4})))|([京津沪渝冀豫云辽黑湘皖鲁新苏浙赣鄂桂甘晋蒙陕吉闽贵粤青藏川宁琼使领][A-Za-z][A-Ha-hJ-Nj-nP-Zp-z0-9]{4}[A-Ha-hJ-Nj-nP-Zp-z0-9挂学警港澳使领]))$/
   // 提单输入的车牌号
   function getCarNoList(name) {
     var body = {
       currentPage: 0,
-      pageSize: 8
+      pageSize: 100
     }
     if (name) body.name = name
     request('/erp/carNo/list', body).then(
@@ -281,6 +283,19 @@ $(function() {
   }
 
   /**
+   * 根据td号批量改车牌号
+   */
+  function batchChangeCarNoByTD(tdNo) {
+    for (var i = 0; i < tableList.length; i++) {
+      var temp = tableList[i]
+      if (temp.sbillBillcode === 'TD' + tdNo) {
+        temp.datasCarnum = globalShowCarNo
+        tableList[i] = temp
+      }
+    }
+  }
+
+  /**
    * 批量修改选择行对应统一提单的车牌号
    */
   function batchChangeTableRowCarNo() {
@@ -321,7 +336,13 @@ $(function() {
       globalCarNo = ''
       console.log('globalShowCarNo:>>', globalShowCarNo)
       $('#tdCarNo').val(globalShowCarNo)
-      batchChangeTableRowCarNo()
+      if (forceInputCarNo) {
+        forceInputCarNo = false
+        forceSelectCarNo = false
+        batchChangeCarNoByTD($('#tdNo').val())
+      } else {
+        batchChangeTableRowCarNo()
+      }
     } else {
       globalCarNo += idx
     }
@@ -335,7 +356,13 @@ $(function() {
       showMsg('请输入正确车牌号')
       return
     }
-    batchChangeTableRowCarNo()
+    if (forceInputCarNo) {
+      forceInputCarNo = false
+      forceSelectCarNo = false
+      batchChangeCarNoByTD($('#tdNo').val())
+    } else {
+      batchChangeTableRowCarNo()
+    }
     $('#tdCarNo').val(globalShowCarNo)
     $('#zhdCarNo').css('display', 'none')
   })
@@ -348,12 +375,30 @@ $(function() {
     $('#carTypeKey').css('display', 'flex')
   })
   $('#kbClose').click(function() {
+    if (forceInputCarNo) return
     $('#zhdCarNo').css('display', 'none')
   })
+  $('#keyboardCarType').click(function() {
+    hideCarComponent('fullCarKey')
+    $('#carTypeKey').css('display', 'flex')
+  })
+  $('#keyboardCarNo').click(function() {
+    hideCarComponent('carTypeKey')
+    $('#fullCarKey').css('display', 'flex')
+  })
+  // 下拉框保存的车牌号
   var carNoForTd = []
+  // 当强制选择车牌时保存原有的车牌号
+  var originCarNoForId = []
   $('#carnoIptWrap').click(function(e) {
+    if (forceInputCarNo) return
     if (selectRowIndex < 0 && !forceSelectCarNo) {
       showMsg('请选择物资')
+      return
+    }
+    const cntSelectObj = tableList[selectRowIndex]
+    if (carNoForTd.length === 0 && cntSelectObj.datasCarnum.length > 0) {
+      showMsg('此车牌号为手动输入，无需下拉')
       return
     }
     if (carNoForTd.length === 0) {
@@ -395,6 +440,7 @@ $(function() {
             tableList[i] = item
           }
         }
+        carNoForTd = originCarNoForId
         forceSelectCarNo = false
       } else {
         batchChangeTableRowCarNo()
@@ -410,13 +456,13 @@ $(function() {
     }
   })
   $('#manSelect').click(function(e) {
-    console.log(e)
-    if (carNoForTd.length === 0) {
-      showMsg('请输入TD号')
+    if (forceSelectCarNo && !forceInputCarNo) return
+    if (selectRowIndex === -1 && !forceInputCarNo) {
+      showMsg('请选择物资')
       return
     }
-    if (selectRowIndex === -1) {
-      showMsg('请选择物资')
+    if (tableList.length === 0 && !forceInputCarNo) {
+      showMsg('请输入TD号')
       return
     }
     hideCarComponent('zhdCarNoFilterPop')
@@ -940,6 +986,7 @@ $(function() {
     'other'
   ]
   $('#tdNo').focus(function(e) {
+    if (forceSelectCarNo) return
     $('.zhd-keyboard').css('display', 'none')
     $('#zhdCarNoFilterPop').css('display', 'none')
     $('#zhdCarNo').css('display', 'none')
@@ -950,6 +997,7 @@ $(function() {
   })
 
   $('#topAddBtn').click(e => {
+    if (forceSelectCarNo) return
     $('#zhdCarNoFilterPop').css('display', 'none')
     $('#zhdCarNo').css('display', 'none')
     tdNo = $('#tdNo').val()
@@ -985,41 +1033,59 @@ $(function() {
            * */
           var carno = ''
           if (res.data.data.length > 0) {
-            var carnoArr = res.data.data[0].datasCarnum.split(',')
-            if (carnoArr.length > 1) {
-              // FIXME 强制用户选
-              forceSelectCarNo = false
-              for (var i = 0; i < carnoArr.length; i++) {
-                var idx = carNoForTd.findIndex(itm => itm === carnoArr[i])
-                if (idx < 0) {
-                  forceSelectCarNo = true
-                  carNoForTd.push(carnoArr[i])
-                }
-              }
-              if (forceSelectCarNo) {
-                showMsg('车牌号有多个，请选择一个')
+            var singleDataCarNum = res.data.data[0].datasCarnum || ''
+            if (singleDataCarNum.trim().length === 0) {
+              // 判断列表是否存在
+              const existArr = tableList.filter(
+                itm => itm.sbillBillcode === res.data.data[0].sbillBillcode
+              )
+              if (existArr.length === 0) {
+                forceInputCarNo = true
+                forceSelectCarNo = true
+                showMsg('该TD没有车牌号，请手动输入')
                 hideCarComponent('zhdCarNoFilterPop')
-                $('#carnoIptWrap').click()
-              } else {
-                var tempCarNo = tableList.filter(
-                  item => item.sbillBillcode === res.data.data[0].sbillBillcode
-                )[0].datasCarnum
-                globalShowCarNo = tempCarNo
-                $('#tdCarNo').val(globalShowCarNo)
+                $('#manSelect').click()
               }
-              // $('#zhdCarNoFilterPop').css('display', 'flex')
-              // $('#zhdCarNoFilterPop').css('top', '100px')
-              // $('#zhdCarNoFilterPop').css(
-              //   'left',
-              //   e.currentTarget.offsetLeft - 100 + 'px'
-              // )
             } else {
-              carno = carnoArr[0]
-              $('#tdCarNo').val(carno)
-              globalShowCarNo = carno
-              var index = carNoForTd.findIndex(itm => itm === globalShowCarNo)
-              if (index < 0) {
-                carNoForTd.push(carno)
+              forceInputCarNo = false
+              var carnoArr = singleDataCarNum.split(',')
+              if (carnoArr.length > 1) {
+                forceSelectCarNo = false
+                for (var i = 0; i < carnoArr.length; i++) {
+                  var idx = carNoForTd.findIndex(itm => itm === carnoArr[i])
+                  if (idx < 0) {
+                    forceSelectCarNo = true
+                    carNoForTd.push(carnoArr[i])
+                  }
+                }
+                if (forceSelectCarNo) {
+                  originCarNoForId = carNoForTd
+                  carNoForTd = carnoArr
+                  showMsg('车牌号有多个，请选择一个')
+                  hideCarComponent('zhdCarNoFilterPop')
+                  $('#carnoIptWrap').click()
+                } else {
+                  var tempCarNo = tableList.filter(
+                    item =>
+                      item.sbillBillcode === res.data.data[0].sbillBillcode
+                  )[0].datasCarnum
+                  globalShowCarNo = tempCarNo
+                  $('#tdCarNo').val(globalShowCarNo)
+                }
+                // $('#zhdCarNoFilterPop').css('display', 'flex')
+                // $('#zhdCarNoFilterPop').css('top', '100px')
+                // $('#zhdCarNoFilterPop').css(
+                //   'left',
+                //   e.currentTarget.offsetLeft - 100 + 'px'
+                // )
+              } else {
+                carno = carnoArr[0]
+                $('#tdCarNo').val(carno)
+                globalShowCarNo = carno
+                var index = carNoForTd.findIndex(itm => itm === globalShowCarNo)
+                if (index < 0) {
+                  carNoForTd.push(carno)
+                }
               }
             }
           }
@@ -1149,6 +1215,7 @@ $(function() {
       })
   })
   $('#topClearBtn').click(() => {
+    if (forceSelectCarNo) return
     tdNo = ''
     hideCarComponent('zhdCarNoFilterPop')
     hideCarComponent('zhdCarNo')
@@ -2049,9 +2116,11 @@ $(function() {
      * 如果没有提单了，去除车牌号
      */
     var restIndex = tableList.filter(itm => itm.datasCarnum === sbillCarNo)
-    if (restIndex < 0) {
-      carNocarNoForTd = carNoForTd.filter(itm => itm !== sbillCarNo)
+    if (restIndex === 0) {
+      carNoForTd = carNoForTd.filter(itm => itm !== sbillCarNo)
     }
+    $('#tdCarNo').val('')
+    globalShowCarNo = ''
     selectRowIndex = -1
     resetLinkmap()
     updateTableData(tableList)
@@ -2171,6 +2240,7 @@ $(function() {
       })
     )
     $('#wzBody .tr').click(function() {
+      if (forceSelectCarNo) return
       var rowIdx = $(this).data('rowindex')
       selectRowIndex = Number(rowIdx)
       console.log('selectRowIndex:>>' + selectRowIndex)
