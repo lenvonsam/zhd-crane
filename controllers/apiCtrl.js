@@ -1,6 +1,6 @@
 const httpHelp = require('../utils/http')
-const PROXYURL = 'http://192.168.80.99:8080/warehouse-dev/warehouse'
-// const PROXYURL = 'http://192.168.80.102:8686/warehouse/warehouse'
+// const PROXYURL = 'http://192.168.80.99:8080/warehouse-dev/warehouse'
+const PROXYURL = 'http://192.168.80.102:8686/warehouse/warehouse'
 // const PROXYURL = 'http://localhost:7568/warehouse'
 
 module.exports = {
@@ -90,7 +90,7 @@ module.exports = {
           'currentUser',
           `${data.data.memberCode}|${data.data.operatorUserid}|${data.data.superWarehousemanFlag}`,
           {
-            domain: '192.168.80.200',
+            domain: '192.168.80.91',
             maxAge: 13 * 60 * 60 * 1000,
             httpOnly: false
           }
