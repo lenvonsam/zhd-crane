@@ -332,8 +332,6 @@ $(function() {
         return
       }
       $('#zhdCarNo').css('display', 'none')
-      globalCarType = ''
-      globalCarNo = ''
       console.log('globalShowCarNo:>>', globalShowCarNo)
       $('#tdCarNo').val(globalShowCarNo)
       if (forceInputCarNo) {
