@@ -997,6 +997,8 @@ $(function() {
   })
 
   $('#topAddBtn').click(e => {
+    selectRowIndex = -1
+    initActiveRect(selectRowIndex)
     if (forceSelectCarNo) return
     $('#zhdCarNoFilterPop').css('display', 'none')
     $('#zhdCarNo').css('display', 'none')
@@ -2116,7 +2118,7 @@ $(function() {
      * 如果没有提单了，去除车牌号
      */
     var restIndex = tableList.filter(itm => itm.datasCarnum === sbillCarNo)
-    if (restIndex === 0) {
+    if (restIndex.length === 0) {
       carNoForTd = carNoForTd.filter(itm => itm !== sbillCarNo)
     }
     $('#tdCarNo').val('')
