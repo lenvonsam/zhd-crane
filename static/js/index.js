@@ -984,6 +984,7 @@ $(function() {
     'other'
   ]
   $('#tdNo').focus(function(e) {
+    console.log('forceSelectCarNo:>>', forceSelectCarNo)
     if (forceSelectCarNo) return
     $('.zhd-keyboard').css('display', 'none')
     $('#zhdCarNoFilterPop').css('display', 'none')
@@ -1014,6 +1015,7 @@ $(function() {
         sbillBillcode: tdNo
       })
         .then(res => {
+          canBtnClick = true
           console.log(res)
           if (res.status == 0) {
             // showMsg('用户过期')
@@ -1218,6 +1220,7 @@ $(function() {
           }
         })
         .catch(err => {
+          canBtnClick = true
           console.error(err)
           showMsg(err)
         })
