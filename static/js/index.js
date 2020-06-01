@@ -1,3 +1,5 @@
+// 强制选择车牌号
+var forceSelectCarNo = false
 $(function() {
   // 仓库名称
   var wname = ''
@@ -100,8 +102,6 @@ $(function() {
   var globalCarType = ''
   var globalCarNo = ''
   var globalShowCarNo = ''
-  // 强制选择车牌号
-  var forceSelectCarNo = false
   // 强制输入车牌号
   var forceInputCarNo = false
   var carNoReg = /^(([京津沪渝冀豫云辽黑湘皖鲁新苏浙赣鄂桂甘晋蒙陕吉闽贵粤青藏川宁琼使领][A-Za-z](([0-9]{5}[DFdf])|([DFdf]([A-Ha-hJ-Nj-nP-Zp-z0-9])[0-9]{4})))|([京津沪渝冀豫云辽黑湘皖鲁新苏浙赣鄂桂甘晋蒙陕吉闽贵粤青藏川宁琼使领][A-Za-z][A-Ha-hJ-Nj-nP-Zp-z0-9]{4}[A-Ha-hJ-Nj-nP-Zp-z0-9挂学警港澳使领]))$/
@@ -993,10 +993,12 @@ $(function() {
     // $('.zhd-keyboard').css('left', (e.currentTarget.offsetLeft - 20) + 'px')
     $('.zhd-keyboard').css('display', 'block')
   })
-
+  var canBtnClick = true
   $('#topAddBtn').click(e => {
+    e.stopPropagation()
     selectRowIndex = -1
     initActiveRect(selectRowIndex)
+    console.log('forceSelectCarNo:>>' + forceSelectCarNo)
     if (forceSelectCarNo) return
     $('#zhdCarNoFilterPop').css('display', 'none')
     $('#zhdCarNo').css('display', 'none')
@@ -1006,213 +1008,220 @@ $(function() {
       return
     }
     $('.zhd-keyboard').css('display', 'none')
-    request('/outWaitStorageQuery', {
-      sbillBillcode: tdNo
-    })
-      .then(res => {
-        console.log(res)
-        if (res.status == 0) {
-          // showMsg('用户过期')
-          if (!res.data.data) {
-            showMsg('此提单号查无物资明细')
-            return
-          }
-          // if (res.data.data.length > 0) {
-          //   var firstObj = res.data.data[0]
-          //   if (firstObj.wsFlag == 1) {
-          //     showMsg('系统暂不支持型云提单出库')
-          //     return
-          //   }
-          // }
-          /**
-           * 显示车牌号
-           * 一个自动显示，一个以上需要手动选择
-           * @author samy
-           * @date 2020/05/26
-           * FIXME
-           * */
-          var carno = ''
-          if (res.data.data.length > 0) {
-            var singleDataCarNum = res.data.data[0].datasCarnum || ''
-            if (singleDataCarNum.trim().length === 0) {
-              // 判断列表是否存在
-              const existArr = tableList.filter(
-                itm => itm.sbillBillcode === res.data.data[0].sbillBillcode
-              )
-              if (existArr.length === 0) {
-                forceInputCarNo = true
-                forceSelectCarNo = true
-                showMsg('该TD没有车牌号，请手动输入')
-                hideCarComponent('zhdCarNoFilterPop')
-                $('#manSelect').click()
-              }
-            } else {
-              forceInputCarNo = false
-              var carnoArr = singleDataCarNum.split(',')
-              if (carnoArr.length > 1) {
-                forceSelectCarNo = false
-                for (var i = 0; i < carnoArr.length; i++) {
-                  var idx = carNoForTd.findIndex(itm => itm === carnoArr[i])
-                  if (idx < 0) {
-                    forceSelectCarNo = true
-                    carNoForTd.push(carnoArr[i])
-                  }
-                }
-                if (forceSelectCarNo) {
-                  originCarNoForId = carNoForTd
-                  carNoForTd = carnoArr
-                  showMsg('车牌号有多个，请选择一个')
+    if (canBtnClick) {
+      canBtnClick = false
+      request('/outWaitStorageQuery', {
+        sbillBillcode: tdNo
+      })
+        .then(res => {
+          console.log(res)
+          if (res.status == 0) {
+            // showMsg('用户过期')
+            if (!res.data.data) {
+              showMsg('此提单号查无物资明细')
+              return
+            }
+            // if (res.data.data.length > 0) {
+            //   var firstObj = res.data.data[0]
+            //   if (firstObj.wsFlag == 1) {
+            //     showMsg('系统暂不支持型云提单出库')
+            //     return
+            //   }
+            // }
+            /**
+             * 显示车牌号
+             * 一个自动显示，一个以上需要手动选择
+             * @author samy
+             * @date 2020/05/26
+             * FIXME
+             * */
+            var carno = ''
+            if (res.data.data.length > 0) {
+              var singleDataCarNum = res.data.data[0].datasCarnum || ''
+              if (singleDataCarNum.trim().length === 0) {
+                // 判断列表是否存在
+                const existArr = tableList.filter(
+                  itm => itm.sbillBillcode === res.data.data[0].sbillBillcode
+                )
+                if (existArr.length === 0) {
+                  forceInputCarNo = true
+                  forceSelectCarNo = true
+                  showMsg('该TD没有车牌号，请手动输入')
                   hideCarComponent('zhdCarNoFilterPop')
-                  $('#carnoIptWrap').click()
+                  $('#manSelect').click()
+                }
+              } else {
+                forceInputCarNo = false
+                var carnoArr = singleDataCarNum.split(',')
+                if (carnoArr.length > 1) {
+                  forceSelectCarNo = false
+                  for (var i = 0; i < carnoArr.length; i++) {
+                    var idx = carNoForTd.findIndex(itm => itm === carnoArr[i])
+                    if (idx < 0) {
+                      forceSelectCarNo = true
+                      carNoForTd.push(carnoArr[i])
+                    }
+                  }
+                  if (forceSelectCarNo) {
+                    originCarNoForId = carNoForTd
+                    carNoForTd = carnoArr
+                    showMsg('车牌号有多个，请选择一个')
+                    hideCarComponent('zhdCarNoFilterPop')
+                    $('#carnoIptWrap').click()
+                  } else {
+                    var tempCarNo = tableList.filter(
+                      item =>
+                        item.sbillBillcode === res.data.data[0].sbillBillcode
+                    )[0].datasCarnum
+                    globalShowCarNo = tempCarNo
+                    $('#tdCarNo').val(globalShowCarNo)
+                  }
+                  // $('#zhdCarNoFilterPop').css('display', 'flex')
+                  // $('#zhdCarNoFilterPop').css('top', '100px')
+                  // $('#zhdCarNoFilterPop').css(
+                  //   'left',
+                  //   e.currentTarget.offsetLeft - 100 + 'px'
+                  // )
                 } else {
-                  var tempCarNo = tableList.filter(
-                    item =>
-                      item.sbillBillcode === res.data.data[0].sbillBillcode
-                  )[0].datasCarnum
-                  globalShowCarNo = tempCarNo
-                  $('#tdCarNo').val(globalShowCarNo)
-                }
-                // $('#zhdCarNoFilterPop').css('display', 'flex')
-                // $('#zhdCarNoFilterPop').css('top', '100px')
-                // $('#zhdCarNoFilterPop').css(
-                //   'left',
-                //   e.currentTarget.offsetLeft - 100 + 'px'
-                // )
-              } else {
-                carno = carnoArr[0]
-                $('#tdCarNo').val(carno)
-                globalShowCarNo = carno
-                var index = carNoForTd.findIndex(itm => itm === globalShowCarNo)
-                if (index < 0) {
-                  carNoForTd.push(carno)
+                  carno = carnoArr[0]
+                  $('#tdCarNo').val(carno)
+                  globalShowCarNo = carno
+                  var index = carNoForTd.findIndex(
+                    itm => itm === globalShowCarNo
+                  )
+                  if (index < 0) {
+                    carNoForTd.push(carno)
+                  }
                 }
               }
             }
-          }
 
-          if (tableList.length == 0) {
-            tableList = res.data.data
-            updateTableData(tableList)
-          } else {
-            // 重新渲染之前选择的物资
-            let currentTD = ''
-            if (selectRowIndex >= 0)
-              currentTD = tableList[selectRowIndex]['sbillBillbatch']
-            var chooseItems = {}
-            console.log('linkMap:>>', linkMap)
-            Object.keys(linkMap).map(itm => {
-              if (linkMap[itm].length > 0) {
-                linkMap[itm].map(item => {
-                  let keys = Object.keys(chooseItems)
-                  let indx = keys.findIndex(
-                    im => im == tableList[item]['sbillBillbatch']
-                  )
-                  if (indx >= 0) {
-                    chooseItems[tableList[item]['sbillBillbatch']] =
-                      itm + ';' + chooseItems[tableList[item]['sbillBillbatch']]
-                  } else {
-                    chooseItems[tableList[item]['sbillBillbatch']] = itm
-                  }
-                })
+            if (tableList.length == 0) {
+              tableList = res.data.data
+              updateTableData(tableList)
+            } else {
+              // 重新渲染之前选择的物资
+              let currentTD = ''
+              if (selectRowIndex >= 0)
+                currentTD = tableList[selectRowIndex]['sbillBillbatch']
+              var chooseItems = {}
+              console.log('linkMap:>>', linkMap)
+              Object.keys(linkMap).map(itm => {
+                if (linkMap[itm].length > 0) {
+                  linkMap[itm].map(item => {
+                    let keys = Object.keys(chooseItems)
+                    let indx = keys.findIndex(
+                      im => im == tableList[item]['sbillBillbatch']
+                    )
+                    if (indx >= 0) {
+                      chooseItems[tableList[item]['sbillBillbatch']] =
+                        itm +
+                        ';' +
+                        chooseItems[tableList[item]['sbillBillbatch']]
+                    } else {
+                      chooseItems[tableList[item]['sbillBillbatch']] = itm
+                    }
+                  })
+                }
+              })
+              $('.crane-btn').unbind()
+              res.data.data.map(itm => {
+                let idx = tableList.findIndex(
+                  item => item.sbillBillbatch == itm.sbillBillbatch
+                )
+                if (idx < 0) tableList.push(itm)
+              })
+              updateTableData(tableList)
+              if (currentTD.length != '') {
+                selectRowIndex = tableList.findIndex(
+                  itm => itm.sbillBillbatch == currentTD
+                )
+                initActiveRect(selectRowIndex)
               }
-            })
-            $('.crane-btn').unbind()
-            res.data.data.map(itm => {
-              let idx = tableList.findIndex(
-                item => item.sbillBillbatch == itm.sbillBillbatch
-              )
-              if (idx < 0) tableList.push(itm)
-            })
-            updateTableData(tableList)
-            if (currentTD.length != '') {
-              selectRowIndex = tableList.findIndex(
-                itm => itm.sbillBillbatch == currentTD
-              )
-              initActiveRect(selectRowIndex)
+              resetLinkmap()
+              console.log('chooseItems:>>>', chooseItems)
+              Object.keys(chooseItems).map(k => {
+                let idx = tableList.findIndex(itm => itm.sbillBillbatch == k)
+                let btnIdx = chooseItems[k]
+                console.log('btnIdx:>>', btnIdx)
+                console.log('; indx:>>>', btnIdx.toString().indexOf(';'))
+                if (btnIdx.toString().indexOf(';') > 0) {
+                  // 一个物资多秤
+                  let arr = btnIdx.toString().split(';')
+                  console.log('arr:>>', arr)
+                  arr.map((it, indx) => {
+                    linkMap[Number(it)].push(idx)
+                    if (indx == 0) {
+                      $('#wzBody .tr')
+                        .eq(idx)
+                        .find('.td')
+                        .eq(9)
+                        .html('')
+                      $('#wzBody .tr')
+                        .eq(idx)
+                        .find('.td')
+                        .eq(9)
+                        .html(
+                          '<div class="crane-btn column" data-bidx="' +
+                            it +
+                            '" data-ridx="' +
+                            idx +
+                            '"><span>' +
+                            craneNames[it] +
+                            '</span></div>'
+                        )
+                    } else {
+                      $('#wzBody .tr')
+                        .eq(idx)
+                        .find('.td')
+                        .eq(9)
+                        .prepend(
+                          '<div class="crane-btn column" data-bidx="' +
+                            it +
+                            '" data-ridx="' +
+                            idx +
+                            '"><span>' +
+                            craneNames[it] +
+                            '</span></div>'
+                        )
+                    }
+                  })
+                } else {
+                  linkMap[btnIdx].push(idx)
+                  $('#wzBody .tr')
+                    .eq(idx)
+                    .find('.td')
+                    .eq(9)
+                    .html('')
+                  $('#wzBody .tr')
+                    .eq(idx)
+                    .find('.td')
+                    .eq(9)
+                    .html(
+                      '<div class="crane-btn column" data-bidx="' +
+                        btnIdx +
+                        '" data-ridx="' +
+                        idx +
+                        '"><span>' +
+                        craneNames[btnIdx] +
+                        '</span></div>'
+                    )
+                }
+                bindCraneBtn(idx)
+              })
             }
-            resetLinkmap()
-            console.log('chooseItems:>>>', chooseItems)
-            Object.keys(chooseItems).map(k => {
-              let idx = tableList.findIndex(itm => itm.sbillBillbatch == k)
-              let btnIdx = chooseItems[k]
-              console.log('btnIdx:>>', btnIdx)
-              console.log('; indx:>>>', btnIdx.toString().indexOf(';'))
-              if (btnIdx.toString().indexOf(';') > 0) {
-                // 一个物资多秤
-                let arr = btnIdx.toString().split(';')
-                console.log('arr:>>', arr)
-                arr.map((it, indx) => {
-                  linkMap[Number(it)].push(idx)
-                  if (indx == 0) {
-                    $('#wzBody .tr')
-                      .eq(idx)
-                      .find('.td')
-                      .eq(9)
-                      .html('')
-                    $('#wzBody .tr')
-                      .eq(idx)
-                      .find('.td')
-                      .eq(9)
-                      .html(
-                        '<div class="crane-btn column" data-bidx="' +
-                          it +
-                          '" data-ridx="' +
-                          idx +
-                          '"><span>' +
-                          craneNames[it] +
-                          '</span></div>'
-                      )
-                  } else {
-                    $('#wzBody .tr')
-                      .eq(idx)
-                      .find('.td')
-                      .eq(9)
-                      .prepend(
-                        '<div class="crane-btn column" data-bidx="' +
-                          it +
-                          '" data-ridx="' +
-                          idx +
-                          '"><span>' +
-                          craneNames[it] +
-                          '</span></div>'
-                      )
-                  }
-                })
-              } else {
-                linkMap[btnIdx].push(idx)
-                $('#wzBody .tr')
-                  .eq(idx)
-                  .find('.td')
-                  .eq(9)
-                  .html('')
-                $('#wzBody .tr')
-                  .eq(idx)
-                  .find('.td')
-                  .eq(9)
-                  .html(
-                    '<div class="crane-btn column" data-bidx="' +
-                      btnIdx +
-                      '" data-ridx="' +
-                      idx +
-                      '"><span>' +
-                      craneNames[btnIdx] +
-                      '</span></div>'
-                  )
-              }
-              bindCraneBtn(idx)
-            })
+            console.log(tableList)
+          } else if (resp.status == -2) {
+            window.location.href = '/login?type=1'
+          } else {
+            showMsg(resp.message)
           }
-          console.log(tableList)
-        } else if (resp.status == -2) {
-          window.location.href = '/login?type=1'
-        } else {
-          showMsg(resp.message)
-        }
-      })
-      .catch(err => {
-        console.error(err)
-        showMsg(err)
-      })
+        })
+        .catch(err => {
+          console.error(err)
+          showMsg(err)
+        })
+    }
   })
   $('#topClearBtn').click(() => {
     if (forceSelectCarNo) return
@@ -2501,8 +2510,10 @@ function formatWeight(val) {
 }
 
 function initActiveRect(idx) {
-  hideCarComponent('zhdCarNoFilterPop')
-  hideCarComponent('zhdCarNo')
+  if (!forceSelectCarNo) {
+    hideCarComponent('zhdCarNoFilterPop')
+    hideCarComponent('zhdCarNo')
+  }
   if (idx == -1) {
     $('#wzBody > .active-rect').css('display', 'none')
   } else {
