@@ -3,6 +3,9 @@
 .relative {
   position: relative;
 }
+.flex {
+  display: flex;
+}
 .column {
   display: flex;
   flex-direction: column;
@@ -17,12 +20,28 @@
   align-items: center;
 }
 
+.row-wrap {
+  flex-wrap: wrap;
+}
+
+.align-center {
+  align-items: center;
+}
+
+.justify-center {
+  justify-content: center;
+}
+
 .col {
   flex: 1;
 }
 
 .padding {
   padding: 15px 15px;
+}
+
+.mt-15 {
+  margin-top: 15px;
 }
 
 .ml-5 {
@@ -85,17 +104,32 @@ input:focus {
   top: -50px;
   left: 10%;
   right: 10%;
-  padding:  15px 15px;
+  padding: 15px 15px;
   background: #fff;
   opacity: 0.9;
   border-radius: 6px;
   text-align: center;
 }
 
-.message.error {
+.message.error,
+.c-red {
   color: red;
 }
 
+.bg-yellow {
+  background: #f39800 !important;
+}
+.bg-blue {
+  background: #005bac !important;
+}
+
+.c-white {
+  color: #fff;
+}
+
+/**
+* ============================ 吊秤数字键盘 ============================
+*/
 .zhd-keyboard {
   display: none;
   position: fixed;
@@ -165,6 +199,10 @@ input:focus {
 .zhd-keyboard .num-wrap .num span {
   color: #262626;
 }
+
+/**
+* ============================ 模态框 ============================
+*/
 
 .zhd-modal {
   position: fixed;
@@ -242,6 +280,10 @@ input:focus {
   color: #64819e;
 }
 
+/**
+* ============================ 页面加载 ============================
+*/
+
 .zhd-loading {
   position: fixed;
   display: none;
@@ -252,7 +294,7 @@ input:focus {
   z-index: 1000;
 }
 
-.zhd-loading .bg{
+.zhd-loading .bg {
   position: absolute;
   left: 0;
   right: 0;
@@ -275,4 +317,136 @@ input:focus {
   color: #fff;
   font-size: 40px;
   font-weight: bold;
+}
+
+/**
+* ============================ 选择车牌号组件 ============================
+*/
+.zhd-carno {
+  position: absolute;
+  background: #fff;
+  z-index: 9999;
+  box-sizing: border-box;
+}
+
+.zhd-carno .zhd-carno-filter {
+  position: relative;
+  box-sizing: border-box;
+  flex: 0 0 200px;
+  padding: 15px 15px;
+}
+
+.zhd-carno .zhd-carno-filter.up-arrow::after {
+  position: absolute;
+  width: 0;
+  height: 0;
+  content: '';
+  border-left: 8px solid transparent;
+  border-right: 8px solid transparent;
+  border-bottom: 12px solid #fff;
+  top: -11px;
+  right: 20px;
+}
+.zhd-carno .zhd-carno-filter .sub-title {
+  color: #888;
+  font-size: 14px;
+  margin-top: 5px;
+}
+
+.zhd-carno .zhd-carno-filter .list {
+  max-height: 100px;
+  overflow-x: hidden;
+  overflow-y: auto;
+  margin-top: 10px;
+}
+.zhd-carno .zhd-carno-filter .list .item {
+  line-height: 35px;
+  font-size: 20px;
+}
+
+.zhd-carno .zhd-carno-filter .list .item .cbx {
+  flex: 0 0 40px;
+}
+
+.zhd-carno .zhd-carno-filter .list .item .cbx > img {
+  width: 27px;
+  height: 27px;
+}
+.zhd-carno .zhd-carno-filter.right-line {
+  border-right: 1px solid #ddd;
+}
+
+.zhd-carno .zhd-carno-add {
+  flex: 1;
+  box-sizing: border-box;
+  padding: 10px 15px;
+  position: relative;
+}
+
+.zhd-carno .zhd-carno-add.up-arrow::after {
+  position: absolute;
+  width: 0;
+  height: 0;
+  content: '';
+  border-left: 8px solid transparent;
+  border-right: 8px solid transparent;
+  border-bottom: 12px solid #fff;
+  top: -11px;
+  left: 45%;
+}
+
+.zhd-carno .zhd-carno-add .add-btn {
+  width: 106px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  color: #fff;
+  justify-content: center;
+  letter-spacing: 3px;
+  font-size: 20px;
+  background-image: url('../img/btnd.png');
+  background-size: cover;
+  background-repeat: no-repeat;
+}
+
+.zhd-carno-keyboard {
+  background: #eee;
+  /*z-index: 9999;
+  position: fixed; */
+  /* bottom: 0; */
+  /* left: 0; */
+  /* right: 0; */
+  /* padding: 10px 10%; */
+  padding: 10px 0px;
+}
+.zhd-carno-keyboard .key-item {
+  width: 75px;
+  height: 75px;
+  text-align: center;
+  line-height: 75px;
+  margin: 6px;
+  border-radius: 5px;
+  font-size: 30px;
+  cursor: pointer;
+  background: #fff;
+}
+
+.zhd-carno-keyboard .key-item:active,
+.zhd-carno-keyboard .key-item.num:active {
+  background: rgba(238, 238, 238, 0.9);
+  color: #fff;
+}
+
+.zhd-carno-keyboard .key-item.num {
+  width: 120px;
+  font-size: 35px;
+}
+.zhd-carno-keyboard .key-item.close {
+  cursor: pointer;
+}
+
+.zhd-carno-keyboard .content {
+  justify-content: center;
+  width: 900px;
+  margin: 0 auto;
 }
