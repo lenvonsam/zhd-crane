@@ -1,4 +1,5 @@
 $(function () {
+  alert("测试docker");
   $('body').removeClass('login-bg')
   $('body').addClass('login-bg')
   var pageType = $('input[name="loginType"]').val()
