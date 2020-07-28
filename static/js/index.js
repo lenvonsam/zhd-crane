@@ -23,7 +23,10 @@ $(function() {
     '05': ['01', '02', '03', '04', '05'],
     '06': ['01', '02', '03', '04'],
     '07': ['01', '02', '03', '04'],
-    '08': ['01', '02', '03', '04', '05', '06', '07']
+    '08': ['01', '02', '03', '04', '05', '06', '07'],
+    '10': ['01', '02', '03', '04', '05', '06', '07'],
+    '11': ['01', '02', '03', '04'],
+    '12': ['01', '02', '03', '04', '05', '06', '07']
   }
   // 选择操作员
   var wnameCheckArr = []
@@ -389,6 +392,7 @@ $(function() {
   // 当强制选择车牌时保存原有的车牌号
   var originCarNoForId = []
   $('#carnoIptWrap').click(function(e) {
+    hideCarComponent('zhdOriginPlaceFilterPop')
     if (forceInputCarNo) return
     if (selectRowIndex < 0 && !forceSelectCarNo) {
       showMsg('请选择物资')
@@ -454,6 +458,7 @@ $(function() {
     }
   })
   $('#manSelect').click(function(e) {
+    hideCarComponent('zhdOriginPlaceFilterPop')
     if (forceSelectCarNo && !forceInputCarNo) return
     if (selectRowIndex === -1 && !forceInputCarNo) {
       showMsg('请选择物资')
@@ -475,6 +480,8 @@ $(function() {
       showMsg('请选择物资')
       return
     }
+    hideCarComponent('zhdCarNoFilterPop')
+    hideCarComponent('zhdCarNo')
     $('#zhdOriginPlaceFilterPop .list').html('')
     for (var i = 0; i < globalOriginPlaceArr.length; i++) {
       if (globalOriginPlace == globalOriginPlaceArr[i]) {
@@ -504,7 +511,10 @@ $(function() {
       currentObj.originPlace = globalOriginPlace
     })
     $('#zhdOriginPlaceFilterPop').css('top', '100px')
-    $('#zhdOriginPlaceFilterPop').css('left', e.currentTarget.offsetLeft + 'px')
+    $('#zhdOriginPlaceFilterPop').css(
+      'left',
+      e.currentTarget.offsetLeft - 90 + 'px'
+    )
     var displayStr = $('#zhdOriginPlaceFilterPop').css('display')
     if (displayStr === 'none') {
       $('#zhdOriginPlaceFilterPop').css('display', 'flex')
@@ -1045,6 +1055,7 @@ $(function() {
     initActiveRect(selectRowIndex)
     console.log('forceSelectCarNo:>>' + forceSelectCarNo)
     if (forceSelectCarNo) return
+    hideCarComponent('zhdOriginPlaceFilterPop')
     $('#zhdCarNoFilterPop').css('display', 'none')
     $('#zhdCarNo').css('display', 'none')
     tdNo = $('#tdNo').val()
@@ -1276,6 +1287,7 @@ $(function() {
   $('#topClearBtn').click(() => {
     if (forceSelectCarNo) return
     tdNo = ''
+    hideCarComponent('zhdOriginPlaceFilterPop')
     hideCarComponent('zhdCarNoFilterPop')
     hideCarComponent('zhdCarNo')
     $('.zhd-keyboard').css('display', 'none')
