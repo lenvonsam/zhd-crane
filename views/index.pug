@@ -6,6 +6,10 @@ append scripts
   script(src="/lib/socket.io.js")
   script(src="/js/index.js")
 block content
+  #zhdOriginPlaceFilterPop.zhd-carno(style="display:none; width: 320px")
+    .zhd-carno-filter.up-arrow(style="flex: 0 0 320px;")
+      div 请选择该物资的原产地
+      .list.middle
   #zhdCarNoFilterPop.zhd-carno(style="display:none; width: 225px")
     .zhd-carno-filter.up-arrow(style="flex: 0 0 225px;")
       div 提单对应车牌号
@@ -80,13 +84,17 @@ block content
   .main-head.row
     image(src="/img/bgys.png", style="height: 160px; position: absolute; top: 0px; left: 0px;")
     .main-brand= pageBrand
-    div(style="flex-basis: 170px") 提货车号
-    #carnoIptWrap(style="flex-basis: 225px")
+    div(style="flex-basis: 86px") 车号
+    #carnoIptWrap.arrow-container.relative(style="flex-basis: 225px")
       .main-ipt.row
         input#tdCarNo.center(readOnly)
     #manSelect.row(style="flex-basis: 128px")
       .main-btn
         span 手动输入
+    .center(style="flex-basis: 140px") 原产地
+    #originAreaWrap.arrow-container.relative.row(style="flex-basis: 225px")
+      .main-ipt.row
+        input#originAreaIpt.center(readOnly)
     .flex.justify-center(style="flex-basis: 70px") TD
     .row(style="flex-basis: 225px")
       .main-ipt.row

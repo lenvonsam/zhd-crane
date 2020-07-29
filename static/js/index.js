@@ -389,6 +389,7 @@ $(function() {
   // 当强制选择车牌时保存原有的车牌号
   var originCarNoForId = []
   $('#carnoIptWrap').click(function(e) {
+    hideCarComponent('zhdOriginPlaceFilterPop')
     if (forceInputCarNo) return
     if (selectRowIndex < 0 && !forceSelectCarNo) {
       showMsg('请选择物资')
@@ -454,6 +455,7 @@ $(function() {
     }
   })
   $('#manSelect').click(function(e) {
+    hideCarComponent('zhdOriginPlaceFilterPop')
     if (forceSelectCarNo && !forceInputCarNo) return
     if (selectRowIndex === -1 && !forceInputCarNo) {
       showMsg('请选择物资')
@@ -467,6 +469,55 @@ $(function() {
     $('#zhdCarNo').css('top', '100px')
     $('#zhdCarNo').css('left', '10%')
     $('#zhdCarNo').css('display', 'flex')
+  })
+
+  // 行原产地下来 originAreaWrap
+  $('#originAreaWrap').click(function(e) {
+    if (selectRowIndex < 0) {
+      showMsg('请选择物资')
+      return
+    }
+    hideCarComponent('zhdCarNoFilterPop')
+    hideCarComponent('zhdCarNo')
+    $('#zhdOriginPlaceFilterPop .list').html('')
+    for (var i = 0; i < globalOriginPlaceArr.length; i++) {
+      if (globalOriginPlace == globalOriginPlaceArr[i]) {
+        $('#zhdOriginPlaceFilterPop .list').append(
+          '<div class="item row"><div class="cbx flex align-center"><img src="/img/cbxd.png"/></div><div class="col">' +
+            globalOriginPlaceArr[i] +
+            '</div></div>'
+        )
+      } else {
+        $('#zhdOriginPlaceFilterPop .list').append(
+          '<div class="item row"><div class="cbx flex align-center"><img src="/img/cbx.png"/></div><div class="col">' +
+            globalOriginPlaceArr[i] +
+            '</div></div>'
+        )
+      }
+    }
+    $('#zhdOriginPlaceFilterPop .list .item').click(function() {
+      var val = $(this)
+        .find('.col')
+        .eq(0)
+        .text()
+      globalOriginPlace = val
+      console.log('globalOriginPlace:>>' + globalOriginPlace)
+      $('#originAreaIpt').val(globalOriginPlace)
+      $('#zhdOriginPlaceFilterPop').css('display', 'none')
+      const currentObj = tableList[selectRowIndex]
+      currentObj.originPlace = globalOriginPlace
+    })
+    $('#zhdOriginPlaceFilterPop').css('top', '100px')
+    $('#zhdOriginPlaceFilterPop').css(
+      'left',
+      e.currentTarget.offsetLeft - 90 + 'px'
+    )
+    var displayStr = $('#zhdOriginPlaceFilterPop').css('display')
+    if (displayStr === 'none') {
+      $('#zhdOriginPlaceFilterPop').css('display', 'flex')
+    } else {
+      $('#zhdOriginPlaceFilterPop').css('display', 'none')
+    }
   })
 
   // 初始化底部磅秤按钮
@@ -1001,6 +1052,7 @@ $(function() {
     initActiveRect(selectRowIndex)
     console.log('forceSelectCarNo:>>' + forceSelectCarNo)
     if (forceSelectCarNo) return
+    hideCarComponent('zhdOriginPlaceFilterPop')
     $('#zhdCarNoFilterPop').css('display', 'none')
     $('#zhdCarNo').css('display', 'none')
     tdNo = $('#tdNo').val()
@@ -1009,6 +1061,9 @@ $(function() {
       return
     }
     $('.zhd-keyboard').css('display', 'none')
+    globalOriginPlace = ''
+    globalOriginPlaceArr = []
+    $('#originAreaIpt').val(globalOriginPlace)
     if (canBtnClick) {
       canBtnClick = false
       request('/outWaitStorageQuery', {
@@ -1229,6 +1284,7 @@ $(function() {
   $('#topClearBtn').click(() => {
     if (forceSelectCarNo) return
     tdNo = ''
+    hideCarComponent('zhdOriginPlaceFilterPop')
     hideCarComponent('zhdCarNoFilterPop')
     hideCarComponent('zhdCarNo')
     $('.zhd-keyboard').css('display', 'none')
@@ -1487,6 +1543,12 @@ $(function() {
            * @date 2020/05/26
            */
           body.datasCarnum = currentObj.datasCarnum
+          /**
+           * 原产地
+           * @author samy
+           * @date 2020/07/27
+           */
+          body.originPlace = currentObj.originPlace
           // 添加凭证出库逻辑 2019年07月24日
           if (Number(currentObj.pickType) === 1) {
             body.picktokenBillcode = currentObj.picktokenBillcode
@@ -1806,6 +1868,14 @@ $(function() {
       detailIdx.map(itm => {
         totalPlankArr.push(tableList[itm])
       })
+      // 判断是否所有明细都选择了原产地
+      const originPlaceFilterArr = totalPlankArr.filter(
+        itm => itm.originPlace == null || itm.originPlace == ''
+      )
+      if (originPlaceFilterArr.length > 0) {
+        showMsg('有物资未选择原产地，无法出库')
+        return
+      }
       // FIXME 出库
       if (detailIdx.length > 1) {
         let arr = detailIdx.map(itm => tableList[itm])
@@ -1843,6 +1913,10 @@ $(function() {
     } else {
       let currentObj = tableList[selectRowIndex]
       let currentTd = currentObj.sbillBillcode
+      if (currentObj.originPlace == null || currentObj.originPlace == '') {
+        showMsg('该物资未选择原产地，无法出库')
+        return
+      }
       delete singleGoodsCount[currentObj.sbillBillbatch]
       singleOutStorage(currentObj, currentTd, cnt, w, 0, 0, userChooseBtnIdx)
     }
@@ -2228,7 +2302,11 @@ $(function() {
     console.log('出库后的按钮映射')
     console.log(linkMap)
     if (manAudit) showMsg('请去电脑后台人工审核出库')
-    else showMsg('该物资已出库成功')
+    else {
+      showMsg('该物资已出库成功')
+      globalOriginPlace = ''
+      $('#originAreaIpt').val(globalOriginPlace)
+    }
     if (cb) cb()
   }
 
@@ -2239,6 +2317,41 @@ $(function() {
       2: [],
       3: []
     }
+  }
+
+  /**
+   *
+   * 获取选择行原产地的信息
+   *
+   * @param partName 品名
+   * @param spec 规格
+   * @author samy
+   * @date 2020/07/27
+   */
+  // 原产地
+  var globalOriginPlace = ''
+  // 下拉原产地数组
+  var globalOriginPlaceArr = []
+  function getRowOriginPlace(partName, spec) {
+    request('/queryOriginPlace', { partName, spec })
+      .then(res => {
+        console.log('resp:>>', res)
+        if (res.status === 0) {
+          globalOriginPlaceArr = res.data
+        } else {
+          globalOriginPlaceArr = []
+          globalOriginPlace = ''
+          $('#originAreaIpt').val(globalOriginPlace)
+          showMsg(data.message)
+        }
+      })
+      .catch(err => {
+        console.error('origin place error:>>', err)
+        globalOriginPlaceArr = []
+        globalOriginPlace = ''
+        $('#originAreaIpt').val(globalOriginPlace)
+        showMsg(err.message || '网络异常')
+      })
   }
 
   function updateTableData(data) {
@@ -2260,6 +2373,15 @@ $(function() {
       // 判断是否可以直接出库
       let selectObj = tableList[selectRowIndex]
       console.log(selectObj)
+      // 获取本行原产地信息
+      $('#zhdOriginPlaceFilterPop').css('display', 'none')
+      if (selectObj.originPlace) {
+        globalOriginPlace = selectObj.originPlace
+      } else {
+        globalOriginPlace = ''
+      }
+      $('#originAreaIpt').val(globalOriginPlace)
+      getRowOriginPlace(selectObj.partsnameName, selectObj.goodsSpec)
       // 添加显示提单的车牌号
       globalSelectRowIndex = selectRowIndex
       globalShowCarNo = selectObj.datasCarnum

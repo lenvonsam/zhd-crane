@@ -39,9 +39,12 @@ $(function() {
     'goodsSpec',
     'goodsProperty1',
     'productareaName',
+    'originPlace',
     'goodsNum',
     'goodsWeight',
     'employeeName',
+    'driverInfo',
+    'datasCarnum',
     'other',
     'dataAudit'
   ]
@@ -170,14 +173,40 @@ $(function() {
           if (itm['employeeMobile'] && k == 'employeeName')
             showStr += '<br>' + itm['employeeMobile']
           tdStr += '<div class="td">' + showStr + '</div>'
-        } else if (k != 'other') {
-          tdStr += '<div class="td">' + itm[k] + '<br/></div>'
-        } else {
+        } else if (k === 'driverInfo') {
+          tdStr += '<div class="td middle">'
+          if (itm['datasDriver']) tdStr += itm['datasDriver'] + '<br>'
+          if (itm['driverPhone']) tdStr += itm['driverPhone'] + '<br>'
+          // if (itm['datasCarnum']) tdStr += itm['datasCarnum']
+          tdStr += '</div>'
+        }
+        // else if (k === 'productareaName') {
+        //   tdStr += '<div class="td">' + itm['productareaName']
+        //   if (itm['originPlace']) {
+        //     tdStr += '<br>原产地: ' + itm['originPlace']
+        //   }
+        //   tdStr += '</div>'
+        // }
+        else if (k === 'other') {
           tdStr += '<div class="td">' + itm['goodsMaterial']
           if (itm['goodsProperty5']) tdStr += '<br/>' + itm['goodsProperty5']
           if (itm['goodsProperty4']) tdStr += '<br/>' + itm['goodsProperty4']
-          if (itm['datasCarnum']) tdStr += '<br/>' + itm['datasCarnum']
+          // if (itm['datasCarnum']) tdStr += '<br/>' + itm['datasCarnum']
           tdStr += '</div>'
+        } else {
+          if (
+            k === 'goodsNum' ||
+            k === 'goodsProperty1' ||
+            k === 'goodsWeight' ||
+            k === 'datasCarnum'
+          ) {
+            tdStr += '<div class="td min">' + itm[k] + '<br/></div>'
+          } else {
+            tdStr +=
+              '<div class="td">' +
+              (itm[k] == null ? '' : itm[k]) +
+              '<br/></div>'
+          }
         }
       })
       rowStr += '<div class="tr row center">' + tdStr + '</div>'
