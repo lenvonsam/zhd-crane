@@ -119,8 +119,13 @@
 }
 .outd-th.row .grid.min,
 .outd-query-body .table .tr .td.min {
+  flex: 0 0 80px;
+}
+.outd-th.row .grid.middle,
+.outd-query-body .table .tr .td.middle {
   flex: 0 0 140px;
 }
+
 .outd-th.row .grid:last-child,
 .outd-query-body .table .tr .td:last-child {
   flex: 1;
