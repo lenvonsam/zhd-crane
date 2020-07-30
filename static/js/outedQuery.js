@@ -174,9 +174,15 @@ $(function() {
             showStr += '<br>' + itm['employeeMobile']
           tdStr += '<div class="td">' + showStr + '</div>'
         } else if (k === 'driverInfo') {
-          tdStr += '<div class="td middle">'
-          if (itm['datasDriver']) tdStr += itm['datasDriver'] + '<br>'
-          if (itm['driverPhone']) tdStr += itm['driverPhone'] + '<br>'
+          tdStr += '<div class="td middle text-ellips">'
+          if (itm['datasDriver'])
+            tdStr +=
+              (itm['datasDriver'] == 'null' ? '--' : itm['datasDriver']) +
+              '<br>'
+          if (itm['driverPhone'])
+            tdStr +=
+              (itm['driverPhone'] == 'null' ? '--' : itm['driverPhone']) +
+              '<br>'
           // if (itm['datasCarnum']) tdStr += itm['datasCarnum']
           tdStr += '</div>'
         }
@@ -200,7 +206,7 @@ $(function() {
             k === 'goodsWeight' ||
             k === 'datasCarnum'
           ) {
-            tdStr += '<div class="td min">' + itm[k] + '<br/></div>'
+            tdStr += '<div class="td min text-ellips">' + itm[k] + '<br/></div>'
           } else {
             tdStr +=
               '<div class="td">' +
