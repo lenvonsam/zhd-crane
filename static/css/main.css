@@ -321,11 +321,7 @@
   z-index: 20;
 }
 
-#carnoIptWrap {
-  position: relative;
-}
-
-#carnoIptWrap::after {
+.arrow-container::after {
   position: absolute;
   content: '';
   width: 0;
