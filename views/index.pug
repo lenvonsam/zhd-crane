@@ -42,6 +42,25 @@ block content
         .title ${modalTitle}
         .modal-btn.confirm 确定
         .modal-btn.cancel 取消
+  script(id="zhdModalPwd", type="text/template")
+    .zhd-modal.pwd(id="${modalId}")
+      .bg
+      .content
+        .head 特权密码
+        .body
+          <% _.each(goods, function(itm, index) { %>
+            .line.mb-15 ${itm.partsnameName}${itm.goodsSpec}重量超出规定范围
+          <%});%>
+          .row.mb-15
+            .flex-120.center 用户名
+            .col
+              input#pwdName.ipt(placeholder="请输入用户名")
+          .row
+            .flex-120.center 密码
+            .col
+              input#pwdPwd.ipt(type="password", placeholder="请输入密码")
+        .modal-btn.confirm 确定
+        .modal-btn.cancel 取消
   script(id="weightBtns", type="text/template")
     .row.top-section.relative(style="bottom: -50px")
       <% _.each(btns, function(itm, index){ %>
@@ -142,19 +161,3 @@ block content
             span#weightWrapAdd(style="position: absolute; top: -5px; right: -65px; font-size: 58px; color: #fff;z-index: 30;") +
             span#weightInfo
       #secBtns.row
-      //- .row
-        .bottom
-          .row.section
-            .col.row.pl-15
-              #calcWeight.bottom-btn
-                span 计重
-            .col.row.pl-15
-              #confirmAction.bottom-btn
-                span 确认
-            .col.row.pl-15
-              #cancelAction.bottom-btn
-                span 取消
-            .col.row.pl-15
-              #submitAction.bottom-btn
-                span 提交
-

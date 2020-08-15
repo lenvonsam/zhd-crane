@@ -593,6 +593,119 @@ $(function() {
   $('#secBtns').html(bottomTemp(datas))
   // modal template
   var modalTemp = _.template($('#zhdModal').html())
+  /**
+   * 特权密码框
+   * @author samy
+   * @date 2020/08/14
+   */
+  var modalPwdTemp = _.template($('#zhdModalPwd').html())
+
+  // 特权密码类型
+  var globalPrivpassCode = '001'
+  // 特权密码姓名
+  var globalOperatorNamePriv = ''
+  // 特权密码
+  var globalOperatorPassPriv = ''
+
+  var jbRuleSuffix = ['.5', '.75', '.0', '.25']
+  // 特权密码卷板判断规则
+  function shouldInputPwdForJb(objs, factWeight) {
+    if (objs[0].pntreeName === '板材') {
+      let min = 0
+      let max = 0
+      let rowWeightRange = {}
+      if (objs.length > 1) {
+        objs.map(obj => {
+          rowWeightRange = getJbWeightRange(obj)
+          min += calcJbWeight(obj, rowWeightRange.min)
+          max += calcJbWeight(obj, rowWeightRange.max)
+        })
+      } else {
+        const cnt = $('#countIpt').val()
+        rowWeightRange = getJbWeightRange(objs[0])
+        min = calcJbWeight(objs[0], rowWeightRange.min, cnt)
+        max = calcJbWeight(objs[0], rowWeightRange.max, cnt)
+      }
+      return factWeight < min || factWeight > max
+    } else {
+      return false
+    }
+  }
+
+  /**
+   *  计算理论卷板重量
+   * @author samy
+   * @date 2020/08/15
+   * @param {*} obj  物资
+   * @param {*} thick 厚度
+   * @param {*} cnt 数量
+   * 公式 = 厚(mm) * 宽(mm) * 长(m) * 密度(7.85) * 数量 / 1000000
+   * 结果四舍五入保留3位小数
+   */
+  function calcJbWeight(obj, thick, cnt) {
+    let maxCount = cnt
+    if (!cnt) {
+      if (Number(obj.pickType) == 1) {
+        // 凭证物资
+        maxCount = obj.detailOkNnum
+      } else {
+        maxCount = Number(obj.goodsNum - obj.oconsignDetailOknum)
+      }
+    }
+    return Number(
+      (
+        (thick *
+          Number(obj.goodsSpec2) *
+          Number(obj.goodsProperty1) *
+          maxCount *
+          7.85) /
+        1000000
+      ).toFixed(3)
+    )
+  }
+
+  /**
+   * 获取单个卷板物资理论重量范围
+   * @author samy
+   * @date 2020/08/15
+   */
+  function getJbWeightRange(obj) {
+    let min = 0
+    let max = 0
+    let arr = obj.goodsSpec.split('-')
+    if (arr.length >= 2 && arr[1].indexOf('.') > 0) {
+      let prefix = arr[1].substring(0, arr[1].indexOf('.'))
+      let suffix = arr[1].substring(arr[1].indexOf('.'))
+      switch (suffix) {
+        case '.0':
+          min = Number((Number(prefix) - 1).toString() + '.9')
+          max = Number(arr[1])
+          break
+        case '.25':
+          min = Number(prefix + '.1')
+          max = Number(prefix + '.3')
+          break
+        case '.5':
+          min = Number(prefix + '.35')
+          max = Number(prefix + '.6')
+          break
+        case '.75':
+          min = Number(prefix + '.6')
+          max = Number(prefix + '.8')
+          break
+        default:
+          min = obj.goodsSpec1
+          max = obj.goodsSpec1
+      }
+    } else {
+      max = obj.goodsSpec1
+      min = obj.goodsSpec1
+    }
+    return {
+      max,
+      min
+    }
+  }
   // 根据品名、材质、规格、产地相等，能合并一同绑定出库
   function isTheSame(origin, compare) {
     console.log('is the same', origin, compare)
@@ -1566,6 +1679,15 @@ $(function() {
             optBody.datasDriver = currentObj.datasDriver
             optBody.datasIdentitynum = currentObj.datasIdentitynum
           }
+          /**
+           * 特权密码(针对卷板)
+           * @date 2020/08/15
+           * @author samy
+           */
+          body.privpassCode = globalPrivpassCode
+          body.operatorNamePriv = globalOperatorNamePriv
+          body.operatorPassPriv = globalOperatorPassPriv
+
           var optID = 0
           request('/save/crane/operator', optBody).then(res => {
             if (res.status === 0) {
@@ -1815,7 +1937,46 @@ $(function() {
     $('#weightInfo').text(val.toFixed(3))
   })
 
+  /**
+   * 磅计物资出库(为特权密码单独抽出来的方法)
+   * @author samy
+   * @date 2020/08/15
+   * @param {*} detailIdx 明细序列
+   * @param {*} w 重量
+   * @param {*} cnt 数量
+   */
+  function bangOutStorage(detailIdx, w, cnt) {
+    // FIXME 出库
+    if (detailIdx.length > 1) {
+      let arr = detailIdx.map(itm => tableList[itm])
+      let ct = tableList[selectRowIndex]
+      let idx = arr.findIndex(itm => itm.sbillBillbatch == ct.sbillBillbatch)
+      console.log(idx)
+      if (idx >= 0) {
+        console.log('batch outstorage')
+        batchWeight(0, detailIdx, w, cnt)
+      } else {
+        let currentObj = tableList[selectRowIndex]
+        let currentTd = currentObj.sbillBillcode
+        delete singleGoodsCount[currentObj.sbillBillbatch]
+        singleOutStorage(currentObj, currentTd, cnt, w, 0, 0, userChooseBtnIdx)
+      }
+    } else {
+      console.log('single bang outstorage')
+      let currentObj = tableList[detailIdx[0]]
+      if (detailIdx.length == 0) currentObj = tableList[selectRowIndex]
+      let selectObj = tableList[selectRowIndex]
+      if (selectObj.sbillBillbatch != currentObj.sbillBillbatch)
+        currentObj = tableList[selectRowIndex]
+      let currentTd = currentObj.sbillBillcode
+      delete singleGoodsCount[selectObj.sbillBillbatch]
+      singleOutStorage(currentObj, currentTd, cnt, w, 0, 0, userChooseBtnIdx)
+    }
+  }
+
   $('#weightInfoWrap').click(() => {
+    globalOperatorNamePriv = ''
+    globalOperatorPassPriv = ''
     let w = $('#weightInfo').text()
     let cnt = $('#countIpt').val()
     if (selectRowIndex > -1) {
@@ -1879,40 +2040,79 @@ $(function() {
         showMsg('有物资未选择原产地，无法出库')
         return
       }
-      // FIXME 出库
-      if (detailIdx.length > 1) {
-        let arr = detailIdx.map(itm => tableList[itm])
-        let ct = tableList[selectRowIndex]
-        let idx = arr.findIndex(itm => itm.sbillBillbatch == ct.sbillBillbatch)
-        console.log(idx)
-        if (idx >= 0) {
-          console.log('batch outstorage')
-          batchWeight(0, detailIdx, w, cnt)
-        } else {
-          let currentObj = tableList[selectRowIndex]
-          let currentTd = currentObj.sbillBillcode
-          delete singleGoodsCount[currentObj.sbillBillbatch]
-          singleOutStorage(
-            currentObj,
-            currentTd,
-            cnt,
-            w,
-            0,
-            0,
-            userChooseBtnIdx
-          )
-        }
+      // 显示是否需要特权密码
+      if (shouldInputPwdForJb(totalPlankArr, Number(w))) {
+        $('body').append(
+          modalPwdTemp({
+            modalId: 'pwdModalIptShow',
+            goods: totalPlankArr
+          })
+        )
+        $('#pwdName').focus(function() {
+          $('.zhd-keyboard').css('display', 'none')
+          globalFocusDom = '#pwdName'
+          $('.zhd-keyboard').css('display', 'block')
+        })
+        $('#pwdPwd').focus(function() {
+          $('.zhd-keyboard').css('display', 'none')
+          globalFocusDom = '#pwdPwd'
+          $('.zhd-keyboard').css('display', 'block')
+        })
+        // FIXME 需求变更
+        showPwdModal('#pwdModalIptShow', function(resp, name, pwd) {
+          console.log('confirm...', resp, name, pwd)
+          if (resp) {
+            if (name.length === 0) {
+              showMsg('用户名不能为空')
+            } else if (pwd.length === 0) {
+              showMsg('特权密码不能为空')
+            } else {
+              globalOperatorNamePriv = name
+              globalOperatorPassPriv = pwd
+              console.log('去出库')
+              bangOutStorage(detailIdx, w, cnt)
+            }
+          }
+        })
       } else {
-        console.log('single bang outstorage')
-        let currentObj = tableList[detailIdx[0]]
-        if (detailIdx.length == 0) currentObj = tableList[selectRowIndex]
-        let selectObj = tableList[selectRowIndex]
-        if (selectObj.sbillBillbatch != currentObj.sbillBillbatch)
-          currentObj = tableList[selectRowIndex]
-        let currentTd = currentObj.sbillBillcode
-        delete singleGoodsCount[selectObj.sbillBillbatch]
-        singleOutStorage(currentObj, currentTd, cnt, w, 0, 0, userChooseBtnIdx)
+        console.log('不需要特权密码出库')
+        // bangOutStorage(detailIdx, w, cnt)
       }
+
+      // FIXME 出库
+      // if (detailIdx.length > 1) {
+      //   let arr = detailIdx.map(itm => tableList[itm])
+      //   let ct = tableList[selectRowIndex]
+      //   let idx = arr.findIndex(itm => itm.sbillBillbatch == ct.sbillBillbatch)
+      //   console.log(idx)
+      //   if (idx >= 0) {
+      //     console.log('batch outstorage')
+      //     batchWeight(0, detailIdx, w, cnt)
+      //   } else {
+      //     let currentObj = tableList[selectRowIndex]
+      //     let currentTd = currentObj.sbillBillcode
+      //     delete singleGoodsCount[currentObj.sbillBillbatch]
+      //     singleOutStorage(
+      //       currentObj,
+      //       currentTd,
+      //       cnt,
+      //       w,
+      //       0,
+      //       0,
+      //       userChooseBtnIdx
+      //     )
+      //   }
+      // } else {
+      //   console.log('single bang outstorage')
+      //   let currentObj = tableList[detailIdx[0]]
+      //   if (detailIdx.length == 0) currentObj = tableList[selectRowIndex]
+      //   let selectObj = tableList[selectRowIndex]
+      //   if (selectObj.sbillBillbatch != currentObj.sbillBillbatch)
+      //     currentObj = tableList[selectRowIndex]
+      //   let currentTd = currentObj.sbillBillcode
+      //   delete singleGoodsCount[selectObj.sbillBillbatch]
+      //   singleOutStorage(currentObj, currentTd, cnt, w, 0, 0, userChooseBtnIdx)
+      // }
     } else {
       let currentObj = tableList[selectRowIndex]
       let currentTd = currentObj.sbillBillcode

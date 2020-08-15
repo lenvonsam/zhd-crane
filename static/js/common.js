@@ -103,6 +103,36 @@ function showModal(id, cb) {
   )
 }
 
+function showPwdModal(id, cb) {
+  $(id).css('display', 'block')
+  $(id + '.zhd-modal .content').animate(
+    { opacity: 1 },
+    {
+      step: function(num, fix) {
+        $(this).css('transform', 'scale(' + num + ')')
+      },
+      speed: 300,
+      complete: function() {
+        $(id + ' .modal-btn.confirm').click(function() {
+          var iptName = $(id + ' #pwdName').val()
+          var iptPwd = $(id + ' #pwdPwd').val()
+          $(id).css('display', 'none')
+          $('.zhd-keyboard').css('display', 'none')
+          cb(true, iptName, iptPwd)
+          $(id).remove()
+        })
+        $(id + ' .modal-btn.cancel').click(function() {
+          $(id).css('display', 'none')
+          $('.zhd-keyboard').css('display', 'none')
+          cb(false)
+          $(id).remove()
+          console.log('模态框已删除')
+        })
+      }
+    }
+  )
+}
+
 var globalFocusDom = ''
 $(function() {
   // $("body").dblclick(function(e) {

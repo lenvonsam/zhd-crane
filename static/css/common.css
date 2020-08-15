@@ -67,6 +67,9 @@
 .mr-30 {
   margin-right: 30px;
 }
+.mb-15 {
+  margin-bottom: 15px;
+}
 
 .pt-10 {
   padding-top: 10px;
@@ -216,7 +219,7 @@ input:focus {
   right: 0;
   left: 0;
   bottom: 0;
-  z-index: 100;
+  z-index: 99;
   display: none;
 }
 
@@ -242,6 +245,46 @@ input:focus {
   box-sizing: border-box;
   top: calc((100% - 370px) / 2);
   left: calc((100% - 600px) / 2);
+  overflow: hidden;
+}
+.zhd-modal.pwd .content {
+  min-height: 370px;
+  height: auto;
+  top: 20%;
+  padding-bottom: 15px;
+  font-size: 24px;
+  line-height: 28px;
+}
+
+.zhd-modal.pwd .content .head {
+  height: 74px;
+  background: -webkit-linear-gradient(top, #69c6ec 0%, #488cda 100%);
+  color: #fff;
+  box-sizing: border-box;
+  width: 100%;
+  padding-left: 25px;
+  padding-right: 25px;
+  display: flex;
+  align-items: center;
+  font-size: 24px;
+}
+
+.zhd-modal.pwd .content .body {
+  padding: 25px 25px;
+  min-height: 200px;
+}
+
+.zhd-modal.pwd .content .body .line {
+  line-height: 28px;
+  height: 35px;
+}
+
+.zhd-modal.pwd .content input.ipt {
+  height: 50px;
+  border-radius: 6px !important;
+  border-width: 0px !important;
+  font-size: 24px;
+  width: 80%;
 }
 
 .zhd-modal .content .title {
