@@ -632,7 +632,10 @@ $(function() {
   queryPrivpassUserList()
   // 特权密码卷板判断规则
   function shouldInputPwdForJb(objs, factWeight) {
-    if (objs[0].pntreeName === '板材') {
+    if (
+      objs[0].pntreeName === '板材' &&
+      objs[0].partsnameName.indexOf('板') > 0
+    ) {
       let min = 0
       let max = 0
       let rowWeightRange = {}
