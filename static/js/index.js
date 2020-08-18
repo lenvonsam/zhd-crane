@@ -632,6 +632,7 @@ $(function() {
   queryPrivpassUserList()
   // 特权密码卷板判断规则
   function shouldInputPwdForJb(objs, factWeight) {
+    debugger
     if (objs[0].pntreeName === '板材') {
       let min = 0
       let max = 0
@@ -644,7 +645,7 @@ $(function() {
         })
       } else {
         const cnt = $('#countIpt').val()
-        if (objs[0].partsnameName in jbGoods) {
+        if (jbGoods.includes(objs[0].partsnameName)) {
           rowWeightRange = getJbWeightRange(objs[0])
           min = calcJbWeight(objs[0], rowWeightRange.min, cnt)
           max = calcJbWeight(objs[0], rowWeightRange.max, cnt)
