@@ -632,31 +632,29 @@ $(function() {
   queryPrivpassUserList()
   // 特权密码卷板判断规则
   function shouldInputPwdForJb(objs, factWeight) {
-    if (
-      objs[0].pntreeName === '板材' &&
-      objs[0].partsnameName.indexOf('板') > 0
-    ) {
-      let min = 0
-      let max = 0
-      let rowWeightRange = {}
-      if (objs.length > 1) {
-        objs.map(obj => {
-          rowWeightRange = getJbWeightRange(obj)
-          min += calcJbWeight(obj, rowWeightRange.min)
-          max += calcJbWeight(obj, rowWeightRange.max)
-        })
-      } else {
-        const cnt = $('#countIpt').val()
-        if (jbGoods.includes(objs[0].partsnameName)) {
-          rowWeightRange = getJbWeightRange(objs[0])
-          min = calcJbWeight(objs[0], rowWeightRange.min, cnt)
-          max = calcJbWeight(objs[0], rowWeightRange.max, cnt)
-        }
-      }
-      return factWeight < min || factWeight > max
+    // if (
+    //   objs[0].pntreeName === '板材' &&
+    //   objs[0].partsnameName.indexOf('板') > 0
+    // ) {
+    let min = 0
+    let max = 0
+    let rowWeightRange = {}
+    if (objs.length > 1) {
+      objs.map(obj => {
+        rowWeightRange = getJbWeightRange(obj)
+        min += calcJbWeight(obj, rowWeightRange.min)
+        max += calcJbWeight(obj, rowWeightRange.max)
+      })
     } else {
-      return false
+      const cnt = $('#countIpt').val()
+      rowWeightRange = getJbWeightRange(objs[0])
+      min = calcJbWeight(objs[0], rowWeightRange.min, cnt)
+      max = calcJbWeight(objs[0], rowWeightRange.max, cnt)
     }
+    return factWeight < min || factWeight > max
+    // } else {
+    //   return false
+    // }
   }
 
   /**
@@ -2068,8 +2066,15 @@ $(function() {
         showMsg('有物资未选择原产地，无法出库')
         return
       }
+      let isJb = false
+      for (var i = 0; i < totalPlankArr.length; i++) {
+        if (jbGoods.includes(totalPlankArr[i].partsnameName)) {
+          isJb = true
+          break
+        }
+      }
       // 显示是否需要特权密码
-      if (shouldInputPwdForJb(totalPlankArr, Number(w))) {
+      if (shouldInputPwdForJb(totalPlankArr, Number(w)) && isJb) {
         $('body').append(
           modalPwdTemp({
             modalId: 'pwdModalIptShow',
