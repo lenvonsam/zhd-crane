@@ -602,12 +602,34 @@ $(function() {
 
   // 特权密码类型
   var globalPrivpassCode = '001'
+  // 特权密码编号
+  var globalPwdOperatorCode = ''
   // 特权密码姓名
   var globalOperatorNamePriv = ''
   // 特权密码
   var globalOperatorPassPriv = ''
 
-  var jbRuleSuffix = ['.5', '.75', '.0', '.25']
+  var jbGoods = ['普碳开平板', '花纹板', '低合金开平板']
+  // 特权密码用户列表
+  var priPwdUserList = []
+  // 查询特权密码用户列表模块(001)
+  function queryPrivpassUserList() {
+    request('/queryPrivpassUser', {}, 'get')
+      .then(function(data) {
+        console.log(data)
+        if (data.status === 0) {
+          priPwdUserList = data.data
+        } else {
+          showMsg('特权密码用户列表查询失败,' + data.message)
+          priPwdUserList = []
+        }
+      })
+      .catch(function(err) {
+        showMsg('特权密码用户列表查询失败')
+        priPwdUserList = []
+      })
+  }
+  queryPrivpassUserList()
   // 特权密码卷板判断规则
   function shouldInputPwdForJb(objs, factWeight) {
     if (objs[0].pntreeName === '板材') {
@@ -622,9 +644,11 @@ $(function() {
         })
       } else {
         const cnt = $('#countIpt').val()
-        rowWeightRange = getJbWeightRange(objs[0])
-        min = calcJbWeight(objs[0], rowWeightRange.min, cnt)
-        max = calcJbWeight(objs[0], rowWeightRange.max, cnt)
+        if (objs[0].partsnameName in jbGoods) {
+          rowWeightRange = getJbWeightRange(objs[0])
+          min = calcJbWeight(objs[0], rowWeightRange.min, cnt)
+          max = calcJbWeight(objs[0], rowWeightRange.max, cnt)
+        }
       }
       return factWeight < min || factWeight > max
     } else {
@@ -1687,6 +1711,7 @@ $(function() {
           body.privpassCode = globalPrivpassCode
           body.operatorNamePriv = globalOperatorNamePriv
           body.operatorPassPriv = globalOperatorPassPriv
+          body.operatorCode = globalPwdOperatorCode
 
           var optID = 0
           request('/save/crane/operator', optBody).then(res => {
@@ -2048,10 +2073,29 @@ $(function() {
             goods: totalPlankArr
           })
         )
-        $('#pwdName').focus(function() {
+        $('#pwdName').click(function() {
           $('.zhd-keyboard').css('display', 'none')
-          globalFocusDom = '#pwdName'
-          $('.zhd-keyboard').css('display', 'block')
+          $('#pwdFloatNameList').html('')
+          for (var i = 0; i < priPwdUserList.length; i++) {
+            var td =
+              '<div class="item" data-code="' +
+              priPwdUserList[i].operatorCode +
+              '" >' +
+              priPwdUserList[i].operatorName +
+              '</div>'
+            $('#pwdFloatNameList').append(td)
+          }
+          $('#pwdFloatNameList .item').click(function(e) {
+            var code = $(this).data('code')
+            console.log('row code:>>', code)
+            globalPwdOperatorCode = code
+            var name = $(this).text()
+            $('#pwdName').val(name)
+            $('#pwdFloatNameList').css('display', 'none')
+          })
+          $('#pwdFloatNameList').css('display', 'block')
+          // globalFocusDom = '#pwdName'
+          // $('.zhd-keyboard').css('display', 'block')
         })
         $('#pwdPwd').focus(function() {
           $('.zhd-keyboard').css('display', 'none')

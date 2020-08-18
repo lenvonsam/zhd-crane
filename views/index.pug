@@ -53,8 +53,9 @@ block content
           <%});%>
           .row.mb-15
             .flex-120.center 用户名
-            .col
-              input#pwdName.ipt(placeholder="请输入用户名")
+            .col.relative
+              input#pwdName.ipt(placeholder="请输入用户名", readOnly)
+              #pwdFloatNameList
           .row
             .flex-120.center 密码
             .col

@@ -287,6 +287,28 @@ input:focus {
   width: 80%;
 }
 
+.zhd-modal.pwd #pwdFloatNameList {
+  position: absolute;
+  top: 52px;
+  min-height: 220px;
+  background: #fff;
+  z-index: 10;
+  border: 1px solid #ddd;
+  right: 0;
+  left: 0;
+  display: none;
+  max-height: 160px;
+  overflow-y: scroll;
+}
+
+.zhd-modal.pwd #pwdFloatNameList .item {
+  line-height: 55px;
+  font-size: 27px;
+  height: 55px;
+  border-bottom: 1px solid #ddd;
+  text-align: center;
+}
+
 .zhd-modal .content .title {
   height: 270px;
   display: flex;
