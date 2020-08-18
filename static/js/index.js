@@ -632,7 +632,6 @@ $(function() {
   queryPrivpassUserList()
   // 特权密码卷板判断规则
   function shouldInputPwdForJb(objs, factWeight) {
-    debugger
     if (objs[0].pntreeName === '板材') {
       let min = 0
       let max = 0
@@ -2121,7 +2120,7 @@ $(function() {
         })
       } else {
         console.log('不需要特权密码出库')
-        // bangOutStorage(detailIdx, w, cnt)
+        bangOutStorage(detailIdx, w, cnt)
       }
 
       // FIXME 出库
