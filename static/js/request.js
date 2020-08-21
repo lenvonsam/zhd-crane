@@ -1,4 +1,4 @@
-function request (url, params, method = 'post') {
+function request(url, params, method = 'post') {
   return new Promise((resolve, reject) => {
     $.ajax({
       method: 'post',
@@ -8,10 +8,10 @@ function request (url, params, method = 'post') {
         method
       },
       url: '/api/proxy',
-      success (data) {
+      success(data) {
         resolve(data)
       },
-      error (err) {
+      error(err) {
         reject(err)
       }
     })
@@ -30,10 +30,10 @@ function getWarehouseName() {
     $.ajax({
       method: 'get',
       url: '/api/warehouseName',
-      success (data) {
+      success(data) {
         resolve(data)
       },
-      error (err) {
+      error(err) {
         reject(err)
       }
     })

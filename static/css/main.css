@@ -332,3 +332,7 @@
   right: 15px;
   top: 26px;
 }
+
+.flex-120 {
+  flex: 0 0 120px;
+}
