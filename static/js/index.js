@@ -2074,12 +2074,16 @@ $(function() {
         }
       }
       // 判断规格是否含符合规则的板材
+      const jbSpecRules = ['.0', '.25', '.5', '.75']
       let isInputPwd = false
       for (var i = 0; i < totalPlankArr.length; i++) {
         const arr = totalPlankArr[i].goodsSpec.split('-')
         if (arr.length >= 2 && arr[1].indexOf('.') > 0) {
-          isInputPwd = true
-          break
+          const suffix = arr[1].substring(arr[1].indexOf('.'))
+          if (jbSpecRules.includes(suffix)) {
+            isInputPwd = true
+            break
+          }
         }
       }
       // 显示是否需要特权密码
