@@ -2073,8 +2073,17 @@ $(function() {
           break
         }
       }
+      // 判断规格是否含符合规则的板材
+      let isInputPwd = false
+      for (var i = 0; i < totalPlankArr.length; i++) {
+        const arr = totalPlankArr[i].goodsSpec.split('-')
+        if (arr.length >= 2 && arr[1].indexOf('.') > 0) {
+          isInputPwd = true
+          break
+        }
+      }
       // 显示是否需要特权密码
-      if (shouldInputPwdForJb(totalPlankArr, Number(w)) && isJb) {
+      if (shouldInputPwdForJb(totalPlankArr, Number(w)) && isJb && isInputPwd) {
         $('body').append(
           modalPwdTemp({
             modalId: 'pwdModalIptShow',
