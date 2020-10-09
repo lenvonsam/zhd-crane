@@ -1327,7 +1327,16 @@ $(function() {
                 let idx = tableList.findIndex(
                   item => item.sbillBillbatch == itm.sbillBillbatch
                 )
-                if (idx < 0) tableList.push(itm)
+                if (idx < 0) {
+                  tableList.push(itm)
+                } else {
+                  /**
+                   * 修复车牌号第一次查询返回没有值的问题
+                   * @time 2020-10-09
+                   * @author samy
+                   */
+                  tableList[idx] = itm
+                }
               })
               updateTableData(tableList)
               if (currentTD.length != '') {
