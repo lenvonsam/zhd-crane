@@ -1226,21 +1226,6 @@ $(function() {
             //     return
             //   }
             // }
-            res.data.data.map(itm => {
-              let idx = tableList.findIndex(
-                item => item.sbillBillbatch == itm.sbillBillbatch
-              )
-              if (idx < 0) {
-                tableList.push(itm)
-              } else {
-                /**
-                 * 修复车牌号第一次查询返回没有值的问题
-                 * @time 2020-10-09
-                 * @author samy
-                 */
-                tableList[idx] = itm
-              }
-            })
             /**
              * 显示车牌号
              * 一个自动显示，一个以上需要手动选择
@@ -1282,10 +1267,11 @@ $(function() {
                     hideCarComponent('zhdCarNoFilterPop')
                     $('#carnoIptWrap').click()
                   } else {
-                    var tempCarNo = tableList.filter(
-                      item =>
-                        item.sbillBillcode === res.data.data[0].sbillBillcode
-                    )[0].datasCarnum
+                    // var tempCarNo = tableList.filter(
+                    //   item =>
+                    //     item.sbillBillcode === res.data.data[0].sbillBillcode
+                    // )[0].datasCarnum
+                    var tempCarNo = carnoArr[0]
                     globalShowCarNo = tempCarNo
                     $('#tdCarNo').val(globalShowCarNo)
                   }
@@ -1344,6 +1330,13 @@ $(function() {
                 )
                 if (idx < 0) {
                   tableList.push(itm)
+                } else {
+                  /**
+                   * 修复车牌号第一次查询返回没有值的问题
+                   * @time 2020-10-09
+                   * @author samy
+                   */
+                  tableList[idx] = itm
                 }
               })
               updateTableData(tableList)
