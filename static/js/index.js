@@ -1336,7 +1336,10 @@ $(function() {
                    * @time 2020-10-09
                    * @author samy
                    */
-                  tableList[idx] = itm
+                  var originItem = tableList[idx]
+                  if (!originItem.datasCarnum) {
+                    tableList[idx] = itm
+                  }
                 }
               })
               updateTableData(tableList)
