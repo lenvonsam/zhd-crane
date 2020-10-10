@@ -2665,6 +2665,9 @@ $(function() {
       getRowOriginPlace(selectObj.partsnameName, selectObj.goodsSpec)
       // 添加显示提单的车牌号
       globalSelectRowIndex = selectRowIndex
+      if (selectObj.datasCarnum.indexOf(',') > 0) {
+        selectObj.datasCarnum = globalShowCarNo
+      }
       globalShowCarNo = selectObj.datasCarnum
       $('#tdCarNo').val(globalShowCarNo)
       let td = selectObj.sbillBillbatch
