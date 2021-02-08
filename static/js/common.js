@@ -1,4 +1,4 @@
-var globalTimeout = null
+// 消息显示
 function showMsg(msgInfo) {
   if (globalTimeout) clearTimeout(globalTimeout)
   $('body').append(`<div class="message error">${msgInfo}</div>`)
@@ -24,7 +24,12 @@ function fullScreen() {
   return
 }
 
+/**
+ * 键盘组件全局变量
+ */
+// 键盘组件
 var kb = null
+// 键盘拖拽对象
 var kbDrag = false
 
 function initKeyboardDrag() {
@@ -133,7 +138,75 @@ function showPwdModal(id, cb) {
   )
 }
 
-var globalFocusDom = ''
+// 通过id隐藏组件
+function hideComponentById(domId) {
+  $('#' + domId).css('display', 'none')
+}
+
+// 上浮重量
+function floorWeight(val) {
+  let w = Number(val)
+  if (isNaN(w)) {
+    return '0'
+  } else {
+    return w.toFixed(3)
+  }
+}
+
+// 解决前端浮点数的问题
+function getFixWeight(val) {
+  console.log('single weight:>>', val)
+  let newVal = Math.round(Number(val) * 10000) + ''
+  console.log('newval:>>', newVal)
+  let prefix = '0'
+  if (newVal.length > 2) {
+    prefix = newVal.substring(0, newVal.length - 2)
+  }
+  let num = newVal.substring(newVal.length - 2, newVal.length - 1)
+  let lastNum = newVal.substring(newVal.length - 1, newVal.length)
+  console.log('取值:>>>', num, ';', lastNum)
+  if (Number(lastNum) > 0 && Number(num) < 9) {
+    return Number(Number(prefix + '' + (Number(num) + 1)) / 1000).toFixed(3)
+  } else {
+    console.log('不存在')
+    if (lastNum > 0) {
+      return Number(
+        (Number(newVal.substring(0, newVal.length - 1)) + 1) / 1000
+      ).toFixed(3)
+    } else {
+      return Number(
+        Number(newVal.substring(0, newVal.length - 1)) / 1000
+      ).toFixed(3)
+    }
+  }
+}
+
+// 数组值相加
+function arraySum(arr) {
+  return arr.reduce((a, b) => Number(a) + Number(b), 0)
+}
+
+// 格式化重量
+function formatWeight(val) {
+  let w = Number(val)
+  if (isNaN(w)) {
+    return '0'
+  } else {
+    let str = w.toString()
+    let dotStr = str.substring(str.indexOf('.'))
+    if (dotStr.length > 4) {
+      let lastNum = Number(
+        str.substring(str.indexOf('.') + 4, str.indexOf('.') + 5)
+      )
+      let preNum = Number(str.substring(0, str.indexOf('.') + 4))
+      if (lastNum >= 5) preNum += 0.001
+      return preNum.toFixed(3)
+    } else {
+      return str
+    }
+  }
+}
+
 $(function() {
   // $("body").dblclick(function(e) {
   //   e.stopPropagation();

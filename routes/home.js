@@ -6,5 +6,6 @@ const routes = router
   .get('login', api.loginPage)
   .get('menu', api.menuPage)
   .get('outedQuery', api.outedQueryPage)
+  .get('instorage', api.inStoragePage)
 
 module.exports = routes

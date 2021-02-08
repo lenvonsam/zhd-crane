@@ -4,7 +4,7 @@ body {
   margin: 0 !important;
 }
 .menu-bg {
-  background-image: url("../img/menu_bg.png");
+  background-image: url('../img/menu_bg.png');
   background-size: cover;
   box-sizing: border-box;
   height: 100vh;
@@ -18,7 +18,7 @@ body {
   position: absolute;
   top: 20px;
   right: 20px;
-  background-image: url("../img/gb.png");
+  background-image: url('../img/gb.png');
   background-size: cover;
 }
 
@@ -36,12 +36,16 @@ body {
   background-size: cover;
 }
 
+.menu-bg .menu-btn-group .menu-btn.in-btn {
+  background-image: url('../img/in_btn.png');
+}
+
 .menu-bg .menu-btn-group .menu-btn.out-btn {
-  background-image: url("../img/out_btn.png");
+  background-image: url('../img/out_btn.png');
 }
 
 .menu-bg .menu-btn-group .menu-btn.out-query-btn {
-  background-image: url("../img/out_query_btn.png");
+  background-image: url('../img/out_query_btn.png');
 }
 
 .menu-bg .menu-btn-group:hover,

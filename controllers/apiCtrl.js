@@ -1,6 +1,6 @@
 const httpHelp = require('../utils/http')
-const PROXYURL = 'http://192.168.80.99:8080/warehouse-dev/warehouse'
-// const PROXYURL = 'http://192.168.80.102:8686/warehouse/warehouse'
+// const PROXYURL = 'http://192.168.80.99:8080/warehouse-dev/warehouse'
+const PROXYURL = 'http://127.0.0.1:8008/api/'
 // const PROXYURL = 'http://localhost:7568/warehouse'
 
 module.exports = {
@@ -15,7 +15,7 @@ module.exports = {
     if (val) {
       let arr = val.split('|')
       ctx.body = {
-        wname: arr[1]
+        wname: arr[3]
       }
     } else {
       await ctx.render('login', {
@@ -29,15 +29,14 @@ module.exports = {
     let params = Object.assign({}, body.params)
     let user = ctx.cookies.get('currentUser')
     console.log('user', user)
+    console.log('url:>>', body.url)
+    console.log('method:>>', body.method)
     let userArr = user ? user.split('|') : []
-    if (body.url == '/outWaitStorageQuery') {
-      if (userArr && userArr.length == 3) {
-        params.currentPage = 1
-        params.pageSize = 100
-        params.memberCode = userArr[0]
-        params.warehouseCode = ''
-        params.superWarehousemanFlag = userArr[2]
-        params.userId = userArr[1]
+    if (body.url == 'crane/dc/outStorage' && body.method == 'get') {
+      if (userArr && userArr.length == 4) {
+        params.warehouseId = userArr[0]
+        params.stockRoomId = userArr[1]
+        params.stockZoneId = userArr[2]
       } else {
         ctx.body = {
           status: -2,
@@ -82,19 +81,25 @@ module.exports = {
         ? await httpHelp.httpGet(PROXYURL + body.url, params)
         : await httpHelp.httpPost(PROXYURL + body.url, params)
     console.log('warehouse proxy resp:>>\n', data)
-    if (body.url == '/login') {
-      if (data.status == 0 && data.data != null) {
-        // let str = JSON.stringify(data.data)
-        // console.log('cookie 保存', data.data)
-        await ctx.cookies.set(
-          'currentUser',
-          `${data.data.memberCode}|${data.data.operatorUserid}|${data.data.superWarehousemanFlag}`,
-          {
-            domain: '192.168.80.200',
-            maxAge: 13 * 60 * 60 * 1000,
-            httpOnly: false
-          }
+    if (body.url == '/base/user/login') {
+      if (data.success) {
+        let userData = await httpHelp.httpGet(
+          PROXYURL + 'crane/dc/warehouse/' + params.username + '/userInfo'
         )
+        console.log('userData:>>', userData)
+        if (userData.success) {
+          // let str = JSON.stringify(data.data)
+          // console.log('cookie 保存', data.data)
+          await ctx.cookies.set(
+            'currentUser',
+            `${userData.data.warehouseId}|${userData.data.stockRoomId}|${userData.data.stockZoneId}|${params.username}`,
+            {
+              domain: 'localhost',
+              maxAge: 13 * 60 * 60 * 1000,
+              httpOnly: false
+            }
+          )
+        }
       }
     }
     ctx.body = data

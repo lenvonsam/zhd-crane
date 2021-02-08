@@ -29,14 +29,15 @@ $(function() {
       window.showMsg('密码不能为空')
     } else {
       loading('数据请求中，请耐心等待...')
-      request('/login', {
+      request('/base/user/login', {
         username: username.trim(),
-        pwd: hexMd5(password.trim())
+        password: password.trim(),
+        applicationCode: 'dc'
       })
         .then(resp => {
           console.log(resp)
           hideLoad()
-          if (resp.status == 0 && resp.data != null) {
+          if (resp.success) {
             console.log('跳转')
             window.location.href = '/menu'
           } else {

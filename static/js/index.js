@@ -16,7 +16,7 @@ $(function() {
   // }
   // 测试仓库名对应的操作员编码
   var wnameMap = {
-    '01': ['01', '02', '03', '04', '05', '06', '07'],
+    '110': ['01', '02', '03', '04', '05', '06', '07'],
     '02': ['01', '02', '03', '04', '05'],
     '03': ['01', '02', '03', '04', '05', '06', '07'],
     '04': ['01', '02', '03', '04', '05', '06', '07'],
@@ -59,31 +59,8 @@ $(function() {
           $(this).removeClass('checked')
           wnameCheckArr = wnameCheckArr.filter(itm => itm !== name)
         }
-
-        // var cbxcheck = $('.cbx-employee').eq(idx).is(":checked");
-        // $('.cbx-employee').eq(idx).prop('checked', !cbxcheck);
-        // console.log('cbxcheck:>>', cbxcheck);
-        // if (!cbxcheck) {
-        //   wnameCheckArr.push(wname + name);
-        // } else {
-        //   wnameCheckArr = wnameCheckArr.filter(itm => itm !== (wname + name));
-        // }
         console.log('wname arr:>>', wnameCheckArr)
       })
-      // $('.cbx-employee').change(function() {
-      //   var name = $(this).data('name');
-      //   var check = $(this).is(":checked");
-      //   console.log('cbx:>>', check);
-      //   if (check) {
-      //     var idx = wnameCheckArr.findIndex(itm => itm === name);
-      //     if (idx < 0) {
-      //       wnameCheckArr.push(name)
-      //     }
-      //   } else {
-      //     wnameCheckArr = wnameCheckArr.filter(itm => itm !== name);
-      //   }
-      //   console.log('wname arr:>>', wnameCheckArr)
-      // });
     })
     .catch(err => {
       console.log(err)
@@ -292,7 +269,7 @@ $(function() {
     for (var i = 0; i < tableList.length; i++) {
       var temp = tableList[i]
       if (temp.sbillBillcode === 'TD' + tdNo) {
-        temp.datasCarnum = globalShowCarNo
+        temp.carNo = globalShowCarNo
         tableList[i] = temp
       }
     }
@@ -305,12 +282,12 @@ $(function() {
     var rowObj = tableList[selectRowIndex]
     console.log('rowObj:>>', rowObj)
     var billCode = rowObj.sbillBillcode
-    var originCarNo = rowObj.datasCarnum
+    var originCarNo = rowObj.carNo
     if (originCarNo !== globalShowCarNo) {
       for (var i = 0; i < tableList.length; i++) {
         var temp = tableList[i]
         if (temp.sbillBillcode === billCode) {
-          temp.datasCarnum = globalShowCarNo
+          temp.carNo = globalShowCarNo
           tableList[i] = temp
         }
       }
@@ -399,7 +376,7 @@ $(function() {
       return
     }
     const cntSelectObj = tableList[selectRowIndex]
-    if (carNoForTd.length === 0 && cntSelectObj.datasCarnum.length > 0) {
+    if (carNoForTd.length === 0 && cntSelectObj.carNo.length > 0) {
       showMsg('此车牌号为手动输入，无需下拉')
       return
     }
@@ -438,7 +415,7 @@ $(function() {
         for (var i = 0; i < tableList.length; i++) {
           var item = tableList[i]
           if (item.sbillBillcode === 'TD' + tdNo) {
-            item.datasCarnum = globalShowCarNo
+            item.carNo = globalShowCarNo
             tableList[i] = item
           }
         }
@@ -484,16 +461,20 @@ $(function() {
     hideCarComponent('zhdCarNo')
     $('#zhdOriginPlaceFilterPop .list').html('')
     for (var i = 0; i < globalOriginPlaceArr.length; i++) {
-      if (globalOriginPlace == globalOriginPlaceArr[i]) {
+      if (globalOriginPlace == globalOriginPlaceArr[i]['supplierOrgName']) {
         $('#zhdOriginPlaceFilterPop .list').append(
-          '<div class="item row"><div class="cbx flex align-center"><img src="/img/cbxd.png"/></div><div class="col">' +
-            globalOriginPlaceArr[i] +
+          '<div class="item row"><div class="cbx flex align-center"><img src="/img/cbxd.png"/></div><div class="col" data-index="' +
+            globalOriginPlaceArr[i]['supplierOrgId'] +
+            '">' +
+            globalOriginPlaceArr[i]['supplierOrgName'] +
             '</div></div>'
         )
       } else {
         $('#zhdOriginPlaceFilterPop .list').append(
-          '<div class="item row"><div class="cbx flex align-center"><img src="/img/cbx.png"/></div><div class="col">' +
-            globalOriginPlaceArr[i] +
+          '<div class="item row"><div class="cbx flex align-center"><img src="/img/cbx.png"/></div><div class="col" data-index="' +
+            globalOriginPlaceArr[i]['supplierOrgId'] +
+            '">' +
+            globalOriginPlaceArr[i]['supplierOrgName'] +
             '</div></div>'
         )
       }
@@ -503,12 +484,19 @@ $(function() {
         .find('.col')
         .eq(0)
         .text()
+      var idx = $(this)
+        .find('.col')
+        .eq(0)
+        .data('index')
+      console.log('idx:>>>>', idx)
       globalOriginPlace = val
+      globalOriginPlaceId = idx
       console.log('globalOriginPlace:>>' + globalOriginPlace)
       $('#originAreaIpt').val(globalOriginPlace)
       $('#zhdOriginPlaceFilterPop').css('display', 'none')
       const currentObj = tableList[selectRowIndex]
       currentObj.originPlace = globalOriginPlace
+      currentObj.originPlaceId = idx
     })
     $('#zhdOriginPlaceFilterPop').css('top', '100px')
     $('#zhdOriginPlaceFilterPop').css(
@@ -629,12 +617,12 @@ $(function() {
         priPwdUserList = []
       })
   }
-  queryPrivpassUserList()
+  // queryPrivpassUserList()
   // 特权密码卷板判断规则
   function shouldInputPwdForJb(objs, factWeight) {
     // if (
-    //   objs[0].pntreeName === '板材' &&
-    //   objs[0].partsnameName.indexOf('板') > 0
+    //   objs[0].productClassName === '板材' &&
+    //   objs[0].productBrandName.indexOf('板') > 0
     // ) {
     let min = 0
     let max = 0
@@ -680,8 +668,8 @@ $(function() {
     return Number(
       (
         (thick *
-          Number(obj.goodsSpec2) *
-          Number(obj.goodsProperty1) *
+          Number(obj.specification2) *
+          Number(obj.length) *
           maxCount *
           7.85) /
         1000000
@@ -697,7 +685,7 @@ $(function() {
   function getJbWeightRange(obj) {
     let min = 0
     let max = 0
-    let arr = obj.goodsSpec.split('-')
+    let arr = obj.specification.split('-')
     if (arr.length >= 2 && arr[1].indexOf('.') > 0) {
       let prefix = arr[1].substring(0, arr[1].indexOf('.'))
       let suffix = arr[1].substring(arr[1].indexOf('.'))
@@ -719,12 +707,12 @@ $(function() {
           max = Number(prefix + '.8')
           break
         default:
-          min = obj.goodsSpec1
-          max = obj.goodsSpec1
+          min = obj.specification1
+          max = obj.specification1
       }
     } else {
-      max = obj.goodsSpec1
-      min = obj.goodsSpec1
+      max = obj.specification1
+      min = obj.specification1
     }
     return {
       max,
@@ -735,41 +723,45 @@ $(function() {
   function isTheSame(origin, compare) {
     console.log('is the same', origin, compare)
     var orginStr =
-      origin.partsnameName +
+      origin.productBrandName +
       '**' +
-      origin.goodsSpec +
+      origin.specification +
       '**' +
-      origin.productareaName +
+      origin.prodAreaName +
       '**' +
-      origin.goodsMaterial +
+      origin.productTextureName +
       '**' +
-      origin.goodsProperty1
+      origin.length
     var compareStr =
-      compare.partsnameName +
+      compare.productBrandName +
       '**' +
-      compare.goodsSpec +
+      compare.specification +
       '**' +
-      compare.productareaName +
+      compare.prodAreaName +
       '**' +
-      compare.goodsMaterial +
+      compare.productTextureName +
       '**' +
-      compare.goodsProperty1
+      compare.length
     console.log(compareStr, orginStr)
     return orginStr == compareStr
   }
   // 板材物资合并秤重规则
-  // pntreeName 物资大类
-  // partsnameName 品名
+  // productClassName 物资大类
+  // productBrandName 品名
   // warehouseName 仓库名称
-  // goodsSpec1 厚度(mm)
-  // goodsSpec2 宽度(mm)
+  // specification1 厚度(mm)
+  // specification2 宽度(mm)
   function plankCompare(origin, compare) {
     var originStr =
-      origin.goodsSpec1 + '**' + origin.goodsSpec2 + '**' + origin.warehouseName
-    var compareStr =
-      compare.goodsSpec1 +
+      origin.specification1 +
       '**' +
-      origin.goodsSpec2 +
+      origin.specification2 +
+      '**' +
+      origin.warehouseName
+    var compareStr =
+      compare.specification1 +
+      '**' +
+      origin.specification2 +
       '**' +
       origin.warehouseName
     console.log('plank origin:>>', originStr, '; compare:>>', compareStr)
@@ -784,8 +776,8 @@ $(function() {
     plankWeightArr = []
     let selectObj = tableList[selectRowIndex]
     console.log('selectObj:>>', selectObj)
-    let cnt = Number(selectObj.goodsNum - selectObj.oconsignDetailOknum)
-    if (selectObj.goodsMetering == '理计' || selectObj.mtype == 0) {
+    let cnt = selectObj.usableAmount
+    if (selectObj.quantityType == '01' || selectObj.mtype == 0) {
       showMsg('无需关联吊秤可以直接出库')
       return
     }
@@ -858,13 +850,11 @@ $(function() {
       console.log('orign idx:>>', linkMap[btnIdx][0])
       let origin = tableList[linkMap[btnIdx][0]]
       // 判断是否是单个物资多秤的情况
-      let idx = tableList.findIndex(
-        itm => itm.sbillBillbatch == origin.sbillBillbatch
-      )
+      let idx = tableList.findIndex(itm => itm.soleId == origin.soleId)
       let compare = tableList[selectRowIndex]
-      console.log('origin obj', origin, origin.sbillBillbatch)
-      console.log('compare obj', compare, compare.sbillBillbatch)
-      if (origin.pntreeName == '板材') {
+      console.log('origin obj', origin, origin.soleId)
+      console.log('compare obj', compare, compare.soleId)
+      if (origin.productClassName == '板材') {
         if (
           origin.warehouseName == '板材定开' ||
           origin.warehouseName == '开平厂'
@@ -1163,15 +1153,15 @@ $(function() {
   var selectRowIndex = -1
   var tableList = []
   var trKeys = [
-    'sbillBillcode',
-    'partsnameName',
-    'goodsSpec',
-    'goodsProperty1',
-    'productareaName',
-    'goodsMaterial',
-    'goodCount',
+    'businessTypeNo',
+    'productBrandName',
+    'specification',
+    'length',
+    'prodAreaName',
+    'productTextureName',
+    'usableAmount',
     // 公差 goodsProperty5 重量 goodsProperty4
-    'goodsProperty5',
+    'toleranceRange',
     // 其他 车牌号
     'other'
   ]
@@ -1203,19 +1193,24 @@ $(function() {
     }
     $('.zhd-keyboard').css('display', 'none')
     globalOriginPlace = ''
+    globalOriginPlaceId = ''
     globalOriginPlaceArr = []
     $('#originAreaIpt').val(globalOriginPlace)
     if (canBtnClick) {
       canBtnClick = false
-      request('/outWaitStorageQuery', {
-        sbillBillcode: tdNo
-      })
+      request(
+        'crane/dc/outStorage',
+        {
+          businessTypeNo: tdNo
+        },
+        'get'
+      )
         .then(res => {
           canBtnClick = true
           console.log(res)
-          if (res.status == 0) {
+          if (res.success) {
             // showMsg('用户过期')
-            if (!res.data.data) {
+            if (!res.data) {
               showMsg('此提单号查无物资明细')
               return
             }
@@ -1234,12 +1229,12 @@ $(function() {
              * FIXME
              * */
             var carno = ''
-            if (res.data.data.length > 0) {
-              var singleDataCarNum = res.data.data[0].datasCarnum || ''
+            if (res.data.length > 0) {
+              var singleDataCarNum = res.data[0].carNo || ''
               if (singleDataCarNum.trim().length === 0) {
                 // 判断列表是否存在
                 const existArr = tableList.filter(
-                  itm => itm.sbillBillcode === res.data.data[0].sbillBillcode
+                  itm => itm.soleId === res.data.data[0].soleId
                 )
                 if (existArr.length === 0) {
                   forceInputCarNo = true
@@ -1270,7 +1265,7 @@ $(function() {
                     // var tempCarNo = tableList.filter(
                     //   item =>
                     //     item.sbillBillcode === res.data.data[0].sbillBillcode
-                    // )[0].datasCarnum
+                    // )[0].carNo
                     var tempCarNo = carnoArr[0]
                     globalShowCarNo = tempCarNo
                     $('#tdCarNo').val(globalShowCarNo)
@@ -1296,13 +1291,13 @@ $(function() {
             }
 
             if (tableList.length == 0) {
-              tableList = res.data.data
+              tableList = res.data
               updateTableData(tableList)
             } else {
               // 重新渲染之前选择的物资
               let currentTD = ''
               if (selectRowIndex >= 0)
-                currentTD = tableList[selectRowIndex]['sbillBillbatch']
+                currentTD = tableList[selectRowIndex]['soleId']
               var chooseItems = {}
               console.log('linkMap:>>', linkMap)
               Object.keys(linkMap).map(itm => {
@@ -1310,24 +1305,20 @@ $(function() {
                   linkMap[itm].map(item => {
                     let keys = Object.keys(chooseItems)
                     let indx = keys.findIndex(
-                      im => im == tableList[item]['sbillBillbatch']
+                      im => im == tableList[item]['soleId']
                     )
                     if (indx >= 0) {
-                      chooseItems[tableList[item]['sbillBillbatch']] =
-                        itm +
-                        ';' +
-                        chooseItems[tableList[item]['sbillBillbatch']]
+                      chooseItems[tableList[item]['soleId']] =
+                        itm + ';' + chooseItems[tableList[item]['soleId']]
                     } else {
-                      chooseItems[tableList[item]['sbillBillbatch']] = itm
+                      chooseItems[tableList[item]['soleId']] = itm
                     }
                   })
                 }
               })
               $('.crane-btn').unbind()
-              res.data.data.map(itm => {
-                let idx = tableList.findIndex(
-                  item => item.sbillBillbatch == itm.sbillBillbatch
-                )
+              res.data.map(itm => {
+                let idx = tableList.findIndex(item => item.soleId == itm.soleId)
                 if (idx < 0) {
                   tableList.push(itm)
                 } else {
@@ -1337,7 +1328,7 @@ $(function() {
                    * @author samy
                    */
                   var originItem = tableList[idx]
-                  if (!originItem.datasCarnum) {
+                  if (!originItem.carNo) {
                     tableList[idx] = itm
                   }
                 }
@@ -1345,14 +1336,14 @@ $(function() {
               updateTableData(tableList)
               if (currentTD.length != '') {
                 selectRowIndex = tableList.findIndex(
-                  itm => itm.sbillBillbatch == currentTD
+                  itm => itm.soleId == currentTD
                 )
                 initActiveRect(selectRowIndex)
               }
               resetLinkmap()
               console.log('chooseItems:>>>', chooseItems)
               Object.keys(chooseItems).map(k => {
-                let idx = tableList.findIndex(itm => itm.sbillBillbatch == k)
+                let idx = tableList.findIndex(itm => itm.soleId == k)
                 let btnIdx = chooseItems[k]
                 console.log('btnIdx:>>', btnIdx)
                 console.log('; indx:>>>', btnIdx.toString().indexOf(';'))
@@ -1422,10 +1413,10 @@ $(function() {
               })
             }
             console.log(tableList)
-          } else if (resp.status == -2) {
+          } else if (res.status == -2) {
             window.location.href = '/login?type=1'
           } else {
-            showMsg(resp.message)
+            showMsg(res.message)
           }
         })
         .catch(err => {
@@ -1464,14 +1455,14 @@ $(function() {
      * @date 2019/07/29
      * @content 需求来源 曹工和线下确认理计物资可以修改数量并能自动计算重量
      * */
-    // if ((selectObj.goodsMetering == "理计" && Number(selectObj.pickType) != 1) || selectObj.mtype == 0) {
+    // if ((selectObj.quantityType == "理计" && Number(selectObj.pickType) != 1) || selectObj.mtype == 0) {
     //   return "理计不能修改数量";
-    // } else if (selectObj.goodsMetering == "理计" && Number(selectObj.pickType) == 1) {
+    // } else if (selectObj.quantityType == "理计" && Number(selectObj.pickType) == 1) {
     //   return "ok";
     // }
     if (selectObj.mtype == 0) {
       return '整卷开平不能修改数量'
-    } else if (selectObj.goodsMetering == '理计') {
+    } else if (selectObj.quantityType == '01') {
       return 'ok'
     } else if (btnIndex == -1) {
       return '请先选中关联设备的物资'
@@ -1512,14 +1503,12 @@ $(function() {
     }
     var selectObj = tableList[selectRowIndex]
     // 判断理计物资不能超过出库最大值
-    if (selectObj.goodsMetering == '理计') {
-      let maxCount = 0
-      if (Number(selectObj.pickType) == 1) {
-        // 凭证物资
-        maxCount = selectObj.detailOkNnum
-      } else {
-        maxCount = Number(selectObj.goodsNum - selectObj.oconsignDetailOknum)
-      }
+    if (selectObj.quantityType == '01') {
+      let maxCount = selectObj.usableAmount
+      // if (Number(selectObj.pickType) == 1) {
+      //   // 凭证物资
+      //   maxCount = selectObj.detailOkNnum
+      // } else {
       if (countVal > maxCount) {
         showMsg('不能超过可出库数量')
         countVal = maxCount
@@ -1527,12 +1516,12 @@ $(function() {
       }
     }
     var idx = Object.keys(singleGoodsCount).findIndex(
-      itm => itm == selectObj.sbillBillbatch
+      itm => itm == selectObj.soleId
     )
-    if (idx >= 0) singleGoodsCount[selectObj.sbillBillbatch] = Number(countVal)
-    if (selectObj.goodsMetering == '理计' || selectObj.mtype == 0) {
+    if (idx >= 0) singleGoodsCount[selectObj.soleId] = Number(countVal)
+    if (selectObj.quantityType == '01' || selectObj.mtype == 0) {
       let weight = formatWeight(
-        Number(countVal * selectObj.goodsProperty1 * selectObj.goodsProperty2)
+        Number(countVal * selectObj.length * selectObj.meterWeight)
       )
       if (selectObj.mtype == 0) weight = selectObj.goodsWeight
       $('#weightInfo').text(weight)
@@ -1553,14 +1542,8 @@ $(function() {
       countVal++
     }
     var selectObj = tableList[selectRowIndex]
-    if (selectObj.goodsMetering == '理计') {
-      let maxCount = 0
-      if (Number(selectObj.pickType) == 1) {
-        // 凭证物资
-        maxCount = selectObj.detailOkNnum
-      } else {
-        maxCount = Number(selectObj.goodsNum - selectObj.oconsignDetailOknum)
-      }
+    if (selectObj.quantityType == '01') {
+      let maxCount = selectObj.usableAmount
       if (countVal > maxCount) {
         showMsg('不能超过可出库数量')
         countVal = maxCount
@@ -1568,12 +1551,12 @@ $(function() {
       }
     }
     var idx = Object.keys(singleGoodsCount).findIndex(
-      itm => itm == selectObj.sbillBillbatch
+      itm => itm == selectObj.soleId
     )
-    if (idx >= 0) singleGoodsCount[selectObj.sbillBillbatch] = Number(countVal)
-    if (selectObj.goodsMetering == '理计' || selectObj.mtype == 0) {
+    if (idx >= 0) singleGoodsCount[selectObj.soleId] = Number(countVal)
+    if (selectObj.quantityType == '01' || selectObj.mtype == 0) {
       let weight = formatWeight(
-        Number(countVal * selectObj.goodsProperty1 * selectObj.goodsProperty2)
+        Number(countVal * selectObj.length * selectObj.meterWeight)
       )
       if (selectObj.mtype == 0) weight = selectObj.goodsWeight
       $('#weightInfo').text(weight)
@@ -1616,15 +1599,15 @@ $(function() {
             outNo: currentObj.oconsignBillcode,
             outBatchNo: currentObj.oconsignBillbatch,
             tdNo: currentObj.sbillBillcode,
-            goodNo: currentObj.sbillBillbatch,
-            goodName: currentObj.partsnameName,
-            standard: currentObj.goodsSpec,
-            material: currentObj.goodsMaterial,
-            supply: currentObj.productareaName,
-            length: currentObj.goodsProperty1,
+            goodNo: currentObj.soleId,
+            goodName: currentObj.productBrandName,
+            standard: currentObj.specification,
+            material: currentObj.productTextureName,
+            supply: currentObj.prodAreaName,
+            length: currentObj.length,
             weight: weight,
             count: cnt,
-            datasCarnum: currentObj.datasCarnum
+            carNo: currentObj.carNo
           }
           if (wnameCheckArr.length > 0)
             optBody.delivers = wnameCheckArr.join(',')
@@ -1633,7 +1616,7 @@ $(function() {
           if (currentObj.goodsProperty4)
             optBody.weightRange = currentObj.goodsProperty4
           let isBang = true
-          if (currentObj.goodsMetering == '理计' || currentObj.mtype == 0) {
+          if (currentObj.quantityType == '01' || currentObj.mtype == 0) {
             isBang = false
           }
           if (bottomIdx >= 0 && isBang) {
@@ -1696,7 +1679,7 @@ $(function() {
            * @author samy
            * @date 2020/05/26
            */
-          body.datasCarnum = currentObj.datasCarnum
+          body.carNo = currentObj.carNo
           /**
            * 原产地
            * @author samy
@@ -1707,13 +1690,13 @@ $(function() {
           if (Number(currentObj.pickType) === 1) {
             body.picktokenBillcode = currentObj.picktokenBillcode
             body.picktokenBillbatch = currentObj.picktokenBillbatch
-            body.datasCarnum = currentObj.datasCarnum
+            body.carNo = currentObj.carNo
             body.datasDriver = currentObj.datasDriver
             body.datasIdentitynum = currentObj.datasIdentitynum
             // 行为记录
             optBody.picktokenBillcode = currentObj.picktokenBillcode
             optBody.picktokenBillbatch = currentObj.picktokenBillbatch
-            optBody.datasCarnum = currentObj.datasCarnum
+            optBody.carNo = currentObj.carNo
             optBody.datasDriver = currentObj.datasDriver
             optBody.datasIdentitynum = currentObj.datasIdentitynum
           }
@@ -1976,6 +1959,369 @@ $(function() {
     $('#weightInfo').text(val.toFixed(3))
   })
 
+  function arraySum(arr) {
+    return arr.reduce((a, b) => Number(a) + Number(b), 0)
+  }
+
+  function scpOutStorageSuccess(isBang, craneBtnIdxs) {
+    console.log(totalPlankArr)
+    if (!isBang) {
+      // 处理理计物资出库
+      const currentObj = tableList[selectRowIndex]
+      const uniqueCode = currentObj.soleId
+      tableList = tableList.filter(itm => itm.soleId != uniqueCode)
+    } else {
+      const uniqueCodes = totalPlankArr.map(itm => itm.soleId)
+      tableList = tableList.filter(itm => !uniqueCodes.includes(itm.soleId))
+      // 清理磅秤数据
+      // for()
+      // FIXME: 处理多个秤，选择秤正常的情况
+      if (userChooseBtnIdx > -1) {
+        linkMap[userChooseBtnIdx] = []
+        $('.weight-btn')
+          .eq(userChooseBtnIdx)
+          .css('background-image', 'url(/img/dl.png)')
+        $('.weight-btn')
+          .eq(userChooseBtnIdx)
+          .find('span')
+          .eq(0)
+          .text('0')
+        userChooseBtnIdx = -1
+      }
+      // FIXME: 记录行为数据
+    }
+    factWeight = 0
+    updateFactWeight(0)
+    updateTableData(tableList)
+    // 初始化操作员操作
+    clearTopCbx()
+    // 清除车牌号
+    $('#tdCarNo').val('')
+    globalShowCarNo = ''
+    // 清除原产地
+    globalOriginPlace = ''
+    $('#originAreaIpt').val(globalOriginPlace)
+    // 清除高亮条
+    selectRowIndex = -1
+    initActiveRect(selectRowIndex)
+    // 提出出库成功
+    showMsg('该物资已出库成功')
+
+    // let uniqueCode = currentObj.soleId
+    // let sbillCarNo = currentObj.carNo
+    // console.log('uniqueCode:>>>' + uniqueCode)
+    // console.log(linkMap)
+    // // 出库物资是还是磅计，默认是磅计
+    // let isBang = true
+    // if (currentObj.quantityType == '01' || currentObj.mtype == 0) {
+    //   isBang = false
+    // }
+    // if (!isBang) clearTopCbx()
+    // var tableIndex = tableList.findIndex(itm => itm.soleId == uniqueCode)
+    // let otherSelectRowObj = {}
+    // Object.keys(linkMap).map(itm => {
+    //   console.log('itm:>>', itm)
+    //   if (linkMap[itm].length >= 0) {
+    //     var arr = linkMap[itm]
+    //     arr.map(item => {
+    //       if (item != tableIndex) {
+    //         // 判断是否一个物资对应多个秤
+    //         let otherKeys = Object.keys(otherSelectRowObj)
+    //         let idx = otherKeys.findIndex(
+    //           itm => itm == tableList[item]['soleId']
+    //         )
+    //         if (idx >= 0) {
+    //           otherSelectRowObj[tableList[item]['soleId']] =
+    //             itm + ';' + otherSelectRowObj[tableList[item]['soleId']]
+    //         } else {
+    //           otherSelectRowObj[tableList[item]['soleId']] = itm
+    //         }
+    //       }
+    //     })
+    //   }
+    // })
+    // $('.crane-btn').unbind()
+    // tableList = tableList.filter(itm => itm.soleId != uniqueCode)
+    // /**
+    //  * 如果没有提单了，去除车牌号
+    //  */
+    // var restIndex = tableList.filter(itm => itm.carNo === sbillCarNo)
+    // if (restIndex.length === 0) {
+    //   carNoForTd = carNoForTd.filter(itm => itm !== sbillCarNo)
+    // }
+    // $('#tdCarNo').val('')
+    // globalShowCarNo = ''
+    // selectRowIndex = -1
+    // resetLinkmap()
+    // updateTableData(tableList)
+    // Object.keys(otherSelectRowObj).map(k => {
+    //   let idx = tableList.findIndex(itm => itm.soleId == k)
+    //   let btnIdx = otherSelectRowObj[k]
+    //   console.log('success btnidx', btnIdx)
+    //   if (btnIdx.indexOf(';') > 0) {
+    //     // 一个物资对应多秤
+    //     let arr = btnIdx.split(';')
+    //     arr.map((ar, ix) => {
+    //       linkMap[Number(ar)].push(idx)
+    //       console.log('ar:>>', ar, ';ix:>>', ix, '; typoef ar', typeof ar)
+    //       if (ix == 0) {
+    //         $('#wzBody .tr')
+    //           .eq(idx)
+    //           .find('.td')
+    //           .eq(9)
+    //           .html('')
+    //         $('#wzBody .tr')
+    //           .eq(idx)
+    //           .find('.td')
+    //           .eq(9)
+    //           .html(
+    //             '<div class="crane-btn column" data-bidx="' +
+    //               ar +
+    //               '"  data-ridx="' +
+    //               idx +
+    //               '"><span>' +
+    //               craneNames[ar] +
+    //               '</span></div>'
+    //           )
+    //       } else {
+    //         $('#wzBody .tr')
+    //           .eq(idx)
+    //           .find('.td')
+    //           .eq(9)
+    //           .prepend(
+    //             '<div class="crane-btn column" data-bidx="' +
+    //               ar +
+    //               '"  data-ridx="' +
+    //               idx +
+    //               '"><span>' +
+    //               craneNames[ar] +
+    //               '</span></div>'
+    //           )
+    //       }
+    //     })
+    //   } else {
+    //     linkMap[btnIdx].push(idx)
+    //     $('#wzBody .tr')
+    //       .eq(idx)
+    //       .find('.td')
+    //       .eq(9)
+    //       .html('')
+    //     $('#wzBody .tr')
+    //       .eq(idx)
+    //       .find('.td')
+    //       .eq(9)
+    //       .html(
+    //         '<div class="crane-btn column" data-bidx="' +
+    //           btnIdx +
+    //           '"  data-ridx="' +
+    //           idx +
+    //           '"><span>' +
+    //           craneNames[btnIdx] +
+    //           '</span></div>'
+    //       )
+    //   }
+    //   bindCraneBtn(idx)
+    // })
+    // initActiveRect(selectRowIndex)
+    // $('#countIpt').val('')
+    // $('#weightInfo').text('')
+    // if (userChooseBtnIdx > -1 && isBang) {
+    //   $('.weight-btn')
+    //     .eq(userChooseBtnIdx)
+    //     .css('background-image', 'url(/img/dl.png)')
+    //   dwt[userChooseBtnIdx] = 0
+    //   $('.weight-btn')
+    //     .eq(userChooseBtnIdx)
+    //     .find('span')
+    //     .eq(0)
+    //     .text(dwt[userChooseBtnIdx])
+    //   if (linkMap[userChooseBtnIdx].length == 0) {
+    //     clearTopCbx()
+    //     showMultiCranePart(false, userChooseBtnIdx)
+    //     userChooseBtnIdx = -1
+    //   }
+    // }
+    // console.log('出库后的按钮映射')
+    // console.log(linkMap)
+    // if (manAudit) showMsg('请去电脑后台人工审核出库')
+    // else {
+    //   showMsg('该物资已出库成功')
+    //   globalOriginPlace = ''
+    //   $('#originAreaIpt').val(globalOriginPlace)
+    // }
+    // if (cb) cb()
+  }
+
+  /**
+   * 新项目磅计批量出库
+   * @author samy
+   * @date 2021/01/14
+   * @param w 重量
+   * @param cnt 数量
+   * @param type 出库物资类型 01 理计 02 磅计
+   */
+  function scpBangOutStorage(w, cnt, type = '02') {
+    // 每吨重量
+    const perWeight = Number(w) / Number(cnt)
+    const reqBody = {
+      carNo: globalShowCarNo,
+      deliveryPlanIdDTOList: []
+    }
+    let operatorNo = ''
+    if (wnameCheckArr.length > 0) operatorNo = wnameCheckArr.join(',')
+    totalPlankArr.map((itm, idx) => {
+      itm.sourceProdAreaName = itm.originPlace
+      itm.sourceProdAreaId = itm.originPlaceId
+      itm.operatorNo = operatorNo
+      itm.equipment = userChooseBtnIdx >= 0 ? `A${userChooseBtnIdx + 1}` : '-1'
+      reqBody.material = itm.productTextureName
+      reqBody.carNo = itm.carNo
+      reqBody.standard = itm.specification
+      reqBody.supply = itm.prodAreaName
+      reqBody.length = itm.length
+      reqBody.weightRange = itm.weightRange
+      reqBody.toleranceRange = itm.toleranceRange
+      if (itm.usableAmount >= cnt) {
+        itm.count = cnt
+        itm.weight = w
+      } else {
+        if (idx < totalPlankArr.length - 1) {
+          itm.count = itm.usableAmount
+          itm.weight = getFixWeight(Number(perWeight * itm.count).toFixed(4))
+        } else {
+          itm.count = itm.usableAmount
+          if (type === '01') {
+            itm.weight = w
+          } else {
+            itm.weight =
+              w -
+              arraySum(reqBody.deliveryPlanIdDTOList.map(item => item.weight))
+          }
+        }
+      }
+      reqBody.deliveryPlanIdDTOList.push(itm)
+    })
+    console.log('reqBody:>>', reqBody)
+    let isBang = true
+    // FIXME:|| currentObj.mtype == 0  整卷开平
+    if (type == '01') {
+      isBang = false
+    }
+    const multiCraneIdx = []
+    if (userChooseBtnIdx >= 0 && isBang) {
+      // 如果有多次清空数据
+      // 是否是一个物资多秤
+      let selectidx = linkMap[userChooseBtnIdx][0]
+      console.log('selectidx', selectidx)
+      if (selectidx == undefined) selectidx = selectRowIndex
+      const otherStockArray = []
+      multiCraneIdx.push(userChooseBtnIdx)
+      Object.keys(linkMap).map(k => {
+        let ix = linkMap[k].findIndex(im => im == selectidx)
+        if (ix >= 0 && k != userChooseBtnIdx) {
+          multiCraneIdx.push(k)
+          if (dwtCounts[k].records.length > 0) {
+            otherStockArray.push(dwtCounts[k].records.join(';'))
+          }
+          if (linkMap[k].length == 1) {
+            dwtCounts[k].canEdit = false
+            dwtCounts[k].records = []
+            dwtCounts[k].beforeCancelCount = 0
+            $('#cb' + k).unbind()
+            $('#wbtnc' + k).unbind()
+            $('#btntop' + k).remove()
+            dwt[k] = 0
+            $('.weight-btn')
+              .eq(k)
+              .find('span')
+              .eq(0)
+              .text(dwt[k])
+            $('.weight-btn')
+              .eq(k)
+              .css('background-image', 'url("/img/dl.png")')
+          }
+        }
+      })
+      if (dwtCounts[userChooseBtnIdx].records.length > 0) {
+        reqBody.stocks = dwtCounts[userChooseBtnIdx].records.join(';')
+      }
+      if (otherStockArray.length > 0) {
+        reqBody.stocks = reqBody.stocks + '|' + otherStockArray.join('|')
+      }
+      reqBody.multiOutRecords = reqBody.stocks ? reqBody.stocks : ''
+      reqBody.craneIndex = multiCraneIdx.join(';')
+      if (linkMap[userChooseBtnIdx].length == 1) {
+        dwtCounts[userChooseBtnIdx].canEdit = false
+        dwtCounts[userChooseBtnIdx].records = []
+        $('#cb' + userChooseBtnIdx).unbind()
+        $('#wbtnc' + userChooseBtnIdx).unbind()
+        $('#btntop' + userChooseBtnIdx).remove()
+      }
+    } else {
+      // 理计出库记录
+      reqBody.craneIndex = '-1'
+    }
+    loading('出库中，请耐心等待...')
+    console.log('reqBody:>>', reqBody)
+    // return
+    request('crane/dc/outStorage', reqBody, 'post').then(res => {
+      console.log('new storage res', res)
+      if (res.success && res.data.unqualifiedList.length === 0) {
+        hideLoad()
+        showMsg('出库成功')
+        scpOutStorageSuccess(isBang, multiCraneIdx)
+      } else {
+        if (res.success && res.data.unqualifiedList.length > 0) {
+          // 待审核
+          hideLoad()
+          // 中此条物资需要审核确认\n 出库重量:${weight}\n 出库数量:${cnt}
+          const errMsg = res.data.unqualifiedList
+            .map(
+              itm =>
+                `提单号:${itm.sourceBillNo}中${itm.productBrandName}需要审核确认,出库重量:${itm.realWeight},出库数量:${itm.amount}`
+            )
+            .join('\n')
+          $('body').append(
+            modalTemp({
+              modalId: 'modalErr',
+              modalTitle: errMsg
+            })
+          )
+          showModal('#modalErr', function(result) {
+            if (result) {
+              loading('出库中，请耐心等待...')
+              reqBody.affirm = 1
+              request('crane/dc/outStorage', reqBody, 'post')
+                .then(resp => {
+                  hideLoad()
+                  if (resp.success) {
+                    // showMsg('用户审核成功, 准备做出库操作')
+                    scpOutStorageSuccess(isBang, multiCraneIdx)
+                  } else {
+                    showMsg(
+                      '审核失败' +
+                        (resp.message ? ';具体原因' + resp.message : '')
+                    )
+                  }
+                })
+                .catch(err => {
+                  hideLoad()
+                  showMsg(
+                    '审核失败' + (err.message ? ',具体原因' + err.message : '')
+                  )
+                })
+            } else {
+              console.log('用户取消')
+            }
+          })
+        } else {
+          hideLoad()
+          showMsg('出库异常' + res.message)
+        }
+      }
+    })
+  }
+
   /**
    * 磅计物资出库(为特权密码单独抽出来的方法)
    * @author samy
@@ -1989,7 +2335,7 @@ $(function() {
     if (detailIdx.length > 1) {
       let arr = detailIdx.map(itm => tableList[itm])
       let ct = tableList[selectRowIndex]
-      let idx = arr.findIndex(itm => itm.sbillBillbatch == ct.sbillBillbatch)
+      let idx = arr.findIndex(itm => itm.soleId == ct.soleId)
       console.log(idx)
       if (idx >= 0) {
         console.log('batch outstorage')
@@ -1997,7 +2343,7 @@ $(function() {
       } else {
         let currentObj = tableList[selectRowIndex]
         let currentTd = currentObj.sbillBillcode
-        delete singleGoodsCount[currentObj.sbillBillbatch]
+        delete singleGoodsCount[currentObj.soleId]
         singleOutStorage(currentObj, currentTd, cnt, w, 0, 0, userChooseBtnIdx)
       }
     } else {
@@ -2005,10 +2351,10 @@ $(function() {
       let currentObj = tableList[detailIdx[0]]
       if (detailIdx.length == 0) currentObj = tableList[selectRowIndex]
       let selectObj = tableList[selectRowIndex]
-      if (selectObj.sbillBillbatch != currentObj.sbillBillbatch)
+      if (selectObj.soleId != currentObj.soleId)
         currentObj = tableList[selectRowIndex]
       let currentTd = currentObj.sbillBillcode
-      delete singleGoodsCount[selectObj.sbillBillbatch]
+      delete singleGoodsCount[selectObj.soleId]
       singleOutStorage(currentObj, currentTd, cnt, w, 0, 0, userChooseBtnIdx)
     }
   }
@@ -2021,17 +2367,11 @@ $(function() {
     if (selectRowIndex > -1) {
       var selectObj = tableList[selectRowIndex]
       // 判断理计物资不能超过出库最大值
-      if (selectObj.goodsMetering == '理计') {
-        let maxCount = 0
-        if (Number(selectObj.pickType) == 1) {
-          // 凭证物资
-          maxCount = selectObj.detailOkNnum
-        } else {
-          maxCount = Number(selectObj.goodsNum - selectObj.oconsignDetailOknum)
-        }
+      if (selectObj.quantityType == '01') {
+        let maxCount = selectObj.usableAmount
         if (cnt > maxCount) {
           cnt = maxCount
-          $('#countIpt').val(countVal)
+          $('#countIpt').val(cnt)
         }
       }
     }
@@ -2051,10 +2391,10 @@ $(function() {
         return
       }
       var selectObj = tableList[selectRowIndex]
-      if (selectObj.goodsMetering == '理计' || selectObj.mtype == 0) {
-        // 重新计算重量
+      if (selectObj.quantityType == '01' || selectObj.mtype == 0) {
+        // 重新计算重量 FIXME 米重
         let weight = formatWeight(
-          Number(cnt * selectObj.goodsProperty1 * selectObj.goodsProperty2)
+          Number(cnt * selectObj.length * selectObj.meterWeight)
         )
         if (selectObj.mtype == 0) weight = selectObj.goodsWeight
         $('#weightInfo').text(weight)
@@ -2079,127 +2419,20 @@ $(function() {
         showMsg('有物资未选择原产地，无法出库')
         return
       }
-      let isJb = false
-      for (var i = 0; i < totalPlankArr.length; i++) {
-        if (jbGoods.includes(totalPlankArr[i].partsnameName)) {
-          isJb = true
-          break
-        }
-      }
-      // 判断规格是否含符合规则的板材
-      const jbSpecRules = ['.0', '.25', '.5', '.75']
-      let isInputPwd = false
-      for (var i = 0; i < totalPlankArr.length; i++) {
-        const arr = totalPlankArr[i].goodsSpec.split('-')
-        if (arr.length >= 2 && arr[1].indexOf('.') > 0) {
-          const suffix = arr[1].substring(arr[1].indexOf('.'))
-          if (jbSpecRules.includes(suffix)) {
-            isInputPwd = true
-            break
-          }
-        }
-      }
-      // 显示是否需要特权密码
-      if (shouldInputPwdForJb(totalPlankArr, Number(w)) && isJb && isInputPwd) {
-        $('body').append(
-          modalPwdTemp({
-            modalId: 'pwdModalIptShow',
-            goods: totalPlankArr
-          })
-        )
-        $('#pwdName').click(function() {
-          $('.zhd-keyboard').css('display', 'none')
-          $('#pwdFloatNameList').html('')
-          for (var i = 0; i < priPwdUserList.length; i++) {
-            var td =
-              '<div class="item" data-code="' +
-              priPwdUserList[i].operatorCode +
-              '" >' +
-              priPwdUserList[i].operatorName +
-              '</div>'
-            $('#pwdFloatNameList').append(td)
-          }
-          $('#pwdFloatNameList .item').click(function(e) {
-            var code = $(this).data('code')
-            console.log('row code:>>', code)
-            globalPwdOperatorCode = code
-            var name = $(this).text()
-            $('#pwdName').val(name)
-            $('#pwdFloatNameList').css('display', 'none')
-          })
-          $('#pwdFloatNameList').css('display', 'block')
-          // globalFocusDom = '#pwdName'
-          // $('.zhd-keyboard').css('display', 'block')
-        })
-        $('#pwdPwd').focus(function() {
-          $('.zhd-keyboard').css('display', 'none')
-          globalFocusDom = '#pwdPwd'
-          $('.zhd-keyboard').css('display', 'block')
-        })
-        // FIXME 需求变更
-        showPwdModal('#pwdModalIptShow', function(resp, name, pwd) {
-          console.log('confirm...', resp, name, pwd)
-          if (resp) {
-            if (name.length === 0) {
-              showMsg('用户名不能为空')
-            } else if (pwd.length === 0) {
-              showMsg('特权密码不能为空')
-            } else {
-              globalOperatorNamePriv = name
-              globalOperatorPassPriv = pwd
-              console.log('去出库')
-              bangOutStorage(detailIdx, w, cnt)
-            }
-          }
-        })
-      } else {
-        console.log('不需要特权密码出库')
-        bangOutStorage(detailIdx, w, cnt)
-      }
-
-      // FIXME 出库
-      // if (detailIdx.length > 1) {
-      //   let arr = detailIdx.map(itm => tableList[itm])
-      //   let ct = tableList[selectRowIndex]
-      //   let idx = arr.findIndex(itm => itm.sbillBillbatch == ct.sbillBillbatch)
-      //   console.log(idx)
-      //   if (idx >= 0) {
-      //     console.log('batch outstorage')
-      //     batchWeight(0, detailIdx, w, cnt)
-      //   } else {
-      //     let currentObj = tableList[selectRowIndex]
-      //     let currentTd = currentObj.sbillBillcode
-      //     delete singleGoodsCount[currentObj.sbillBillbatch]
-      //     singleOutStorage(
-      //       currentObj,
-      //       currentTd,
-      //       cnt,
-      //       w,
-      //       0,
-      //       0,
-      //       userChooseBtnIdx
-      //     )
-      //   }
-      // } else {
-      //   console.log('single bang outstorage')
-      //   let currentObj = tableList[detailIdx[0]]
-      //   if (detailIdx.length == 0) currentObj = tableList[selectRowIndex]
-      //   let selectObj = tableList[selectRowIndex]
-      //   if (selectObj.sbillBillbatch != currentObj.sbillBillbatch)
-      //     currentObj = tableList[selectRowIndex]
-      //   let currentTd = currentObj.sbillBillcode
-      //   delete singleGoodsCount[selectObj.sbillBillbatch]
-      //   singleOutStorage(currentObj, currentTd, cnt, w, 0, 0, userChooseBtnIdx)
-      // }
+      // 批量出库
+      console.log('totalPlankArr:>>', totalPlankArr)
+      // bangOutStorage(detailIdx, w, cnt)
+      scpBangOutStorage(w, cnt)
     } else {
       let currentObj = tableList[selectRowIndex]
-      let currentTd = currentObj.sbillBillcode
       if (currentObj.originPlace == null || currentObj.originPlace == '') {
         showMsg('该物资未选择原产地，无法出库')
         return
       }
-      delete singleGoodsCount[currentObj.sbillBillbatch]
-      singleOutStorage(currentObj, currentTd, cnt, w, 0, 0, userChooseBtnIdx)
+      totalPlankArr.push(currentObj)
+      delete singleGoodsCount[currentObj.soleId]
+      const wt = formatWeight(currentObj.length * cnt * currentObj.meterWeight)
+      scpBangOutStorage(Number(wt), cnt, '01')
     }
   })
   let plankWeightArr = []
@@ -2214,19 +2447,17 @@ $(function() {
     console.log('detailArray:>>', detailArray)
     console.log('totalplankarr:>>', totalPlankArr)
     console.log('total w:>>', w)
-    // debugger
-    // if (idx == 0) plankWeightArr = []
     let currentWeight = getFixWeight(
       Number((Number(w) / Number(cnt)) * currentCnt).toFixed(4)
     )
     let tempWeight = 0
     let tempWstr = ''
-    if (currentObj.pntreeName == '板材' && idx < detailArray.length - 1) {
-      // if (currentObj.partsnameName == "花纹板") {
+    if (currentObj.productClassName == '板材' && idx < detailArray.length - 1) {
+      // if (currentObj.productBrandName == "花纹板") {
       //   tempWeight =
-      //     (((Number(currentObj.goodsSpec1) + 0.3) * 7.85) / 1000) *
-      //     (Number(currentObj.goodsSpec2) / 1000) *
-      //     Number(currentObj.goodsProperty1) *
+      //     (((Number(currentObj.specification1) + 0.3) * 7.85) / 1000) *
+      //     (Number(currentObj.specification2) / 1000) *
+      //     Number(currentObj.length) *
       //     currentCnt;
       //   tempWstr = tempWeight.toFixed(4);
       //   currentWeight = getFixWeight(tempWstr);
@@ -2236,9 +2467,9 @@ $(function() {
       //   plankWeightArr.push(currentWeight);
       // } else {
       //   tempWeight =
-      //     ((Number(currentObj.goodsSpec1) * 7.85) / 1000) *
-      //     (Number(currentObj.goodsSpec2) / 1000) *
-      //     Number(currentObj.goodsProperty1) *
+      //     ((Number(currentObj.specification1) * 7.85) / 1000) *
+      //     (Number(currentObj.specification2) / 1000) *
+      //     Number(currentObj.length) *
       //     currentCnt;
       //   tempWstr = tempWeight.toFixed(4);
       //   currentWeight = getFixWeight(tempWstr);
@@ -2251,14 +2482,13 @@ $(function() {
       let totalMeters = 0
       totalPlankArr.map(tempObj => {
         totalMeters += Number(
-          (tempObj.goodsNum - tempObj.oconsignDetailOknum) *
-            tempObj.goodsProperty1
+          (tempObj.goodsNum - tempObj.oconsignDetailOknum) * tempObj.length
         )
       })
       tempWeight =
         (Number(
           (currentObj.goodsNum - currentObj.oconsignDetailOknum) *
-            currentObj.goodsProperty1
+            currentObj.length
         ) /
           totalMeters) *
         w
@@ -2266,7 +2496,7 @@ $(function() {
       currentWeight = getFixWeight(tempWstr)
       plankWeightArr.push(currentWeight)
     } else if (
-      currentObj.pntreeName == '板材' &&
+      currentObj.productClassName == '板材' &&
       idx == detailArray.length - 1
     ) {
       let t = 0
@@ -2280,7 +2510,7 @@ $(function() {
       if (tempWeight < 0) tempWeight = 0.0
       currentWeight = tempWeight.toFixed(3)
     } else if (
-      currentObj.pntreeName != '板材' &&
+      currentObj.productClassName != '板材' &&
       idx < detailArray.length - 1
     ) {
       console.log('currentWeight:>>', currentWeight)
@@ -2288,7 +2518,7 @@ $(function() {
       console.log('crane weight:>>', currentWeight)
       plankWeightArr.push(currentWeight)
     } else if (
-      currentObj.pntreeName != '板材' &&
+      currentObj.productClassName != '板材' &&
       idx == detailArray.length - 1
     ) {
       console.log('不是板材到最后', plankWeightArr)
@@ -2310,7 +2540,7 @@ $(function() {
       ';currentWeight:>>',
       currentWeight
     )
-    delete singleGoodsCount[currentObj.sbillBillbatch]
+    delete singleGoodsCount[currentObj.soleId]
     singleOutStorage(
       currentObj,
       currentTd,
@@ -2377,8 +2607,6 @@ $(function() {
         factWeight = 0
         updateFactWeight(factWeight)
         userChooseBtnIdx = -1
-        // if (res.currentIdx < res.arr.length && userChooseBtnIdx > -1)
-        // batchWeight(res.currentIdx, res.arr, w, cnt);
       }
     )
   }
@@ -2389,22 +2617,6 @@ $(function() {
     window.location.href = '/menu'
   })
 
-  // 计重
-  // $('#calcWeight').click(() => {
-  //   alert('集中')
-  // })
-  // 确认
-  // $('#confirmAction').click(() => {
-  //   alert('确认')
-  // })
-  // 取消
-  // $('#cancelAction').click(() => {
-  //   alert('取消')
-  // })
-  // 提交
-  // $('#submitAction').click(() => {
-  //   alert('提交')
-  // })
   // 绑定磅秤按钮事件
   function bindCraneBtn(rowIndex) {
     let temp = $('#wzBody .tr')
@@ -2433,19 +2645,17 @@ $(function() {
   }
   function outStorageSuccess(currentObj, manAudit = false, cb) {
     // clearTopCbx()
-    let uniqueCode = currentObj.sbillBillbatch
-    let sbillCarNo = currentObj.datasCarnum
+    let uniqueCode = currentObj.soleId
+    let sbillCarNo = currentObj.carNo
     console.log('uniqueCode:>>>' + uniqueCode)
     console.log(linkMap)
     // 出库物资是还是磅计，默认是磅计
     let isBang = true
-    if (currentObj.goodsMetering == '理计' || currentObj.mtype == 0) {
+    if (currentObj.quantityType == '01' || currentObj.mtype == 0) {
       isBang = false
     }
     if (!isBang) clearTopCbx()
-    var tableIndex = tableList.findIndex(
-      itm => itm.sbillBillbatch == uniqueCode
-    )
+    var tableIndex = tableList.findIndex(itm => itm.soleId == uniqueCode)
     let otherSelectRowObj = {}
     Object.keys(linkMap).map(itm => {
       console.log('itm:>>', itm)
@@ -2456,33 +2666,24 @@ $(function() {
             // 判断是否一个物资对应多个秤
             let otherKeys = Object.keys(otherSelectRowObj)
             let idx = otherKeys.findIndex(
-              itm => itm == tableList[item]['sbillBillbatch']
+              itm => itm == tableList[item]['soleId']
             )
             if (idx >= 0) {
-              otherSelectRowObj[tableList[item]['sbillBillbatch']] =
-                itm + ';' + otherSelectRowObj[tableList[item]['sbillBillbatch']]
+              otherSelectRowObj[tableList[item]['soleId']] =
+                itm + ';' + otherSelectRowObj[tableList[item]['soleId']]
             } else {
-              otherSelectRowObj[tableList[item]['sbillBillbatch']] = itm
+              otherSelectRowObj[tableList[item]['soleId']] = itm
             }
           }
         })
       }
     })
-    // console.log("weightBtnIdx:>>>" + weightBtnIdx);
-    // linkMap[weightBtnIdx] = -1;
-    // if (userChooseBtnIdx > -1 && isBang) {
-    //   Object.keys(linkMap).map(k => {
-    //     var currentWeightArr = linkMap[k];
-    //     currentWeightArr = currentWeightArr.filter(itm => itm != tableIndex);
-    //     linkMap[k] = currentWeightArr;
-    //   })
-    // }
     $('.crane-btn').unbind()
-    tableList = tableList.filter(itm => itm.sbillBillbatch != uniqueCode)
+    tableList = tableList.filter(itm => itm.soleId != uniqueCode)
     /**
      * 如果没有提单了，去除车牌号
      */
-    var restIndex = tableList.filter(itm => itm.datasCarnum === sbillCarNo)
+    var restIndex = tableList.filter(itm => itm.carNo === sbillCarNo)
     if (restIndex.length === 0) {
       carNoForTd = carNoForTd.filter(itm => itm !== sbillCarNo)
     }
@@ -2492,7 +2693,7 @@ $(function() {
     resetLinkmap()
     updateTableData(tableList)
     Object.keys(otherSelectRowObj).map(k => {
-      let idx = tableList.findIndex(itm => itm.sbillBillbatch == k)
+      let idx = tableList.findIndex(itm => itm.soleId == k)
       let btnIdx = otherSelectRowObj[k]
       console.log('success btnidx', btnIdx)
       if (btnIdx.indexOf(';') > 0) {
@@ -2572,8 +2773,6 @@ $(function() {
         .find('span')
         .eq(0)
         .text(dwt[userChooseBtnIdx])
-      // debugger
-      // showMultiCranePart((linkMap[userChooseBtnIdx].length > 0), userChooseBtnIdx)
       if (linkMap[userChooseBtnIdx].length == 0) {
         clearTopCbx()
         showMultiCranePart(false, userChooseBtnIdx)
@@ -2613,11 +2812,11 @@ $(function() {
   var globalOriginPlace = ''
   // 下拉原产地数组
   var globalOriginPlaceArr = []
-  function getRowOriginPlace(partName, spec) {
-    request('/queryOriginPlace', { partName, spec })
+  function getRowOriginPlace(skuId) {
+    request(`crane/dc/goods/${skuId}/originPlaces`, {}, 'get')
       .then(res => {
         console.log('resp:>>', res)
-        if (res.status === 0) {
+        if (res.success) {
           globalOriginPlaceArr = res.data
         } else {
           globalOriginPlaceArr = []
@@ -2656,28 +2855,32 @@ $(function() {
       console.log(selectObj)
       // 获取本行原产地信息
       $('#zhdOriginPlaceFilterPop').css('display', 'none')
-      if (selectObj.originPlace) {
-        globalOriginPlace = selectObj.originPlace
+      if (selectObj.sourceProdAreaName) {
+        globalOriginPlace = selectObj.sourceProdAreaName
+        globalOriginPlaceId = selectObj.sourceProdAreaId
       } else {
         globalOriginPlace = ''
+        globalOriginPlaceId = ''
       }
       $('#originAreaIpt').val(globalOriginPlace)
-      getRowOriginPlace(selectObj.partsnameName, selectObj.goodsSpec)
+      getRowOriginPlace(selectObj.skuId)
       // 添加显示提单的车牌号
       globalSelectRowIndex = selectRowIndex
-      if (selectObj.datasCarnum.indexOf(',') > 0) {
-        selectObj.datasCarnum = globalShowCarNo
+      if (selectObj.carNo.indexOf(',') > 0) {
+        selectObj.carNo = globalShowCarNo
       }
-      globalShowCarNo = selectObj.datasCarnum
+      globalShowCarNo = selectObj.carNo
       $('#tdCarNo').val(globalShowCarNo)
-      let td = selectObj.sbillBillbatch
-      let cnt = Number(selectObj.goodsNum - selectObj.oconsignDetailOknum)
-      if (Number(selectObj.pickType) === 1) {
-        cnt = Number(selectObj.goodsNum)
-      }
-      if (selectObj.goodsMetering == '理计' || selectObj.mtype == 0) {
+      let td = selectObj.soleId
+      let cnt = selectObj.usableAmount
+      // let cnt = selectObj.usableAmount
+      // if (Number(selectObj.pickType) === 1) {
+      //   cnt = Number(selectObj.goodsNum)
+      // }
+      // mtype是代表整卷开平  quantityType 01 理计 02 磅计
+      if (selectObj.quantityType == '01' || selectObj.mtype == 0) {
         let weight = formatWeight(
-          Number(cnt * selectObj.goodsProperty1 * selectObj.goodsProperty2)
+          Number(cnt * selectObj.length * selectObj.meterWeight)
         )
         if (selectObj.mtype == 0) weight = selectObj.goodsWeight
         $('#weightInfo').text(weight)
@@ -2723,7 +2926,7 @@ $(function() {
       )
       showModal('#modalDel', function(result) {
         if (result) {
-          let currentTD = tableList[rowidx]['sbillBillbatch']
+          let currentTD = tableList[rowidx]['soleId']
           let btnIndx = -1
           let otherSelectRowObj = {}
           console.log('currentTD:>>' + currentTD)
@@ -2735,17 +2938,13 @@ $(function() {
             if (linkMap[k].length > 0) {
               linkMap[k].map(idx => {
                 let keys = Object.keys(otherSelectRowObj)
-                let indx = keys.findIndex(
-                  im => im == tableList[idx]['sbillBillbatch']
-                )
+                let indx = keys.findIndex(im => im == tableList[idx]['soleId'])
                 if (indx >= 0) {
                   // 一对多
-                  otherSelectRowObj[tableList[idx]['sbillBillbatch']] =
-                    k +
-                    ';' +
-                    otherSelectRowObj[tableList[idx]['sbillBillbatch']]
+                  otherSelectRowObj[tableList[idx]['soleId']] =
+                    k + ';' + otherSelectRowObj[tableList[idx]['soleId']]
                 } else {
-                  otherSelectRowObj[tableList[idx]['sbillBillbatch']] = k
+                  otherSelectRowObj[tableList[idx]['soleId']] = k
                 }
               })
             }
@@ -2753,25 +2952,7 @@ $(function() {
           selectRowIndex = -1
           $('.crane-btn').unbind()
           delete singleGoodsCount[currentTD]
-          tableList = tableList.filter(
-            itm => itm['sbillBillbatch'] != currentTD
-          )
-          // TODO 判断当前选择物资是否是一对多个秤
-          // let otherArr = [];
-          // Object.keys(linkMap).map(k => {
-          //   let idx = linkMap[k].findIndex(im => im == rowidx);
-          //   if (idx >= 0 && k != btnIndx) otherArr.push(k);
-          // });
-          // if (otherArr.length > 0) {
-          //   // 清空对于底部按钮
-          //   otherArr.map(itm => {
-          //     $(".weight-btn")
-          //       .eq(itm)
-          //       .css("background-image", "url(/img/dl.png)");
-          //     showMultiCranePart(false, itm);
-          //   });
-          // }
-          // ======
+          tableList = tableList.filter(itm => itm['soleId'] != currentTD)
           updateTableData(tableList)
           resetLinkmap()
           // 清空底部按钮
@@ -2782,7 +2963,7 @@ $(function() {
             showMultiCranePart(false, k)
           })
           Object.keys(otherSelectRowObj).map(k => {
-            let idx = tableList.findIndex(itm => itm.sbillBillbatch == k)
+            let idx = tableList.findIndex(itm => itm.soleId == k)
             let btnIdx = otherSelectRowObj[k]
             if (btnIdx.indexOf(';') > 0) {
               let arr = btnIdx.split(';')
@@ -2856,12 +3037,6 @@ $(function() {
               )
             showMultiCranePart(linkMap[k].length > 0, k)
           })
-          // if (btnIndx >= 0 && linkMap[btnIndx].length == 0) {
-          //   $(".weight-btn")
-          //     .eq(btnIndx)
-          //     .css("background-image", "url(/img/dl.png)");
-          //   showMultiCranePart(false, btnIndx);
-          // }
           initActiveRect(selectRowIndex)
         }
       })
@@ -2873,11 +3048,11 @@ $(function() {
     let count = 0
     selectIdxArray.map(itm => {
       let selectObj = tableList[itm]
-      count += Number(selectObj.goodsNum - selectObj.oconsignDetailOknum)
+      count += selectObj.usableAmount
     })
     if (selectIdxArray.length == 1) {
       let obj = tableList[selectIdxArray[0]]
-      count = singleGoodsCount[obj.sbillBillbatch]
+      count = singleGoodsCount[obj.soleId]
     }
     $('#countIpt').val(count)
   }
@@ -2888,13 +3063,6 @@ function floorWeight(val) {
     return '0'
   } else {
     return w.toFixed(3)
-    // let str = w.toString();
-    // let dotStr = str.substring(str.indexOf("."));
-    // if (dotStr.length > 4) {
-    //   return str.substring(0, str.indexOf(".") + 4);
-    // } else {
-    //   return w.toFixed(3);
-    // }
   }
 }
 

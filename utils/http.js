@@ -6,8 +6,10 @@ module.exports = {
       uri: url,
       qs: body,
       json: true,
+      timeout: 60000,
       headers: {
-        'User-Agent': 'Request-Promise'
+        'User-Agent': 'Request-Promise',
+        PlatformId: 'ZF'
       }
     })
   },
@@ -15,8 +17,13 @@ module.exports = {
     return rp({
       method: 'POST',
       uri: url,
-      form: body,
-      json: true
+      body: body,
+      json: true,
+      timeout: 60000,
+      headers: {
+        PlatformId: 'ZF',
+        'content-type': 'application/json'
+      }
     })
   }
 }

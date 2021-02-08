@@ -32,21 +32,21 @@ $(function() {
   var queryObj = {}
   // 行单元key
   var tdKeys = [
-    'sbillBillcode',
-    'companyAbbreviate',
+    'deliveryOutNo',
+    'purchaseOrgName',
     // "datasAcceptcorpname",
-    'partsnameName',
-    'goodsSpec',
-    'goodsProperty1',
-    'productareaName',
-    'originPlace',
-    'goodsNum',
-    'goodsWeight',
-    'employeeName',
-    'driverInfo',
-    'datasCarnum',
+    'productBrandName',
+    'specification',
+    'length',
+    'prodAreaName',
+    'sourceProdAreaName',
+    'amount',
+    'weight',
+    'createUserName',
+    'extractPerson',
+    'carNo',
     'other',
-    'dataAudit'
+    'auditStatus'
   ]
   $('#tdNo').focus(function(e) {
     $('.zhd-keyboard').css('display', 'none')
@@ -67,9 +67,9 @@ $(function() {
       showMsg('请选择查询选项')
       return
     }
-    if (tdNo.length == 0) delete queryObj.sbillBillcode
+    if (tdNo.length == 0) delete queryObj.billCode
     $('.zhd-keyboard').css('display', 'none')
-    if (tdNo.length > 0) queryObj.sbillBillcode = 'TD' + tdNo
+    if (tdNo.length > 0) queryObj.billCode = 'TD' + tdNo
     if (startTime.length > 0) queryObj.startDate = startTime
     if (endTime.length > 0) queryObj.endDate = endTime
     loadData(queryObj)
@@ -153,8 +153,8 @@ $(function() {
     data.map(itm => {
       var tdStr = ''
       tdKeys.map(k => {
-        if (k == 'dataAudit') {
-          if (itm[k] == 1) {
+        if (k == 'auditStatus') {
+          if (itm[k] == '30') {
             tdStr += '<div class="td"><div class="status-btn pass"></div></div>'
           } else if (itm[k] == -1) {
             tdStr +=
@@ -162,26 +162,26 @@ $(function() {
           } else {
             tdStr += '<div class="td"><div class="status-btn wait"></div></div>'
           }
-        } else if (k == 'sbillBillcode') {
+        } else if (k == 'deliveryOutNo') {
           tdStr +=
             '<div class="td">' +
-            (itm['sbillBillcode'] == null ? '/' : itm[k]) +
+            (itm['deliveryOutNo'] == null ? '/' : itm[k]) +
             '</div>'
-        } else if (k == 'employeeName' || k == 'companyAbbreviate') {
+        } else if (k == 'createUserName' || k == 'purchaseOrgName') {
           var showStr = '/'
           if (itm[k]) showStr = itm[k]
-          if (itm['employeeMobile'] && k == 'employeeName')
+          if (itm['employeeMobile'] && k == 'purchaseOrgName')
             showStr += '<br>' + itm['employeeMobile']
           tdStr += '<div class="td">' + showStr + '</div>'
-        } else if (k === 'driverInfo') {
+        } else if (k === 'extractPerson') {
           tdStr += '<div class="td middle text-ellips">'
-          if (itm['datasDriver'])
+          if (itm['extractPerson'])
             tdStr +=
-              (itm['datasDriver'] == 'null' ? '--' : itm['datasDriver']) +
+              (itm['extractPerson'] == 'null' ? '--' : itm['extractPerson']) +
               '<br>'
-          if (itm['driverPhone'])
+          if (itm['extractPhone'])
             tdStr +=
-              (itm['driverPhone'] == 'null' ? '--' : itm['driverPhone']) +
+              (itm['extractPhone'] == 'null' ? '--' : itm['extractPhone']) +
               '<br>'
           // if (itm['datasCarnum']) tdStr += itm['datasCarnum']
           tdStr += '</div>'
@@ -194,17 +194,17 @@ $(function() {
         //   tdStr += '</div>'
         // }
         else if (k === 'other') {
-          tdStr += '<div class="td">' + itm['goodsMaterial']
-          if (itm['goodsProperty5']) tdStr += '<br/>' + itm['goodsProperty5']
-          if (itm['goodsProperty4']) tdStr += '<br/>' + itm['goodsProperty4']
+          tdStr += '<div class="td">' + itm['productTextureName']
+          if (itm['weightRange']) tdStr += '<br/>' + itm['weightRange']
+          if (itm['toleranceRange']) tdStr += '<br/>' + itm['toleranceRange']
           // if (itm['datasCarnum']) tdStr += '<br/>' + itm['datasCarnum']
           tdStr += '</div>'
         } else {
           if (
-            k === 'goodsNum' ||
-            k === 'goodsProperty1' ||
-            k === 'goodsWeight' ||
-            k === 'datasCarnum'
+            k === 'amount' ||
+            k === 'length' ||
+            k === 'weight' ||
+            k === 'carNo'
           ) {
             tdStr += '<div class="td min text-ellips">' + itm[k] + '<br/></div>'
           } else {
@@ -228,10 +228,10 @@ $(function() {
     Object.keys(body).map(itm => {
       reqBody[itm] = body[itm]
     })
-    request('/outStorageQuery', reqBody)
+    request('/crane/dc/outedStorage', reqBody, 'get')
       .then(res => {
-        if (res.status == 0) {
-          if (!res.data.data) {
+        if (res.success) {
+          if (!res.data) {
             $('#wzBody').html('')
             showMsg('暂无数据')
             $('#totalPage').text('共0页')
@@ -239,18 +239,16 @@ $(function() {
             $('#totalWzWeight').text('总重量：0')
             return
           }
-          handlerData(res.data.data)
+          handlerData(res.data.outBoundList.list)
           if (currentPage === 1) {
             if (Number($('#pgIpt').val()) > currentPage) {
               $('#pgIpt').val('')
             }
-            initPaginate(res.data.pageCount, currentPage)
-            $('#totalPage').text('共' + res.data.pageCount + '页')
+            initPaginate(res.data.outBoundList.pages, currentPage)
+            $('#totalPage').text('共' + res.data.outBoundList.pages + '页')
           }
-          $('#totalWzCount').text('总数量：' + res.data.pageNo)
-          $('#totalWzWeight').text(
-            '总重量：' + Number(res.data.pageSize / 1000).toFixed(3)
-          )
+          $('#totalWzCount').text('总数量：' + res.data.totalCount)
+          $('#totalWzWeight').text('总重量：' + res.data.totalWeight)
         } else showMsg(res.message || '网络异常')
       })
       .catch(err => {
