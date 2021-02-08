@@ -1,6 +1,7 @@
 const httpHelp = require('../utils/http')
 // const PROXYURL = 'http://192.168.80.99:8080/warehouse-dev/warehouse'
-const PROXYURL = 'http://127.0.0.1:8008/api/'
+// const PROXYURL = 'http://127.0.0.1:8008/api/'
+const PROXYURL = 'http://aliscp-pro.aliyun.xingyun361.com:8008/api/'
 // const PROXYURL = 'http://localhost:7568/warehouse'
 
 module.exports = {
@@ -94,7 +95,7 @@ module.exports = {
             'currentUser',
             `${userData.data.warehouseId}|${userData.data.stockRoomId}|${userData.data.stockZoneId}|${params.username}`,
             {
-              domain: 'localhost',
+              domain: '192.168.80.91',
               maxAge: 13 * 60 * 60 * 1000,
               httpOnly: false
             }
