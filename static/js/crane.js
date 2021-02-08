@@ -159,7 +159,6 @@ var CRANE_FUNCS = {
       .eq(rowIndex)
       .find('.crane-btn')
     temp.click(function(e) {
-      debugger
       e.stopPropagation()
       console.log('已经绑定')
       console.log($(this).data('bidx'))
@@ -204,7 +203,6 @@ var CRANE_FUNCS = {
    * 批量修改选择行对应统一提单的车牌号
    */
   batchChangeTableRowCarNo() {
-    debugger
     var rowObj = globalConfig.crane.tableList[globalConfig.crane.selectRowIndex]
     console.log('rowObj:>>', rowObj)
     var billCode = rowObj.businessTypeNo
@@ -342,7 +340,6 @@ var CRANE_FUNCS = {
       })
     } else {
       // 减掉取消绑定的重量
-      debugger
       var totalWeight = 0
       dwtCounts[userChooseBtnIdx].records.map(itm => {
         totalWeight += Number(itm)
