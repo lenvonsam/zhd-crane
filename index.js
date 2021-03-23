@@ -4,7 +4,7 @@ const path = require('path')
 const app = new Koa()
 const http = require('http')
 const server = http.createServer(app.callback())
-const io = require('socket.io')(server)
+const io = require('socket.io').listen(server)
 const net = require('net')
 
 // 中间件
@@ -58,7 +58,7 @@ const socketPorts = [3001, 3002, 3003, 3004]
 function socketHandler(socket, port, portIdx) {
   // console.log(`socket port:>>${port}`)
   // socket.setEncoding('utf8')
-  socket.setEncoding("hex");
+  socket.setEncoding('hex')
   socket.setTimeout(0)
   try {
     socket.on('data', data => {
