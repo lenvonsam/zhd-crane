@@ -1,7 +1,8 @@
 const httpHelp = require('../utils/http')
 // const PROXYURL = 'http://192.168.80.99:8080/warehouse-dev/warehouse'
 // const PROXYURL = 'http://127.0.0.1:8008/api/'
-const PROXYURL = 'http://aliscp-pro.aliyun.xingyun361.com:8008/api/'
+// const PROXYURL = 'http://aliscp-pro.aliyun.xingyun361.com:8008/api/'
+const PROXYURL = 'http://gatepro.xingyun361.com/api/'
 // const PROXYURL = 'http://localhost:7568/warehouse'
 
 module.exports = {
