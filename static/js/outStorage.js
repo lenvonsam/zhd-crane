@@ -510,7 +510,7 @@ $(function() {
       request(
         'crane/dc/outStorage',
         {
-          businessTypeNo: 'XSTD' + tdNo
+          businessTypeNo: 'TD' + tdNo
         },
         'get'
       )
