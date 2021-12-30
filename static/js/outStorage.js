@@ -750,19 +750,19 @@ $(function() {
     } else {
       globalConfig.crane.countVal = Number(globalConfig.crane.countVal)
       globalConfig.crane.countVal--
-      if (globalConfig.crane.countVal < 0) globalConfig.crane.countVal = 0
+      if (globalConfig.crane.countVal <= 0) globalConfig.crane.countVal = 1
     }
     var selectObj =
       globalConfig.crane.tableList[globalConfig.crane.selectRowIndex]
     // 判断理计物资不能超过出库最大值
-    if (selectObj.quantityType == '01') {
-      let maxCount = selectObj.usableAmount
-      if (globalConfig.crane.countVal > maxCount) {
-        showMsg('不能超过可出库数量')
-        globalConfig.crane.countVal = maxCount
-        $('#countIpt').val(globalConfig.crane.countVal)
-      }
-    }
+    // if (selectObj.quantityType == '01') {
+    //   let maxCount = selectObj.usableAmount
+    //   if (globalConfig.crane.countVal > maxCount) {
+    //     showMsg('不能超过可出库数量')
+    //     globalConfig.crane.countVal = maxCount
+    //     $('#countIpt').val(globalConfig.crane.countVal)
+    //   }
+    // }
     var idx = Object.keys(globalConfig.crane.singleGoodsCount).findIndex(
       itm => itm == selectObj.soleId
     )
@@ -800,14 +800,14 @@ $(function() {
     }
     var selectObj =
       globalConfig.crane.tableList[globalConfig.crane.selectRowIndex]
-    if (selectObj.quantityType == '01') {
-      let maxCount = selectObj.usableAmount
-      if (globalConfig.crane.countVal > maxCount) {
-        showMsg('不能超过可出库数量')
-        globalConfig.crane.countVal = maxCount
-        $('#countIpt').val(globalConfig.crane.countVal)
-      }
+    // if (selectObj.quantityType == '01') {
+    let maxCount = selectObj.usableAmount
+    if (globalConfig.crane.countVal > maxCount) {
+      showMsg('不能超过可出库数量')
+      globalConfig.crane.countVal = maxCount
+      $('#countIpt').val(globalConfig.crane.countVal)
     }
+    // }
     var idx = Object.keys(globalConfig.crane.singleGoodsCount).findIndex(
       itm => itm == selectObj.soleId
     )
